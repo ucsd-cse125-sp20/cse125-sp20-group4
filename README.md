@@ -6,6 +6,9 @@ We are using [vcpkg](https://docs.microsoft.com/en-us/cpp/build/vcpkg?view=vs-20
 
 ### Required Packages:
 
+#### Client:
+
 - `spdlog:x64-windows`
-- `opengl:x64-windows`
-- `freeglut:x64-windows`
+- `glew:x64-windows`
+- `glfw3:x64-windows`
+- `glm:x64-windows`
