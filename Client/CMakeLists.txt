@@ -15,7 +15,7 @@ target_include_directories(Client
 
 # Register source files
 file(GLOB_RECURSE Client_SRC CONFIGURE_DEPENDS src/*.cpp)
-message(DEBUG "Sources: " ${Client_SRC})
+message(DEBUG "Sources: ${Client_SRC}")
 target_sources(Client PRIVATE ${Client_SRC})
 
 # Find dependencies
@@ -44,4 +44,28 @@ if (MSVC)
     target_link_options(Client PRIVATE)
 else()
     target_compile_options(Client PRIVATE -Wall -Wextra -Werror)
+endif()
+
+# Include resource files in artifacts
+
+# Shaders
+file(GLOB_RECURSE Client_Shaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/*)
+if (Client_Shaders)
+    message(STATUS "Including shader targets.")
+    message(DEBUG "Shaders: ${Client_Shaders}")
+    list(TRANSFORM Client_Shaders PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Client_Shaders_SRC)
+    message(TRACE "Shader sources: ${Client_Shaders_SRC}")
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Client>/Shaders
+                       COMMENT "Creating shader output directory."
+                       )
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Client_Shaders_SRC} $<TARGET_FILE_DIR:Client>/Shaders
+                       BYPRODUCTS ${Client_Shaders}
+                       COMMENT "Copying shaders to output."
+                       )
+else()
+    message(STATUS "No shader targets found.")
 endif()
