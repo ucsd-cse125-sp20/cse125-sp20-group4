@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Window.h"
-#include "Shaders.h"
+#include "Drawing/Shaders.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -197,7 +197,7 @@ void Window::display_callback( GLFWwindow * ) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
-    Shader shaderProgram = Shaders::flatShader();
+    Shader shaderProgram = Shaders::flat();
     glUseProgram( shaderProgram );
 
     // Render scene.

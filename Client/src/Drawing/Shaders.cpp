@@ -1,23 +1,63 @@
 #include <stdio.h>
-#include <vector>
-#include <iostream>
-#include <fstream>
 #include <algorithm>
+#include <stdexcept>
+#include <fstream>
+#include <iostream>
+#include <vector>
 
-#include "Shaders.h"
+#include "logger.h"
 
-constexpr auto SHADER_DIR = "Shaders/";
-constexpr auto VERTEX_SHADER_EXT = ".vert";
-constexpr auto FRAGMENT_SHADER_EXT = ".frag";
+#include "Drawing/Shaders.h"
 
-/* Static variables */
+static const auto LOGGER = getLogger( "Shaders" );
 
-Shader Shaders::skyboxShader_ = 0;
-Shader Shaders::normalColoringShader_ = 0;
-Shader Shaders::curveShader_ = 0;
-Shader Shaders::flatShader_ = 0;
-Shader Shaders::phongShader_ = 0;
-Shader Shaders::horizonShader_ = 0;
+static constexpr auto SHADER_DIR = "Shaders/";
+static constexpr auto VERTEX_SHADER_EXT = ".vert";
+static constexpr auto FRAGMENT_SHADER_EXT = ".frag";
+
+/* Private variables */
+
+std::unordered_map<std::string, Shader> Shaders::shaders;
+
+/* Public functions */
+
+void Shaders::initializeShaders() {
+
+    shaders["skybox"] = loadShaders( "skyboxShader" );
+    shaders["normal_coloring"] = loadShaders( "normalColoringShader" );
+    shaders["curve"] = loadShaders( "curveShader" );
+    shaders["flat"] = loadShaders( "flatShader" );
+    shaders["phong"] = loadShaders( "phongShader" );
+    shaders["horizon"] = loadShaders( "horizonShader.vert", "flatShader.frag" );
+
+}
+
+void Shaders::deleteShaders() {
+
+    for ( auto it = shaders.cbegin(); it != shaders.cend(); it++ ) {
+        glDeleteProgram( it->second );
+    }
+
+}
+
+// Getters.
+const Shader & Shaders::get( const std::string shader ) {
+
+    try {
+        return shaders.at( shader );
+    } catch ( const std::out_of_range & ) {
+        LOGGER->critical( "Invalid shader: {}", shader );
+        throw std::invalid_argument( "Invalid shader: " + shader );
+    }
+
+}
+
+const Shader & Shaders::skybox() { return get( "skybox" ); }
+const Shader & Shaders::normalColoring() { return get( "normal_coloring" ); }
+const Shader & Shaders::curve() { return get( "curve" ); }
+const Shader & Shaders::flat() { return get( "flat" ); }
+const Shader & Shaders::phong() { return get( "phong" ); }
+const Shader & Shaders::horizon() { return get( "horizon" ); }
 
 /* Private functions */
 
@@ -26,8 +66,8 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
     vertex_file = SHADER_DIR + vertex_file;
     fragment_file = SHADER_DIR + fragment_file;
 
-    std::cout << "Vertex shader: " << vertex_file << std::endl;
-    std::cout << "Fragment shader: " << fragment_file << std::endl;
+    LOGGER->trace( "Vertex shader: {}", vertex_file );
+    LOGGER->trace( "Fragment shader: {}", fragment_file );
 
     const char * vertex_file_path = vertex_file.c_str();
     const char * fragment_file_path = fragment_file.c_str();
@@ -45,7 +85,7 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
             VertexShaderCode += "\n" + Line;
         VertexShaderStream.close();
     } else {
-        printf( "Impossible to open %s. Check to make sure the file exists and you passed in the right filepath!\n", vertex_file_path );
+        LOGGER->critical( "Impossible to open vertex shader {}. Check to make sure the file exists and you passed in the right filepath!", vertex_file );
         printf( "The current working directory is:" );
         // Please for the love of whatever deity/ies you believe in never do something like the next line of code,
         // Especially on non-Windows systems where you can have the system happily execute "rm -rf ~"
@@ -55,7 +95,7 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
         system( "pwd" );
     #endif
         ( void ) getchar();
-        return 0;
+        throw std::invalid_argument( "Invalid vertex shader path: " + vertex_file );
     }
 
     // Read the Fragment Shader code from the file
@@ -66,6 +106,18 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
         while ( getline( FragmentShaderStream, Line ) )
             FragmentShaderCode += "\n" + Line;
         FragmentShaderStream.close();
+    } else {
+        LOGGER->critical( "Impossible to open fragment shader {}. Check to make sure the file exists and you passed in the right filepath!", fragment_file );
+        printf( "The current working directory is:" );
+        // Please for the love of whatever deity/ies you believe in never do something like the next line of code,
+        // Especially on non-Windows systems where you can have the system happily execute "rm -rf ~"
+    #ifdef _WIN32
+        system( "CD" );
+    #else
+        system( "pwd" );
+    #endif
+        ( void ) getchar();
+        throw std::invalid_argument( "Invalid fragment shader path: " + fragment_file );
     }
 
     GLint Result = GL_FALSE;
@@ -73,7 +125,7 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
 
 
     // Compile Vertex Shader
-    printf( "Compiling shader : %s\n", vertex_file_path );
+    LOGGER->debug( "Compiling vertex shader : {}", vertex_file );
     char const * VertexSourcePointer = VertexShaderCode.c_str();
     glShaderSource( VertexShaderID, 1, &VertexSourcePointer, NULL );
     glCompileShader( VertexShaderID );
@@ -87,15 +139,16 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
     if ( InfoLogLength > 0 ) {
         std::vector<char> VertexShaderErrorMessage( InfoLogLength + 1 );
         glGetShaderInfoLog( VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0] );
-        printf( "%s\n", &VertexShaderErrorMessage[0] );
+        LOGGER->critical( "Encountered error while compiling vertex shader: {}", &VertexShaderErrorMessage[0] );
+        throw std::invalid_argument( "Error compiling vertex shader: " + vertex_file );
     } else {
-        printf( "Successfully compiled vertex shader!\n" );
+        LOGGER->debug( "Successfully compiled vertex shader!" );
     }
 
 
 
     // Compile Fragment Shader
-    printf( "Compiling shader : %s\n", fragment_file_path );
+    LOGGER->debug( "Compiling fragment shader: {}", fragment_file );
     char const * FragmentSourcePointer = FragmentShaderCode.c_str();
     glShaderSource( FragmentShaderID, 1, &FragmentSourcePointer, NULL );
     glCompileShader( FragmentShaderID );
@@ -106,14 +159,15 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
     if ( InfoLogLength > 0 ) {
         std::vector<char> FragmentShaderErrorMessage( InfoLogLength + 1 );
         glGetShaderInfoLog( FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0] );
-        printf( "%s\n", &FragmentShaderErrorMessage[0] );
+        LOGGER->critical( "Encountered error while compiling fragment shader: {}", &FragmentShaderErrorMessage[0] );
+        
     } else {
-        printf( "Successfully compiled fragment shader!\n" );
+        LOGGER->debug( "Successfully compiled fragment shader!" );
     }
 
 
     // Link the program
-    printf( "Linking program\n" );
+    LOGGER->debug( "Linking shader program" );
     GLuint ProgramID = glCreateProgram();
     glAttachShader( ProgramID, VertexShaderID );
     glAttachShader( ProgramID, FragmentShaderID );
@@ -125,9 +179,10 @@ Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file 
     if ( InfoLogLength > 0 ) {
         std::vector<char> ProgramErrorMessage( InfoLogLength + 1 );
         glGetProgramInfoLog( ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0] );
-        printf( "%s\n", &ProgramErrorMessage[0] );
+        LOGGER->critical( "Error while linking shader program: {}", &ProgramErrorMessage[0] );
+        throw std::invalid_argument( "Error linking shader program" );
     }
-    printf( "Successfully Linked Programs\n" );
+    LOGGER->debug( "Successfully linked shader program" );
     glDetachShader( ProgramID, VertexShaderID );
     glDetachShader( ProgramID, FragmentShaderID );
 
@@ -144,34 +199,3 @@ Shader Shaders::loadShaders( std::string shaderName ) {
     return loadShaders( shaderName + VERTEX_SHADER_EXT, shaderName + FRAGMENT_SHADER_EXT );
 
 }
-
-/* Public functions */
-
-void Shaders::initializeShaders() {
-
-    skyboxShader_ = loadShaders( "skyboxShader" );
-    normalColoringShader_ = loadShaders( "normalColoringShader" );
-    curveShader_ = loadShaders( "curveShader" );
-    flatShader_ = loadShaders( "flatShader" );
-    phongShader_ = loadShaders( "phongShader" );
-    horizonShader_ = loadShaders( "horizonShader.vert", "flatShader.frag" );
-
-}
-
-void Shaders::deleteShaders() {
-
-    glDeleteProgram( skyboxShader_ );
-    glDeleteProgram( normalColoringShader_ );
-    glDeleteProgram( curveShader_ );
-    glDeleteProgram( flatShader_ );
-    glDeleteProgram( horizonShader_ );
-
-}
-
-// Getters.
-const Shader & Shaders::skyboxShader() { return skyboxShader_; }
-const Shader & Shaders::normalColoringShader() { return normalColoringShader_; }
-const Shader & Shaders::curveShader() { return curveShader_; }
-const Shader & Shaders::flatShader() { return flatShader_; }
-const Shader & Shaders::phongShader() { return phongShader_; }
-const Shader & Shaders::horizonShader() { return horizonShader_; }

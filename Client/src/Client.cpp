@@ -12,6 +12,7 @@
 #include "spdlog/spdlog.h"
 #include "GLFW/glfw3.h"
 
+#include "logger.h"
 #include "Window.h"
 
 void setup_glew() {
@@ -21,10 +22,10 @@ void setup_glew() {
     GLenum err = glewInit();
     if ( GLEW_OK != err ) {
         /* Problem: glewInit failed, something is seriously wrong. */
-        fprintf( stderr, "Error: %s\n", glewGetErrorString( err ) );
+        spdlog::critical( "Error: {}", glewGetErrorString( err ) );
         glfwTerminate();
     }
-    fprintf( stdout, "Current GLEW version: %s\n", glewGetString( GLEW_VERSION ) );
+    spdlog::info( "Current GLEW version: {}", glewGetString( GLEW_VERSION ) );
 #endif
 
 }
@@ -61,19 +62,19 @@ void setup_opengl_settings() {
 
 void print_versions() {
     // Get info of GPU and supported OpenGL version
-    printf( "Renderer: %s\n", glGetString( GL_RENDERER ) );
-    printf( "OpenGL version supported %s\n", glGetString( GL_VERSION ) );
+    spdlog::info( "Renderer: {}", glGetString( GL_RENDERER ) );
+    spdlog::info( "OpenGL version supported {}", glGetString( GL_VERSION ) );
 
     //If the shading language symbol is defined
 #ifdef GL_SHADING_LANGUAGE_VERSION
-    std::printf( "Supported GLSL version is %s.\n", ( char * ) glGetString( GL_SHADING_LANGUAGE_VERSION ) );
+    spdlog::info( "Supported GLSL version is {}.", ( char * ) glGetString( GL_SHADING_LANGUAGE_VERSION ) );
 #endif
 }
 
 void error_callback( int error, const char * description ) {
 
     // Print error
-    fprintf( stderr, "Error code %d: %s", error, description );
+    spdlog::error( "Error code {}: {}", error, description );
 
 }
 
@@ -95,11 +96,14 @@ void setup_callbacks( GLFWwindow * window ) {
 int main( void ) {
 
     // Create the GLFW window
+    spdlog::info( "Creating window..." );
     GLFWwindow * window = Window::create_window( 640, 480 );
 
     if ( window == NULL ) {
-        std::cerr << "Failed to create window!" << std::endl;
-        return -1;
+        spdlog::critical( "Failed to create window!" );
+        return EXIT_FAILURE;
+    } else {
+        spdlog::info( "Window created." );
     }
 
     // Print OpenGL and GLSL versions
@@ -125,6 +129,8 @@ int main( void ) {
     // Terminate GLFW
     glfwTerminate();
 
-    exit( EXIT_SUCCESS );
+    shutdownLogging();
+
+    return EXIT_SUCCESS;
 
 }

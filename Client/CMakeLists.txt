@@ -38,7 +38,7 @@ target_link_libraries(Client PRIVATE GLEW::GLEW)
 target_link_libraries(Client PRIVATE glm)
 
 # Configure compiler
-target_compile_features(Client PRIVATE cxx_std_11)
+target_compile_features(Client PRIVATE cxx_std_17)
 if (MSVC)
     target_compile_options(Client PRIVATE /W4 /WX /wd4275 /wd4127)
     target_link_options(Client PRIVATE)
