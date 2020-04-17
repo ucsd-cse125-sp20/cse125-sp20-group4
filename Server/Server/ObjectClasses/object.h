@@ -1,30 +1,36 @@
 #pragma once
+#include <string>
+
 class Object {
 private:
     int x, y, z;
-    float directionHorizontal, directionVertical;
+    float orientationY, orientationX;
     int id;
     // mesh
 public:
     //constructor
     Object(int id);
     Object(int id, int x, int y, int z);
-    Object(int id, int x, int y, int z, float hor, float ver);
+    Object(int id, int x, int y, int z, float orientationX, float orientationY);
 
     //setters
+    void setId(int id);
     void setPositionX(int x);
     void setPositionY(int y);
     void setPositionZ(int z);
     void setPosition(int x, int y, int z);
-    void setDirectionHorizontal(float hor);
-    void setDirectionVertical(float ver);
-    void setDirection(float hor, float ver);
+    void setOrientationX(float orientationX);
+    void setOrientationY(float orientationY);
+    void setOrientation(float orientationX, float orientationY);
 
     //getters
     int getId();
     int getPositionX();
     int getPositionY();
     int getPositionZ();
-    float getDirectionHorizontal();
-    float getDirectionVertical();
+    float getOrientationY();
+    float getOrientationX();
+
+    //(de)serialize functions
+    virtual std::string serialize();
 };

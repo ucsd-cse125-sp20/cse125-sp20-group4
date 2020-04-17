@@ -1,23 +1,24 @@
 #include "object.h"
 
 Object::Object(int id) {
-    id = id;
-    x = 0;
-    y = 0;
-    z = 0;
-    directionHorizontal = 0.0f;
-    directionVertical = 0.0f;
+    this->id = id;
+    setPosition(0, 0, 0);
+    setOrientation(0.0f, 0.0f);
 }
 Object::Object(int id, int x, int y, int z) {
-    id = id;
+    this->id = id;
     setPosition(x, y, z);
-    setDirection(0.0f, 0.0f);
+    setOrientation(0.0f, 0.0f);
 }
 
-Object::Object(int id, int x, int y, int z, float hor, float ver) {
-    id = id;
+Object::Object(int id, int x, int y, int z, float orientationX, float orientationY) {
+    this->id = id;
     setPosition(x, y, z);
-    setDirection(hor, ver);
+    setOrientation(orientationX, orientationY);
+}
+
+void Object::setId(int id) {
+    this->id = id;
 }
 
 void Object::setPositionX(int x) {
@@ -38,17 +39,17 @@ void Object::setPosition(int x, int y, int z) {
     setPositionZ(z);
 }
 
-void Object::setDirectionHorizontal(float hor) {
-    this->directionHorizontal = hor;
+void Object::setOrientationY(float orientationY) {
+    this->orientationY = orientationY;
 }
 
-void Object::setDirectionVertical(float ver) {
-    this->directionVertical = ver;
+void Object::setOrientationX(float orientationX) {
+    this->orientationX = orientationX;
 }
 
-void Object::setDirection(float hor, float ver) {
-    setDirectionHorizontal(hor);
-    setDirectionVertical(ver);
+void Object::setOrientation(float orientationX, float orientationY) {
+    setOrientationX(orientationX);
+    setOrientationY(orientationY);
 }
 
 int Object::getId() {
@@ -60,17 +61,28 @@ int Object::getPositionX() {
 }
 
 int Object::getPositionY() {
-    return this->Y;
+    return this->y;
 }
 
 int Object::getPositionZ() {
-    return this->Z;
+    return this->z;
 }
 
-float Object::getDirectionHorizontal() {
-    return this->directionHorizontal;
+float Object::getOrientationX() {
+    return this->orientationX;
 }
 
-float Object::getDirectionVertical() {
-    return this->directionVertical;
+float Object::getOrientationY() {
+    return this->orientationY;
+}
+
+std::string Object::serialize() {
+    // id, x, y, z, directionH, directionV
+    std::string res = std::to_string(getId()) + ","
+        + std::to_string(getPositionX()) + ","
+        + std::to_string(getPositionY()) + ","
+        + std::to_string(getPositionZ()) + ","
+        + std::to_string(getOrientationY()) + ","
+        + std::to_string(getOrientationX());
+    return res;
 }

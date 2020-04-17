@@ -1,16 +1,18 @@
 #pragma once
 #include <map>
+#include <string>
+#include <iostream>
 #include "ObjectClasses/player.h"
-using namespace std;
 
 class GameState
 {
 private:
-    map<int, Object> gameObjects;
-    map<int, Player> players
+    std::map<int, Object&> gameObjects;
+    int nextId;
 public:
     GameState();
-    updateObject(int id);
-    createObject(Object obj);
-    deleteObject(int id);
+    void updateObject(int id);
+    void createObject(Object& obj);
+    void deleteObject(int id);
+    std::string serialize();
 };

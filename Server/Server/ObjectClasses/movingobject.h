@@ -12,8 +12,10 @@ public:
     void setVelocityX(float velX);
     void setVelocityY(float velY);
     void setVelocityZ(float velZ);
-    void setVelocity(float velX, velY, velZ);
+    void setVelocity(float velX, float velY, float velZ);
     float getVelocityX();
     float getVelocityY();
     float getVelocityZ();
+    //(de)serialize functions
+    virtual std::string serialize() override;
 };
