@@ -19,7 +19,7 @@
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
 
-#define LOGFILE_NAME "log/client.log"
+#define LOGFILE_NAME "log/server.log"
 #define LOGLEVEL spdlog::level::debug
 
 #define DEFAULT_BUFLEN 512
