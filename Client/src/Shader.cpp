@@ -6,6 +6,7 @@
 
 #include "Shaders.h"
 
+constexpr auto SHADER_DIR = "Shaders/";
 constexpr auto VERTEX_SHADER_EXT = ".vert";
 constexpr auto FRAGMENT_SHADER_EXT = ".frag";
 
@@ -20,7 +21,16 @@ Shader Shaders::horizonShader_ = 0;
 
 /* Private functions */
 
-Shader Shaders::loadShaders( const char * vertex_file_path, const char * fragment_file_path ) {
+Shader Shaders::loadShaders( std::string vertex_file, std::string fragment_file ) {
+
+    vertex_file = SHADER_DIR + vertex_file;
+    fragment_file = SHADER_DIR + fragment_file;
+
+    std::cout << "Vertex shader: " << vertex_file << std::endl;
+    std::cout << "Fragment shader: " << fragment_file << std::endl;
+
+    const char * vertex_file_path = vertex_file.c_str();
+    const char * fragment_file_path = fragment_file.c_str();
 
     // Create the shaders
     GLuint VertexShaderID = glCreateShader( GL_VERTEX_SHADER );
@@ -131,7 +141,7 @@ Shader Shaders::loadShaders( const char * vertex_file_path, const char * fragmen
 
 Shader Shaders::loadShaders( std::string shaderName ) {
 
-    return loadShaders( ( shaderName + VERTEX_SHADER_EXT ).c_str(), ( shaderName + FRAGMENT_SHADER_EXT ).c_str() );
+    return loadShaders( shaderName + VERTEX_SHADER_EXT, shaderName + FRAGMENT_SHADER_EXT );
 
 }
 

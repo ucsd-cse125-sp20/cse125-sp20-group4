@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Window.h"
+#include "Shaders.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -15,16 +17,16 @@ const char * window_title = "CSE 125 Project";
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
 
-#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, 0.0f )
+#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, -5.0f )
 #define DEFAULT_CAMERA_DIR glm::vec3( 0.0f, 0.0f, 1.0f )//-glm::normalize( DEFAULT_CAMERA_POS )
 
 #define POINT_SIZE_FACTOR 0.5f
 #define MOUSE_ROTATE_SCALE 1.0f
 #define ROTATION_THRESHOLD 0.0001f
-#define CAMERA_MOVEMENT_SPEED 1.0f
+#define CAMERA_MOVEMENT_SPEED 0.1f
 #define DIRECTIONAL_LIGHT_ROTATION_RATE RADIANS( 1.0f )
 
-#define BASE_PAN_SPEED RADIANS( 3.0f )
+#define BASE_PAN_SPEED RADIANS( 1.0f )
 #define X_DEAD_ZONE ( Window::width / 2 ) * 0.6
 #define Y_DEAD_ZONE ( Window::height / 2 ) * 0.6
 #define X_MOVE_SIZE ( Window::width / 2 - X_DEAD_ZONE )
@@ -68,15 +70,25 @@ float Window::aspect = 0.0f;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
+static GLuint VAO, EBO, VBO;
+
 void Window::initialize() {
 
-    // Do nothing for now
+    Shaders::initializeShaders();
+
+    glGenVertexArrays( 1, &VAO );
+    glGenBuffers( 1, &VBO );
+    glGenBuffers( 1, &EBO );
 
 }
 
 void Window::clean_up() {
 
-    // Do nothing for now
+    Shaders::deleteShaders();
+
+    glDeleteVertexArrays( 1, &VAO );
+    glDeleteBuffers( 1, &EBO );
+    glDeleteBuffers( 1, &VBO );
 
 }
 
@@ -178,15 +190,120 @@ void Window::idle_callback() {
 #pragma warning( pop )
 
 }
-bool renderWater = 1;
+
 void Window::display_callback( GLFWwindow * ) {
 
     // Clear the color and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
+    Shader shaderProgram = Shaders::flatShader();
+    glUseProgram( shaderProgram );
+
     // Render scene.
-    // TODO
+    // TODO: Real strategy
+
+    // Send projection and view matrices to shader programs.
+    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "projection" ), 1, GL_FALSE, &Window::P[0][0] );
+    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "view" ), 1, GL_FALSE, &Window::V[0][0] );
+    glUniform3fv( glGetUniformLocation( shaderProgram, "viewPos" ), 1, &Window::cam_pos.x );
+
+    // Bind vertex array.
+    glBindVertexArray( VAO );
+
+    std::vector<float> data;
+
+    for ( int i = -1; i <= 1; i += 2 ) {
+        for ( int j = -1; j <= 1; j += 2 ) {
+            for ( int k = -1; k <= 1; k += 2 ) {
+                data.push_back( i * 1.0f );
+                data.push_back( j * 1.0f );
+                data.push_back( k * 1.0f );
+            }
+        }
+    }
+
+    // Now bind a VBO to it as a GL_ARRAY_BUFFER (drawing data).
+    glBindBuffer( GL_ARRAY_BUFFER, VBO );
+    // Populate buffer with vertex data.
+    glBufferData( GL_ARRAY_BUFFER, data.size() * sizeof( float ), data.data(), GL_STREAM_DRAW );
+
+    // Position.
+    glEnableVertexAttribArray( 0 );
+    glVertexAttribPointer( 0, // Attribute ID.
+        3, // How many components there are per vertex.
+        GL_FLOAT, // What type these components are.
+        GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't.
+        3 * sizeof( GLfloat ), // Offset between consecutive indices.
+        ( GLvoid * ) 0 ); // Offset of the first vertex's component.
+
+    // Bind GL_ELEMENT_ARRAY_BUFFER for drawing order.
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
+
+    std::vector<unsigned int> indices;
+
+    // Left face
+    indices.push_back( 0 );
+    indices.push_back( 2 );
+    indices.push_back( 1 );
+
+    indices.push_back( 1 );
+    indices.push_back( 2 );
+    indices.push_back( 3 );
+
+    // Right face
+    indices.push_back( 5 );
+    indices.push_back( 7 );
+    indices.push_back( 4 );
+
+    indices.push_back( 4 );
+    indices.push_back( 7 );
+    indices.push_back( 6 );
+
+    // Back face
+    indices.push_back( 0 );
+    indices.push_back( 4 );
+    indices.push_back( 2 );
+
+    indices.push_back( 2 );
+    indices.push_back( 4 );
+    indices.push_back( 6 );
+
+    // Front face
+    indices.push_back( 1 );
+    indices.push_back( 3 );
+    indices.push_back( 5 );
+
+    indices.push_back( 3 );
+    indices.push_back( 7 );
+    indices.push_back( 5 );
+
+    // Bottom face
+    indices.push_back( 0 );
+    indices.push_back( 1 );
+    indices.push_back( 5 );
+
+    indices.push_back( 0 );
+    indices.push_back( 5 );
+    indices.push_back( 4 );
+
+    // Top Face
+    indices.push_back( 2 );
+    indices.push_back( 6 );
+    indices.push_back( 3 );
+
+    indices.push_back( 3 );
+    indices.push_back( 6 );
+    indices.push_back( 7 );
+
+    // Buffer drawing order.
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof( unsigned int ), indices.data(), GL_STREAM_DRAW );
+
+    // Tell OpenGL to draw with triangles, using the recorded amount of indices and no offset.
+    glDrawElements( GL_TRIANGLES, ( GLsizei ) indices.size(), GL_UNSIGNED_INT, 0 );
+
+    // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers.
+    glBindVertexArray( 0 );
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();

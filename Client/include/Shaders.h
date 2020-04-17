@@ -23,7 +23,7 @@ class Shaders {
     static Shader phongShader_;
     static Shader horizonShader_;
 
-    static Shader loadShaders( const char * vertex_file_path, const char * fragment_file_path );
+    static Shader loadShaders( std::string vertex_file, std::string fragment_file );
     static Shader loadShaders( std::string shaderName );
 
     public:
