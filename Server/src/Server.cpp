@@ -12,8 +12,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <stdexcept>
+
+#include "logger.h"
+
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
+
+#define LOGFILE_NAME "log/client.log"
+#define LOGLEVEL spdlog::level::debug
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
@@ -54,8 +61,9 @@ DWORD WINAPI handleConn(void* data) {
     }
 }
 
-int main(void)
+int main_inner( void )
 {
+
     WSADATA wsaData;
 
     SOCKET listenSock = INVALID_SOCKET;
@@ -126,4 +134,21 @@ int main(void)
     closesocket(listenSock);
     WSACleanup();
     return 1;
+}
+
+int main( void ) {
+
+    initLogging( LOGFILE_NAME, LOGLEVEL );
+    spdlog::info( "Server starting up." );
+    try {
+        int statusCode = main_inner();
+        spdlog::info( "Server shutting down." );
+        shutdownLogging();
+        return statusCode;
+    } catch ( std::exception & e ) {
+        spdlog::critical( "Unhandled exception: {}", e.what() );
+        shutdownLogging();
+        throw e; // Record and rethrow
+    }
+
 }

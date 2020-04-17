@@ -15,6 +15,9 @@
 #include "logger.h"
 #include "Window.h"
 
+#define LOGFILE_NAME "log/client.log"
+#define LOGLEVEL spdlog::level::debug
+
 void setup_glew() {
 
     // Initialize GLEW. Not needed on OSX systems.
@@ -93,7 +96,7 @@ void setup_callbacks( GLFWwindow * window ) {
 
 }
 
-int main( void ) {
+int main_inner( void ) {
 
     // Create the GLFW window
     spdlog::info( "Creating window..." );
@@ -129,8 +132,23 @@ int main( void ) {
     // Terminate GLFW
     glfwTerminate();
 
-    shutdownLogging();
-
     return EXIT_SUCCESS;
+
+}
+
+int main( void ) {
+
+    initLogging( LOGFILE_NAME, LOGLEVEL );
+    spdlog::info( "Client starting up." );
+    try {
+        int statusCode = main_inner();
+        spdlog::info( "Client shutting down." );
+        shutdownLogging();
+        return statusCode;
+    } catch ( std::exception & e ) {
+        spdlog::critical( "Unhandled exception: {}", e.what() );
+        shutdownLogging();
+        throw e; // Record and rethrow
+    }
 
 }
