@@ -1,5 +1,5 @@
 #include "gameState.h"
-#include "logger.h"
+#include "Shared/logger.h"
 GameState::GameState() {
     this->nextId = 0;
     this->gameObjects = std::map<int, Object&>();

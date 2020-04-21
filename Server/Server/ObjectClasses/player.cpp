@@ -1,5 +1,5 @@
 #include "player.h"
-#include "../logger.h"
+#include "Shared/logger.h"
 
 Player::Player(int id) : Player(id, 0, 0, 0) {}
 Player::Player(int id, int x, int y, int z) : Player(id, x, y, z, 0.0f, 0.0f) {}

@@ -1,5 +1,5 @@
 #include "movingobject.h"
-#include "../logger.h""
+#include "Shared/logger.h""
 
 MovingObject::MovingObject(int id) : MovingObject(id, 0.0f, 0.0f, 0.0f,) {}
 

@@ -1,5 +1,5 @@
 #include "object.h"
-#include "../logger.h"
+#include "Shared/logger.h"
 
 Object::Object(int id) : Object(id, 0, 0, 0) {}
 

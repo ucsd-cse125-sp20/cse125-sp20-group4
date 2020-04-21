@@ -15,8 +15,12 @@ target_include_directories(Server
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+
 # Find dependencies
-#find_package(<> REQUIRED)
+find_package(spdlog REQUIRED)
+
+# Link dependencies
+#target_link_libraries(Server PUBLIC spdlog::spdlog)
 
 # Link dependencies
 target_link_libraries(Server PRIVATE Shared)
