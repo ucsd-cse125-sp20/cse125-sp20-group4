@@ -191,10 +191,19 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
+Project_BINARY_DIR:STATIC=F:/Sources/repos/Server/out/build/x64-Debug
+
+//Value Computed by CMake
+Project_SOURCE_DIR:STATIC=F:/Sources/repos/Server
+
+//Value Computed by CMake
 Server_BINARY_DIR:STATIC=F:/Sources/repos/Server/out/build/x64-Debug
 
 //Value Computed by CMake
 Server_SOURCE_DIR:STATIC=F:/Sources/repos/Server
+
+//The directory containing a CMake configuration file for spdlog.
+spdlog_DIR:PATH=spdlog_DIR-NOTFOUND
 
 
 ########################
