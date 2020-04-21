@@ -15,8 +15,10 @@ target_include_directories(Server
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Find dependencies
-#find_package(<> REQUIRED)
+# Register source files
+file(GLOB_RECURSE Server_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+message(DEBUG "Sources: ${Server_SRC}")
+target_sources(Server PRIVATE ${Server_SRC})
 
 # Link dependencies
 target_link_libraries(Server PRIVATE Shared)

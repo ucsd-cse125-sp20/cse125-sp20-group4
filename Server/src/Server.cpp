@@ -5,15 +5,18 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <Windows.h>
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <processthreadsapi.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <concurrent_queue.h>
 
 #include <stdexcept>
+#include <vector>
 
+#include "client.h"
 #include "logger.h"
 
 // Need to link with Ws2_32.lib
@@ -29,17 +32,15 @@
 DWORD WINAPI handleConn(void* data) {
     int status;
     char buf[DEFAULT_BUFLEN];
-    SOCKET clientSock = *(SOCKET*) data;
-    free(data);
+    Client* client = (Client*) data;
     printf("Connected\n");
-    while ((status = recv(clientSock, buf, DEFAULT_BUFLEN, 0)) > 0) {
+    while ((status = recv(*client->sock, buf, DEFAULT_BUFLEN, 0)) > 0) {
         printf("Received %d bytes\n", status);
-        int sendStatus = send(clientSock, buf, status, 0);
+        int sendStatus = send(*client->sock, buf, status, 0);
         // Echo the buffer back to the sender
         if (sendStatus == SOCKET_ERROR) {
             printf("send failed with error: %d\n", WSAGetLastError());
-            closesocket(clientSock);
-            WSACleanup();
+            closesocket(*client->sock);
             return 1;
         }
         printf("Echoed %d bytes\n", sendStatus);
@@ -47,23 +48,21 @@ DWORD WINAPI handleConn(void* data) {
     if (status == 0) {
         printf("Connection closed\n");
         // shutdown the connection since we're done
-        if (shutdown(clientSock, SD_SEND) == SOCKET_ERROR) {
+        if (shutdown(*client->sock, SD_SEND) == SOCKET_ERROR) {
             printf("shutdown failed with error: %d\n", WSAGetLastError());
-            closesocket(clientSock);
+            closesocket(*client->sock);
             return 1;
         }
-        closesocket(clientSock);
+        closesocket(*client->sock);
         return 0;
     } else {
         printf("recv failed with error: %d\n", WSAGetLastError());
-        closesocket(clientSock);
+        closesocket(*client->sock);
         return 1;
-    }
+    } // todo destructor for client handler
 }
 
-int main_inner( void )
-{
-
+int main_inner(void) {
     WSADATA wsaData;
 
     SOCKET listenSock = INVALID_SOCKET;
@@ -122,11 +121,12 @@ int main_inner( void )
 
     printf("listening on %s\n", DEFAULT_PORT);
 
+    std::vector<Client> clients;
+    int count = 0;
+    concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); // todo use shared data class
     while ((clientSock = accept(listenSock, NULL, NULL)) != INVALID_SOCKET) {
-        SOCKET* threadSock = (SOCKET*) malloc(sizeof(SOCKET));
-        // just pass client socket to new thread, will want to add more, like data xfer channel, etc
-        *threadSock = clientSock;
-        HANDLE thread = CreateThread(NULL, 0, handleConn, threadSock, 0, NULL);
+        Client* client = new Client(&clientSock, &eventQueue);
+        HANDLE thread = CreateThread(NULL, 0, handleConn, client, 0, NULL);
         CloseHandle(thread); // TODO better thread handling, keep in array of clients, etc
     }
 
