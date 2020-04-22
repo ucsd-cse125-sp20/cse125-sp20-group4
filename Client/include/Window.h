@@ -10,6 +10,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 
+#include "state/World.h"
+
 class Window {
 
     private:
@@ -31,6 +33,7 @@ class Window {
     static float aspect;
 
     static GLFWwindow * window;
+    static World world;
 
     static void setCamera();
     static void initialize();

@@ -6,8 +6,9 @@ in vec4 vertexColor;
 // Output color of fragment.
 out vec4 fragColor;
 
-void main()
-{
+void main() {
+
     // Use color interpolated from vertex colors.
     fragColor = vertexColor;
+
 }

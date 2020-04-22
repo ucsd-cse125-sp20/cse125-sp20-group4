@@ -7,7 +7,7 @@
 
 #include "logger.h"
 
-#include "Drawing/Shaders.h"
+#include "drawing/Shaders.h"
 
 static const auto LOGGER = getLogger( "Shaders" );
 
