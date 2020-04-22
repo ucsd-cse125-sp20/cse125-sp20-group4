@@ -5,12 +5,22 @@
 #include <concurrent_queue.h>
 
 class Client {
-public: // todo private
+private: // todo private
 	int id;
-	SOCKET* sock;
+	SOCKET sock;
+	HANDLE thread = NULL;
 	concurrency::concurrent_queue<int>* eventQueue; //todo use shared data class
-	concurrency::concurrent_queue<int> signalQueue = concurrency::concurrent_queue<int>();
 public:
-	Client(int id, SOCKET* sock, concurrency::concurrent_queue<int>* eventQueue);
+	Client(int, SOCKET, HANDLE, concurrency::concurrent_queue<int>*);
 	~Client();
+
+	// getters
+	HANDLE getHandle();
+	int getId();
+
+	int send(char*, int); // todo send shared data type, include serialization inside
+	int recv(char*, int); // todo recv shared data type, include deserialization inside
+	void pushEvent(const int&); // todo push shared data type
+	void pushEvent(int&&); // todo push shared data type
+	bool tryPopEvent(int&); // todo push shared data type
 };
