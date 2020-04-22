@@ -44,9 +44,11 @@ DWORD WINAPI handleGame(void* data) {
     while (!exit) {
         int out;
         int signal;
+        // ************** GAME LOGIC START **************
         while (queues->eventQueue->try_pop(out)) {
             printf("Received from client %d\n", out);
         }
+        // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
         if (queues->signalQueue->try_pop(signal)) {
             // maybe case if more signals
