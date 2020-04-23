@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 
 # Set target executable
-add_executable(Server "src/Server.cpp")
+add_executable(Server)
 
 # Include source directories
 target_include_directories(Server
@@ -14,11 +14,15 @@ target_include_directories(Server
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+# Register source files
+file(GLOB_RECURSE Server_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+message(DEBUG "Sources: ${Server_SRC}")
+target_sources(Server PRIVATE ${Server_SRC})
 
 
 # Find dependencies
 find_package(spdlog REQUIRED)
-find_package(glm REQUIRED)
+find_package(glm CONFIG REQUIRED)
 # Link dependencies
 #target_link_libraries(Server PUBLIC spdlog::spdlog)
 

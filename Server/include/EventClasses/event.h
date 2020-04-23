@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-
+#include "ObjectClasses/object.h"
 class Event
 {
 private:
@@ -9,5 +9,5 @@ public:
 	Event(int objectId);
 	int getObjectId();
 	std::string serialize();
-	void apply(Object& object);
+	virtual void apply(Object& object);
 };

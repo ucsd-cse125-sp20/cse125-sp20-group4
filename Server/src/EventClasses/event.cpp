@@ -1,5 +1,5 @@
 #pragma once
-#include "event.h"
+#include "EventClasses/event.h"
 
 Event::Event(int objectId) {
     this->objectId = objectId;

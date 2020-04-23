@@ -5,7 +5,7 @@
 
 class Object {
 private:
-    glm::vec3 location;
+    glm::vec3 position;
     glm::vec3 orientation;
     int id;
     // mesh
@@ -33,11 +33,11 @@ public:
     float getPositionX();
     float getPositionY();
     float getPositionZ();
+    glm::vec3 getPosition();
     float getOrientationX();
     float getOrientationY();
     float getOrientationZ();
     glm::vec3 getOrientation();
-    float getOrientationX();
     virtual float getNextPositionX();
     virtual float getNextPositionY();
     virtual float getNextPositionZ();

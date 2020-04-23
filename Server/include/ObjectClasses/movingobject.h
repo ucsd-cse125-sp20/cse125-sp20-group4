@@ -18,9 +18,9 @@ public:
     float getVelocityX();
     float getVelocityY();
     float getVelocityZ();
-    int getNextPositionX();
-    int getNextPositionY();
-    int getNextPositionZ();
+    float getNextPositionX();
+    float getNextPositionY();
+    float getNextPositionZ();
     //(de)serialize functions
     virtual std::string serialize() override;
 };

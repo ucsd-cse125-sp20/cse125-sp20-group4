@@ -1,5 +1,5 @@
 #include "gameState.h"
-#include "Shared/logger.h"
+#include "logger.h"
 
 GameState::GameState() {
     this->nextId = 0;
@@ -7,7 +7,7 @@ GameState::GameState() {
 }
 
 void GameState::createObject(Object& obj) {
-    auto log = logger();
+    auto log = getLogger("GameState");
     obj.setId(this->nextId);
     this->gameObjects.insert(std::pair<int, Object&>(nextId, obj));
     this->nextId++;
@@ -15,7 +15,7 @@ void GameState::createObject(Object& obj) {
 }
 
 void GameState::deleteObject(int id) {
-    auto log = logger();
+    auto log = getLogger("GameState");
     log->trace("Deleting GameState object with id: {}", id);
     std::map<int, Object&>::iterator it;
     it = this->gameObjects.find(id);
@@ -53,7 +53,7 @@ void GameState::applyEvent(Event& event) {
 }
 
 std::string GameState::serialize() {
-    auto log = logger();
+    auto log = getLogger("GameState");
     log->trace("Beginning to serialize GameState");
     std::map<int, Object&>::iterator it = this->gameObjects.begin();
     std::string res = "";

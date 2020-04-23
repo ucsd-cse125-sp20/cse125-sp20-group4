@@ -1,5 +1,5 @@
-#include "object.h"
-#include "Shared/logger.h"
+#include "ObjectClasses/object.h"
+#include "logger.h"
 
 
 Object::Object(int id) : Object(id, 0f, 0f, 0f) {}
@@ -7,7 +7,7 @@ Object::Object(int id) : Object(id, 0f, 0f, 0f) {}
 Object::Object(int id, float x, float y, float z) : Object(id, x, y, z, 0f, 0f, 0f) {}
 
 Object::Object(int id, float x, float  y, float z, float dirX, float dirY, float dirZ) {
-    auto log = logger();
+    auto log = getLogger("Object");
     this->id = id;
     setPosition(x, y, z);
     setOrientation(dirX, dirY, dirZ);
@@ -15,7 +15,7 @@ Object::Object(int id, float x, float  y, float z, float dirX, float dirY, float
 }
 
 void Object::setId(int id) {
-    auto log = logger();
+    auto log = getLogger("Object");
     this->id = id;
     log->trace("Setting id of Object to {}", id);
 }
@@ -33,30 +33,27 @@ void Object::setPositionZ(float z) {
 }
 
 void Object::setPosition(float x, float y, float z) {
-    auto logger = logger();
-    this->location = glm::vec3(x, y, z);
-    log->trace("Setting position of Object {} to {}", this->getId(), this->location);
+    auto log = getLogger("Object");
+    this->position = glm::vec3(x, y, z);
+    log->trace("Setting position of Object {} to {}", this->getId(), this->position);
 
 }
 
 void Object::setOrientationY(float orientationY) {
-    auto log = logger();
-    this->orientationY = orientationY;
-    log->trace("Setting Y orientation of Object {} to {}", this->getId(), orientationY);
+    this->setOrientation(this->getOrientation().x, orientationY,  this->getOrientation().z);
+
 }
 
 void Object::setOrientationX(float orientationX) {
-    auto log = logger();
-    this->orientationX = orientationX;
-    log->trace("Setting X orientation of Object {} to {}", this->getId(), orientationX);
+    this->setOrientation(orientationX, this->getOrientation().y, this->getOrientation().z);
 }
 
 void Object::setOrientationZ(float orientationZ) {
-    this->setOrientation()
+    this->setOrientation(this->getOrientation().x, this->getOrientation().y, orientationZ);
 }
 
 void Object::setOrientation(float orientationX, float orientationY, float orientationZ) {
-    auto log = logger();
+    auto log = getLogger("Object");
     this->orientation = glm::vec3(orientationX, orientationY, orientationZ);
     log->trace("Setting orientation of Object {} to {}", this->getId(), orientationX);
 
@@ -67,15 +64,19 @@ int Object::getId() {
 }
 
 float Object::getPositionX() {
-    return this->x;
+    return this->getPosition().x;
 }
 
 float Object::getPositionY() {
-    return this->y;
+    return this->getPosition().y;
 }
 
 float Object::getPositionZ() {
-    return this->z;
+    return this->getPosition().z;
+}
+
+glm::vec3 Object::getPosition() {
+    return this->position;
 }
 
 float Object::getOrientationX() {
@@ -94,21 +95,21 @@ glm::vec3 Object::getOrientation() {
     return this->orientation;
 }
 
-int Object::getNextPositionX() {
+float Object::getNextPositionX() {
     return getPositionX();
 }
 
-int Object::getNextPositionY() {
+float Object::getNextPositionY() {
     return getPositionY();
 }
 
-int Object::getNextPositionZ() {
+float Object::getNextPositionZ() {
     return getPositionZ();
 }
 
 std::string Object::serialize() {
-    auto log = logger();
-    // id, x, y, z, directionH, directionV
+    auto log = getLogger("Object");
+    // id, x, y, z, directionX, directionY, directionZ
     std::string res = std::to_string(getId()) + ","
         + std::to_string(getPositionX()) + ","
         + std::to_string(getPositionY()) + ","
