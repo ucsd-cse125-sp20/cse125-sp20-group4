@@ -8,6 +8,7 @@
 #include "drawing/Shaders.h"
 #include "drawing/model/Axis.h"
 #include "drawing/model/RectangularCuboid.h"
+#include "state/CameraEntity.h"
 #include "state/Entity.h"
 
 // Use of degrees is deprecated. Use radians instead.
@@ -20,7 +21,7 @@ const char * window_title = "CSE 125 Project";
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
 
-#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, -5.0f )
+#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, 0.0f )
 #define DEFAULT_CAMERA_DIR glm::vec3( 0.0f, 0.0f, 1.0f )//-glm::normalize( DEFAULT_CAMERA_POS )
 
 #define POINT_SIZE_FACTOR 0.5f
@@ -42,7 +43,7 @@ const char * window_title = "CSE 125 Project";
 #define ROTATE( direction, angle, axis ) ( glm::rotate( glm::mat4( 1.0f ), ( angle ), ( axis ) ) * glm::vec4( ( direction ), 1.0f ) )
 
 Camera * Window::cam;
-World Window::world;
+World * Window::world;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -59,15 +60,17 @@ int Window::height;
 void Window::initialize() {
 
     Shaders::initializeShaders();
+    world = new World();
 
     cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world.addEntity( "cube1", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f, 3.0f, 10.0f ), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
-    world.addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
-    world.addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
+    world->addEntity( "cube1", new CameraEntity( "player", 0.0f, new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f, 3.0f, 10.0f ), DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ) );
+    world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
+    world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
+    cam = Camera::getCamera( "player" );
 
     // Debugging entities
-    world.addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
+    world->addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
 
 }
 
@@ -75,6 +78,7 @@ void Window::clean_up() {
 
     Camera::removeCamera( "default" );
 
+    delete( world );
     Shaders::deleteShaders();
 
 }
@@ -182,7 +186,7 @@ void Window::display_callback( GLFWwindow * ) {
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
     // Render scene.
-    world.draw( cam->getToView() );
+    world->draw( cam->getToView() );
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();

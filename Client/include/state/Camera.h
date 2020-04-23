@@ -13,7 +13,7 @@ class Camera {
     const glm::mat4x4 & getV() const;
     const glm::mat4x4 & getToView() const;
 
-    void update( const glm::vec3 & pos, const glm::vec3 & dir );
+    virtual void update( const glm::vec3 & pos, const glm::vec3 & dir );
     void move( const glm::vec3 & pos );
     void rotate( const glm::vec3 & dir );
 
@@ -27,6 +27,7 @@ class Camera {
 
     protected:
     Camera( const glm::vec3 & pos, const glm::vec3 & dir );
+    virtual ~Camera() {};
 
     glm::vec3 pos, dir;
 
@@ -38,7 +39,8 @@ class Camera {
 
     static float nearZ, farZ, fov, aspect;
     static glm::mat4x4 P;
-    static std::unordered_map<std::string, Camera *> cameras;
+    // If the boolean is true, camera is managed by something and should not be manually deleted
+    static std::unordered_map<std::string, std::pair<Camera *, bool>> cameras;
 
     static void updateAll();
     static void updateP();

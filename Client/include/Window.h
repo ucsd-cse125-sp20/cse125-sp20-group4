@@ -26,7 +26,7 @@ class Window {
     static int height;
 
     static GLFWwindow * window;
-    static World world;
+    static World * world;
     static Camera * cam;
 
     static void initialize();

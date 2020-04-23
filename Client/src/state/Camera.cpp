@@ -17,7 +17,7 @@ float Camera::fov = RADIANS( 45.0f );
 float Camera::aspect = 0.0f;
 
 glm::mat4x4 Camera::P( 0.0f );
-std::unordered_map<std::string, Camera *> Camera::cameras;
+std::unordered_map<std::string, std::pair<Camera *, bool>> Camera::cameras;
 
 /* Constructor */
 
@@ -106,31 +106,40 @@ Camera * Camera::getCamera( const std::string & name ) {
     if ( it == cameras.end() ) {
         throw std::invalid_argument( "Camera not found." );
     }
-    return it->second;
+    return it->second.first;
 
 }
 
 Camera * Camera::addCamera( const std::string & name, const glm::vec3 & pos, const glm::vec3 & dir ) {
 
-    LOGGER->info( "Adding new camera {}.", name );
+    LOGGER->info( "Adding new camera '{}'.", name );
 
     if ( cameras.count( name ) > 0 ) {
         throw std::invalid_argument( "A camera with that name already exists." );
     }
 
     Camera * cam = new Camera( pos, dir );
-    cameras[name] = cam;
+    cameras[name] = std::make_pair( cam, false );
     return cam;
 
 }
 
 void Camera::removeCamera( const std::string & name ) {
 
-    LOGGER->info( "Removing camera {}.", name );
+    LOGGER->info( "Removing camera '{}'.", name );
 
-    if ( cameras.erase( name ) == 0 ) {
+    auto it = cameras.find( name );
+    if ( it == cameras.end() ) {
         throw std::invalid_argument( "Camera not found." );
     }
+
+    if ( it->second.second ) {
+        throw std::invalid_argument( "Cannot manually delete a managed camera." );
+    }
+
+    Camera * cam = it->second.first;
+    cameras.erase( name );
+    delete( cam );
 
 }
 
@@ -157,7 +166,7 @@ void Camera::updateAll() {
 
     for ( auto it = cameras.begin(); it != cameras.end(); it++ ) {
 
-        it->second->update();
+        it->second.first->update();
 
     }
 
