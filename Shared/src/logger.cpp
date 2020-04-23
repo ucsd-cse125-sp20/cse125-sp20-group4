@@ -96,7 +96,7 @@ void initLoggerInternal( void ) {
 
 }
 
-std::shared_ptr <spdlog::logger> getLogger( const std::string & name ) {
+std::shared_ptr<spdlog::logger> getLogger( const std::string & name ) {
 
     std::lock_guard<std::mutex> lck( getMutex() );
 
@@ -109,6 +109,14 @@ std::shared_ptr <spdlog::logger> getLogger( const std::string & name ) {
 
         spdlog::initialize_logger( logger ); // Initialize with global settings and register
     }
+    return logger;
+
+}
+
+std::shared_ptr<spdlog::logger> getLogger( const std::string & name, spdlog::level::level_enum loglevel ) {
+
+    std::shared_ptr<spdlog::logger> logger = getLogger( name );
+    logger->set_level( loglevel );
     return logger;
 
 }

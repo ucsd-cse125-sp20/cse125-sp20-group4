@@ -5,7 +5,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Window.h"
-#include "Drawing/Shaders.h"
+#include "drawing/Shaders.h"
+#include "drawing/model/Axis.h"
+#include "drawing/model/EmptyModel.h"
+#include "drawing/model/RectangularCuboid.h"
+#include "state/CameraEntity.h"
+#include "state/Entity.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -17,7 +22,7 @@ const char * window_title = "CSE 125 Project";
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
 
-#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, -5.0f )
+#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, 0.0f )
 #define DEFAULT_CAMERA_DIR glm::vec3( 0.0f, 0.0f, 1.0f )//-glm::normalize( DEFAULT_CAMERA_POS )
 
 #define POINT_SIZE_FACTOR 0.5f
@@ -36,24 +41,15 @@ const char * window_title = "CSE 125 Project";
 #define X_SPEED( xPos ) ( ( ( std::abs( xPos ) - X_DEAD_ZONE ) / X_MOVE_SIZE ) * ( ( xPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 #define Y_SPEED( yPos ) ( ( ( std::abs( yPos ) - Y_DEAD_ZONE ) / Y_MOVE_SIZE ) * ( ( yPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 
-// Default camera parameters
-glm::vec3 Window::cam_pos = DEFAULT_CAMERA_POS; // Position of camera.
-glm::vec3 Window::cam_dir = DEFAULT_CAMERA_DIR; // Direction of the camera.
-
 #define ROTATE( direction, angle, axis ) ( glm::rotate( glm::mat4( 1.0f ), ( angle ), ( axis ) ) * glm::vec4( ( direction ), 1.0f ) )
+
+Camera * Window::cam;
+World * Window::world;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
-    cam_dir = ROTATE( cam_dir, angle, axis );
-    setCamera();
-
-}
-
-void Window::setCamera() {
-
-    glm::vec3 cam_look_at = cam_pos + cam_dir;
-    glm::vec3 cam_up = glm::cross( glm::cross( cam_dir, glm::vec3( 0.0f, 1.0f, 0.0f ) ), cam_dir );
-    V = glm::lookAt( cam_pos, cam_look_at, cam_up );
+    glm::vec3 newDir = ROTATE( cam->getDir() , angle, axis );
+    cam->rotate( newDir );
 
 }
 
@@ -62,33 +58,30 @@ GLFWwindow * Window::window = nullptr;
 int Window::width;
 int Window::height;
 
-float Window::nearZ = 0.1f;
-float Window::farZ = 300.0f;
-float Window::fov = RADIANS( 45.0f );
-float Window::aspect = 0.0f;
-
-glm::mat4 Window::P;
-glm::mat4 Window::V;
-
-static GLuint VAO, EBO, VBO;
-
 void Window::initialize() {
 
     Shaders::initializeShaders();
+    world = new World();
 
-    glGenVertexArrays( 1, &VAO );
-    glGenBuffers( 1, &VBO );
-    glGenBuffers( 1, &EBO );
+    cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
+
+    world->addEntity( "cube1", new CameraEntity( "player", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+    world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
+    world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
+    world->addEntity( "cube4", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) ) );
+    cam = Camera::getCamera( "player" );
+
+    // Debugging entities
+    world->addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, false ) );
 
 }
 
 void Window::clean_up() {
 
-    Shaders::deleteShaders();
+    Camera::removeCamera( "default" );
 
-    glDeleteVertexArrays( 1, &VAO );
-    glDeleteBuffers( 1, &EBO );
-    glDeleteBuffers( 1, &VBO );
+    delete( world );
+    Shaders::deleteShaders();
 
 }
 
@@ -156,9 +149,7 @@ void Window::resize_callback( GLFWwindow *, int newWidth, int newHeight ) {
     glViewport( 0, 0, newWidth, newHeight );
 
     if ( newHeight > 0 ) {
-        aspect = ( float ) newWidth / ( float ) newHeight;
-        P = glm::perspective( fov, aspect, nearZ, farZ );
-        setCamera();
+        Camera::setAspect( ( float ) newWidth / ( float ) newHeight );
     }
 
 }
@@ -169,9 +160,8 @@ void Window::idle_callback() {
 
     // Translate camera
     if ( ( movement.x != 0.0f ) || ( movement.y != 0.0f ) || ( movement.z != 0.0f ) ) {
-        glm::vec4 move = glm::inverse( V ) * glm::vec4( movement, 1.0f );
-        cam_pos = glm::vec3( move ); // Camera is moving.
-        setCamera();
+        glm::vec4 move = glm::inverse( cam->getV() ) * glm::vec4( movement, 1.0f );
+        cam->move( glm::vec3( move ) ); // Camera is moving.
     }
 
     // Rotate camera (trackball)
@@ -185,7 +175,7 @@ void Window::idle_callback() {
         rotateCamera( X_SPEED( ( float ) cursorX ), glm::vec3( 0.0f, -1.0f, 0.0f ) );
     }
     if ( std::abs( cursorY ) > Y_DEAD_ZONE ) {
-        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam_dir ) );
+        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
 
@@ -197,113 +187,8 @@ void Window::display_callback( GLFWwindow * ) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
-    Shader shaderProgram = Shaders::flat();
-    glUseProgram( shaderProgram );
-
     // Render scene.
-    // TODO: Real strategy
-
-    // Send projection and view matrices to shader programs.
-    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "projection" ), 1, GL_FALSE, &Window::P[0][0] );
-    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "view" ), 1, GL_FALSE, &Window::V[0][0] );
-    glUniform3fv( glGetUniformLocation( shaderProgram, "viewPos" ), 1, &Window::cam_pos.x );
-
-    // Bind vertex array.
-    glBindVertexArray( VAO );
-
-    std::vector<float> data;
-
-    for ( int i = -1; i <= 1; i += 2 ) {
-        for ( int j = -1; j <= 1; j += 2 ) {
-            for ( int k = -1; k <= 1; k += 2 ) {
-                data.push_back( i * 1.0f );
-                data.push_back( j * 1.0f );
-                data.push_back( k * 1.0f );
-            }
-        }
-    }
-
-    // Now bind a VBO to it as a GL_ARRAY_BUFFER (drawing data).
-    glBindBuffer( GL_ARRAY_BUFFER, VBO );
-    // Populate buffer with vertex data.
-    glBufferData( GL_ARRAY_BUFFER, data.size() * sizeof( float ), data.data(), GL_STREAM_DRAW );
-
-    // Position.
-    glEnableVertexAttribArray( 0 );
-    glVertexAttribPointer( 0, // Attribute ID.
-        3, // How many components there are per vertex.
-        GL_FLOAT, // What type these components are.
-        GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't.
-        3 * sizeof( GLfloat ), // Offset between consecutive indices.
-        ( GLvoid * ) 0 ); // Offset of the first vertex's component.
-
-    // Bind GL_ELEMENT_ARRAY_BUFFER for drawing order.
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
-
-    std::vector<unsigned int> indices;
-
-    // Left face
-    indices.push_back( 0 );
-    indices.push_back( 2 );
-    indices.push_back( 1 );
-
-    indices.push_back( 1 );
-    indices.push_back( 2 );
-    indices.push_back( 3 );
-
-    // Right face
-    indices.push_back( 5 );
-    indices.push_back( 7 );
-    indices.push_back( 4 );
-
-    indices.push_back( 4 );
-    indices.push_back( 7 );
-    indices.push_back( 6 );
-
-    // Back face
-    indices.push_back( 0 );
-    indices.push_back( 4 );
-    indices.push_back( 2 );
-
-    indices.push_back( 2 );
-    indices.push_back( 4 );
-    indices.push_back( 6 );
-
-    // Front face
-    indices.push_back( 1 );
-    indices.push_back( 3 );
-    indices.push_back( 5 );
-
-    indices.push_back( 3 );
-    indices.push_back( 7 );
-    indices.push_back( 5 );
-
-    // Bottom face
-    indices.push_back( 0 );
-    indices.push_back( 1 );
-    indices.push_back( 5 );
-
-    indices.push_back( 0 );
-    indices.push_back( 5 );
-    indices.push_back( 4 );
-
-    // Top Face
-    indices.push_back( 2 );
-    indices.push_back( 6 );
-    indices.push_back( 3 );
-
-    indices.push_back( 3 );
-    indices.push_back( 6 );
-    indices.push_back( 7 );
-
-    // Buffer drawing order.
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof( unsigned int ), indices.data(), GL_STREAM_DRAW );
-
-    // Tell OpenGL to draw with triangles, using the recorded amount of indices and no offset.
-    glDrawElements( GL_TRIANGLES, ( GLsizei ) indices.size(), GL_UNSIGNED_INT, 0 );
-
-    // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers.
-    glBindVertexArray( 0 );
+    world->draw( cam->getToView() );
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
@@ -350,9 +235,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
             case GLFW_KEY_R: // Reset camera position.
-                cam_pos = DEFAULT_CAMERA_POS; // Reset to default position.
-                cam_dir = DEFAULT_CAMERA_DIR; // Set direction too.
-                setCamera();
+                cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
                 break;
 
             case GLFW_KEY_P:
@@ -370,9 +253,13 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( ( mods & GLFW_MOD_SHIFT ) != 0 ) { // Check for shift key.
                     // std::cout << "Current light direction: " << PRINT_VECTOR( Lights::directionalDirection ) << std::endl;
                 } else {
-                    std::cout << "Current camera position: " << PRINT_VECTOR( cam_pos ) << std::endl;
-                    std::cout << "Current camera direction: " << PRINT_VECTOR( cam_dir ) << std::endl;
+                    std::cout << "Current camera position: " << PRINT_VECTOR( cam->getPos() ) << std::endl;
+                    std::cout << "Current camera direction: " << PRINT_VECTOR( cam->getDir() ) << std::endl;
                 }
+                break;
+
+            case GLFW_KEY_X:
+                Axis::toggleAll();
                 break;
 
         }
@@ -436,7 +323,7 @@ void Window::mouse_move_callback( GLFWwindow *, double xpos, double ypos ) {
         float velocity = glm::length( cur - last );
         if ( velocity >= ROTATION_THRESHOLD ) { // Ignore trivially small rotations
             glm::vec3 rotationAxis = glm::cross( last, cur ); // Calculate rotation axis in camera frame.
-            glm::mat4 toWorld = glm::inverse( V ); // Calculate transform from camera to world frame.
+            glm::mat4 toWorld = glm::inverse( cam->getV() ); // Calculate transform from camera to world frame.
             toWorld[3].x = 0.0f; // Remove translation component.
             toWorld[3].y = 0.0f;
             toWorld[3].z = 0.0f;
