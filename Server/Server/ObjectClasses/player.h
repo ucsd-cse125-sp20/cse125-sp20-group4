@@ -9,8 +9,8 @@ private:
 public:
     Player(int id);
     Player(int id, int x, int y, int z);
-    Player(int id, int x, int y, int z, float orientationX, float orientationY);
-    Player(int id, int x, int y, int z, float orientationX, float orientationY, float velX, float velY, float velZ);
+    Player(int id, int x, int y, int z, float orientationX, float orientationY, float orientationZ);
+    Player(int id, int x, int y, int z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ);
     //(de)serialize functions
     virtual std::string serialize() override;
 };

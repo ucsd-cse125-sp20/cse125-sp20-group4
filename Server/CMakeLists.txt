@@ -18,12 +18,13 @@ target_include_directories(Server
 
 # Find dependencies
 find_package(spdlog REQUIRED)
-
+find_package(glm REQUIRED)
 # Link dependencies
 #target_link_libraries(Server PUBLIC spdlog::spdlog)
 
 # Link dependencies
 target_link_libraries(Server PRIVATE Shared)
+target_link_libraries(Server PRIVATE glm)
 
 # Configure compiler
 target_compile_features(Server PRIVATE cxx_std_17)
