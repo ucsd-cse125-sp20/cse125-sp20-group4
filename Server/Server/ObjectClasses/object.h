@@ -37,6 +37,10 @@ public:
     float getOrientationY();
     float getOrientationZ();
     glm::vec3 getOrientation();
+    float getOrientationX();
+    virtual float getNextPositionX();
+    virtual float getNextPositionY();
+    virtual float getNextPositionZ();
 
     //(de)serialize functions
     virtual std::string serialize();

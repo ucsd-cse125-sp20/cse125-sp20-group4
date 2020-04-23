@@ -94,6 +94,18 @@ glm::vec3 Object::getOrientation() {
     return this->orientation;
 }
 
+int Object::getNextPositionX() {
+    return getPositionX();
+}
+
+int Object::getNextPositionY() {
+    return getPositionY();
+}
+
+int Object::getNextPositionZ() {
+    return getPositionZ();
+}
+
 std::string Object::serialize() {
     auto log = logger();
     // id, x, y, z, directionH, directionV
