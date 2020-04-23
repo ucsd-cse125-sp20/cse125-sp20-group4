@@ -16,7 +16,7 @@ public:
     Object(int id, float x, float y, float z, float dirX, float dirY, float dirZ);
 
     //setters
-    void setId(int id);
+    void setId(int inputId);
     void setPositionX(float x);
     void setPositionY(float y);
     void setPositionZ(float z);

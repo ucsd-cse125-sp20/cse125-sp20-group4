@@ -12,4 +12,5 @@ std::string Player::serialize() {
     auto log = getLogger("Player");
     std::string res = "P:" + MovingObject::serialize();
     log->trace("Serialized Player as {}", res);
+    return res;
 }

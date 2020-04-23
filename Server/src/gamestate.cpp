@@ -31,9 +31,9 @@ void GameState::deleteObject(int id) {
 void GameState::updateState() {
     //loop through all objects
     std::map<int, Object&>::iterator it = this->gameObjects.begin();
-    int x;
-    int y;
-    int z;
+    float x;
+    float y;
+    float z;
     while (it != this->gameObjects.end()) {
         // calculate next position
         x = it->second.getNextPositionX();

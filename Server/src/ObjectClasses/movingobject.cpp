@@ -1,9 +1,9 @@
 #include "ObjectClasses/movingobject.h"
-#include "logger.h""
+#include "logger.h"
 
-MovingObject::MovingObject(int id) : MovingObject(id, 0.0f, 0.0f, 0.0f,) {}
+MovingObject::MovingObject(int id) : MovingObject(id, 0.0f, 0.0f, 0.0f) {}
 
-MovingObject::MovingObject(int id, float x, float y, float z) : MovingObject(id, x, y, z, 0.0f, 0.0f) {}
+MovingObject::MovingObject(int id, float x, float y, float z) : MovingObject(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
 
 MovingObject::MovingObject(int id, float x, float y, float z, float orientationX, float orientationY, float orientationZ) : MovingObject(id, x, y, z, orientationX, orientationY, orientationZ, 0.0f, 0.0f, 0.0f) {}
 

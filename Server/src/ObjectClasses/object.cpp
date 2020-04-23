@@ -2,9 +2,9 @@
 #include "logger.h"
 
 
-Object::Object(int id) : Object(id, 0f, 0f, 0f) {}
+Object::Object(int id) : Object(id, 0.0f, 0.0f, 0.0f) {}
 
-Object::Object(int id, float x, float y, float z) : Object(id, x, y, z, 0f, 0f, 0f) {}
+Object::Object(int id, float x, float y, float z) : Object(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
 
 Object::Object(int id, float x, float  y, float z, float dirX, float dirY, float dirZ) {
     auto log = getLogger("Object");
@@ -14,9 +14,9 @@ Object::Object(int id, float x, float  y, float z, float dirX, float dirY, float
     log->trace("Creating Object with id {}, position ({}, {}, {}), and orientation ({}, {}, {})", id, x, y, z, dirX, dirY, dirZ);
 }
 
-void Object::setId(int id) {
+void Object::setId(int inputId) {
     auto log = getLogger("Object");
-    this->id = id;
+    this->id = inputId;
     log->trace("Setting id of Object to {}", id);
 }
 
