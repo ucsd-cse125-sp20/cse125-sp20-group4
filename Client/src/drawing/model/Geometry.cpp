@@ -6,6 +6,8 @@
 #include "logger.h"
 #include "drawing/model/Geometry.h"
 
+#define ROTATE( base, angle, axis ) ( angle ) == 0.0f ? ( base ) : glm::rotate( ( base ), ( angle ), ( axis ) )
+
 static const auto LOGGER = getLogger( "Geometry" );
 
 /* Constructor and destructor */
@@ -43,7 +45,7 @@ Geometry::~Geometry() {
 }
 
 /* Public functions */
-#include "Window.h"
+
 void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) const {
 
     if ( !initialized ) { // Check that is already initialized
@@ -61,12 +63,17 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
     static const glm::vec3 FOWARD( 0.0f, 0.0f, 1.0f );
     static const glm::mat4x4 I( 1.0f );
 
-    float angle = glm::acos( glm::dot( FOWARD, direction ) );
-    glm::vec3 axis = glm::cross( FOWARD, direction );
-    glm::mat4x4 directionRotate = angle == 0.0f ? I : glm::rotate( I, angle, axis );
+    const glm::vec3 horizontalDirection = glm::normalize( glm::vec3( direction.x, 0.0f, direction.z ) );
+    float horizontalAngle = glm::acos( glm::dot( FOWARD, horizontalDirection ) );
+    glm::vec3 horizontalAxis = glm::normalize( glm::cross( FOWARD, horizontalDirection ) );
+    glm::mat4x4 horizontalRotate = ROTATE( I, horizontalAngle, horizontalAxis );
+
+    float verticalAngle = glm::acos( glm::dot( horizontalDirection, direction ) );
+    glm::vec3 verticalAxis = glm::normalize( glm::cross( horizontalDirection, direction ) );
+    glm::mat4x4 verticalRotate = ROTATE( I, verticalAngle, verticalAxis );
 
     // Send combined projection-view=model matrix to shader programs.
-    glm::mat4x4 model = toView * directionRotate;
+    glm::mat4x4 model = toView * verticalRotate * horizontalRotate;
     glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "model" ), 1, GL_FALSE, &model[0][0] );
 
     // Bind vertex array.

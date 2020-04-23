@@ -81,6 +81,10 @@ void Entity::draw( const glm::mat4x4 & toView ) const {
 
 void Entity::updateModelMatrix() {
 
-    modelMatrix = glm::translate( glm::scale( glm::mat4x4( 1.0f ), glm::vec3( scale ) ), position );
+    static const glm::mat4x4 I( 1.0f );
+    glm::mat4x4 scaleMatrix = glm::scale( I, glm::vec3( scale ) );
+    glm::mat4x4 translateMatrix = glm::translate( I, position );
+
+    modelMatrix = translateMatrix * scaleMatrix;
 
 }
