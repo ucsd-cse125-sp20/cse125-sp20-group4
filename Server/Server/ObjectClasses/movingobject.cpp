@@ -50,6 +50,18 @@ float MovingObject::getVelocityZ() {
     return this->velocityZ;
 }
 
+int MovingObject::getNextPositionX() {
+    return getPositionX() + getVelocityX() * SERVER_TICK;
+}
+
+int MovingObject::getNextPositionY() {
+    return getPositionY() + getVelocityY() * SERVER_TICK;
+}
+
+int MovingObject::getNextPositionZ() {
+    return getPositionZ() + getVelocityZ() * SERVER_TICK;
+}
+
 //(de)serialize functions
 std::string MovingObject::serialize() {
     auto log = logger();

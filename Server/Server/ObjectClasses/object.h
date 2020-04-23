@@ -19,7 +19,7 @@ public:
     void setPositionY(int y);
     void setPositionZ(int z);
     void setPosition(int x, int y, int z);
-    void setOrientationX(float orientationX);
+    void setOrientationX(float orientationX); //TODO change orientation to a vector, adding Z
     void setOrientationY(float orientationY);
     void setOrientation(float orientationX, float orientationY);
 
@@ -30,6 +30,9 @@ public:
     int getPositionZ();
     float getOrientationY();
     float getOrientationX();
+    virtual int getNextPositionX();
+    virtual int getNextPositionY();
+    virtual int getNextPositionZ();
 
     //(de)serialize functions
     virtual std::string serialize();

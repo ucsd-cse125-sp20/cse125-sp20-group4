@@ -1,5 +1,6 @@
 #pragma once
 #include "object.h"
+#define SERVER_TICK 50
 
 class MovingObject : public Object {
 private:
@@ -16,6 +17,9 @@ public:
     float getVelocityX();
     float getVelocityY();
     float getVelocityZ();
+    int getNextPositionX();
+    int getNextPositionY();
+    int getNextPositionZ();
     //(de)serialize functions
     virtual std::string serialize() override;
 };

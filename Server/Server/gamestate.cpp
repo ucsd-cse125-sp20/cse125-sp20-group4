@@ -1,12 +1,11 @@
 #include "gameState.h"
 #include "Shared/logger.h"
+
 GameState::GameState() {
     this->nextId = 0;
     this->gameObjects = std::map<int, Object&>();
 }
-void GameState::updateObject(int id) {
-    //TODO
-}
+
 void GameState::createObject(Object& obj) {
     auto log = logger();
     obj.setId(this->nextId);
@@ -14,6 +13,7 @@ void GameState::createObject(Object& obj) {
     this->nextId++;
     log->trace("Created GameState object with id: {}", this->nextId);
 }
+
 void GameState::deleteObject(int id) {
     auto log = logger();
     log->trace("Deleting GameState object with id: {}", id);
@@ -26,8 +26,32 @@ void GameState::deleteObject(int id) {
     else {
         log->trace("Attempted to delete object with id: {} but did not find", id);
     }
-    //TODO add logging
 }
+
+void GameState::updateState() {
+    //loop through all objects
+    std::map<int, Object&>::iterator it = this->gameObjects.begin();
+    int x;
+    int y;
+    int z;
+    while (it != this->gameObjects.end()) {
+        // calculate next position
+        x = it->second.getNextPositionX();
+        y = it->second.getNextPositionY();
+        z = it->second.getNextPositionZ();
+        // TODO check for collisions
+        // set new state
+        it->second.setPosition(x, y, z);
+    }
+}
+
+void GameState::applyEvent(Event& event) {
+    std::map<int, Object&>::iterator it = gameObjects.find(event.getObjectId());
+    if (it != gameObjects.end()) {
+        event.apply(it->second);
+    }
+}
+
 std::string GameState::serialize() {
     auto log = logger();
     log->trace("Beginning to serialize GameState");
