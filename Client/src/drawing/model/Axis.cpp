@@ -8,7 +8,7 @@
 
 #define MAX_COORD 1E+2f
 #define MIN_COORD -MAX_COORD
-#define ARROW_OFFSET 2.0f
+#define ARROW_OFFSET 10.0f
 #define ARROW_SIZE 1.0f
 
 #define POINT_SIZE 3.0f
@@ -42,6 +42,8 @@ Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ),
 
     const float max_coord = MAX_COORD * scale;
     const float min_coord = MIN_COORD * scale;
+    const float arrowOffset = ARROW_OFFSET * scale;
+    const float arrowSize = ARROW_SIZE * scale;
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> colors;
@@ -55,10 +57,10 @@ Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ),
     vertices.push_back( glm::vec3( min_coord, 0.0f, 0.0f ) );
 
     // Arrow for X axis
-    vertices.push_back( glm::vec3( ARROW_OFFSET, ARROW_SIZE, ARROW_SIZE ) );
-    vertices.push_back( glm::vec3( ARROW_OFFSET, -ARROW_SIZE, -ARROW_SIZE ) );
-    vertices.push_back( glm::vec3( ARROW_OFFSET, ARROW_SIZE, -ARROW_SIZE ) );
-    vertices.push_back( glm::vec3( ARROW_OFFSET, -ARROW_SIZE, ARROW_SIZE ) );
+    vertices.push_back( glm::vec3( arrowOffset, arrowSize, arrowSize ) );
+    vertices.push_back( glm::vec3( arrowOffset, -arrowSize, -arrowSize ) );
+    vertices.push_back( glm::vec3( arrowOffset, arrowSize, -arrowSize ) );
+    vertices.push_back( glm::vec3( arrowOffset, -arrowSize, arrowSize ) );
 
     setAxisColor( colors, RED, 4 ); // Set X axis color.
 
@@ -69,12 +71,12 @@ Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ),
     vertices.push_back( glm::vec3( 0.0f, min_coord, 0.0f ) );
 
     // Arrow for Y axis
-    vertices.push_back( glm::vec3( -ARROW_SIZE, ARROW_OFFSET, ARROW_SIZE ) );
-    vertices.push_back( glm::vec3( 0.0f, ARROW_OFFSET, 0.0f ) );
-    vertices.push_back( glm::vec3( ARROW_SIZE, ARROW_OFFSET, ARROW_SIZE ) );
-    vertices.push_back( glm::vec3( 0.0f, ARROW_OFFSET, 0.0f ) );
-    vertices.push_back( glm::vec3( 0.0f, ARROW_OFFSET, -ARROW_SIZE ) );
-    vertices.push_back( glm::vec3( 0.0f, ARROW_OFFSET, 0.0f ) );
+    vertices.push_back( glm::vec3( -arrowSize, arrowOffset, arrowSize ) );
+    vertices.push_back( glm::vec3( 0.0f, arrowOffset, 0.0f ) );
+    vertices.push_back( glm::vec3( arrowSize, arrowOffset, arrowSize ) );
+    vertices.push_back( glm::vec3( 0.0f, arrowOffset, 0.0f ) );
+    vertices.push_back( glm::vec3( 0.0f, arrowOffset, -arrowSize ) );
+    vertices.push_back( glm::vec3( 0.0f, arrowOffset, 0.0f ) );
 
     setAxisColor( colors, GREEN, 6 ); // Set Y axis color.
 
@@ -85,12 +87,12 @@ Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ),
     vertices.push_back( glm::vec3( 0.0f, 0.0f, min_coord ) );
 
     // Arrow for Z axis
-    vertices.push_back( glm::vec3( -ARROW_SIZE, ARROW_SIZE, ARROW_OFFSET ) );
-    vertices.push_back( glm::vec3( ARROW_SIZE, ARROW_SIZE, ARROW_OFFSET ) );
-    vertices.push_back( glm::vec3( ARROW_SIZE, ARROW_SIZE, ARROW_OFFSET ) );
-    vertices.push_back( glm::vec3( -ARROW_SIZE, -ARROW_SIZE, ARROW_OFFSET ) );
-    vertices.push_back( glm::vec3( -ARROW_SIZE, -ARROW_SIZE, ARROW_OFFSET ) );
-    vertices.push_back( glm::vec3( ARROW_SIZE, -ARROW_SIZE, ARROW_OFFSET ) );
+    vertices.push_back( glm::vec3( -arrowSize, arrowSize, arrowOffset ) );
+    vertices.push_back( glm::vec3( arrowSize, arrowSize, arrowOffset ) );
+    vertices.push_back( glm::vec3( arrowSize, arrowSize, arrowOffset ) );
+    vertices.push_back( glm::vec3( -arrowSize, -arrowSize, arrowOffset ) );
+    vertices.push_back( glm::vec3( -arrowSize, -arrowSize, arrowOffset ) );
+    vertices.push_back( glm::vec3( arrowSize, -arrowSize, arrowOffset ) );
 
     setAxisColor( colors, BLUE, 6 ); // Set Z axis color.
 
