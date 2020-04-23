@@ -6,6 +6,7 @@
 
 #include "Window.h"
 #include "drawing/Shaders.h"
+#include "drawing/model/Axis.h"
 #include "drawing/model/RectangularCuboid.h"
 #include "state/Entity.h"
 
@@ -79,6 +80,7 @@ void Window::initialize() {
     Shaders::initializeShaders();
 
     world.addEntity( "cube", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f, 3.0f, 10.0f ), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
+    world.addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
 
 }
 
@@ -87,6 +89,10 @@ void Window::clean_up() {
     Entity * cube = world.removeEntity( "cube" );
     delete( cube->model );
     delete( cube );
+
+    Entity * axis = world.removeEntity( "worldAxis" );
+    delete( axis->model );
+    delete( axis );
 
     Shaders::deleteShaders();
 
@@ -268,6 +274,10 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                     std::cout << "Current camera position: " << PRINT_VECTOR( cam_pos ) << std::endl;
                     std::cout << "Current camera direction: " << PRINT_VECTOR( cam_dir ) << std::endl;
                 }
+                break;
+
+            case GLFW_KEY_X:
+                Axis::toggleAll();
                 break;
 
         }

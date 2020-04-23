@@ -27,7 +27,7 @@ Geometry::Geometry( const Shader & shaderProgram, GLenum drawMode ) : shaderProg
 
 }
 
-Geometry::Geometry( const Shader & shaderProgram, const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, std::vector<unsigned int> indices, GLenum drawMode ) : Geometry( shaderProgram, drawMode ) {
+Geometry::Geometry( const Shader & shaderProgram, const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<unsigned int> & indices, GLenum drawMode ) : Geometry( shaderProgram, drawMode ) {
 
     initialize( vertices, colors, normals, indices );
 
@@ -53,6 +53,8 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
     LOGGER->trace( "Drawing geometry." );
 
     glUseProgram( shaderProgram );
+
+    setup();
 
     // Calculate rotation matrix for direction
     // NOTE: assume direction is a unit vector
@@ -114,13 +116,15 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
     // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers.
     glBindVertexArray( 0 );
 
+    restore();
+
     LOGGER->trace( "Finished drawing geometry." );
 
 }
 
 /* Protected functions */
 
-void Geometry::initialize( const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, std::vector<unsigned int> idx ) {
+void Geometry::initialize( const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<unsigned int> & idx ) {
 
     if ( vertices.size() != colors.size() || vertices.size() != normals.size() ) {
         throw std::invalid_argument( "Geometry data lengths do not match." );
