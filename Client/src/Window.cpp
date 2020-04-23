@@ -39,26 +39,15 @@ const char * window_title = "CSE 125 Project";
 #define X_SPEED( xPos ) ( ( ( std::abs( xPos ) - X_DEAD_ZONE ) / X_MOVE_SIZE ) * ( ( xPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 #define Y_SPEED( yPos ) ( ( ( std::abs( yPos ) - Y_DEAD_ZONE ) / Y_MOVE_SIZE ) * ( ( yPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 
-// Default camera parameters
-glm::vec3 Window::cam_pos = DEFAULT_CAMERA_POS; // Position of camera.
-glm::vec3 Window::cam_dir = DEFAULT_CAMERA_DIR; // Direction of the camera.
-
 #define ROTATE( direction, angle, axis ) ( glm::rotate( glm::mat4( 1.0f ), ( angle ), ( axis ) ) * glm::vec4( ( direction ), 1.0f ) )
 
+Camera * Window::cam;
 World Window::world;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
-    cam_dir = ROTATE( cam_dir, angle, axis );
-    setCamera();
-
-}
-
-void Window::setCamera() {
-
-    glm::vec3 cam_look_at = cam_pos + cam_dir;
-    glm::vec3 cam_up = glm::cross( glm::cross( cam_dir, glm::vec3( 0.0f, 1.0f, 0.0f ) ), cam_dir );
-    V = glm::lookAt( cam_pos, cam_look_at, cam_up );
+    glm::vec3 newDir = ROTATE( cam->getDir() , angle, axis );
+    cam->rotate( newDir );
 
 }
 
@@ -67,17 +56,11 @@ GLFWwindow * Window::window = nullptr;
 int Window::width;
 int Window::height;
 
-float Window::nearZ = 0.1f;
-float Window::farZ = 300.0f;
-float Window::fov = RADIANS( 45.0f );
-float Window::aspect = 0.0f;
-
-glm::mat4 Window::P;
-glm::mat4 Window::V;
-
 void Window::initialize() {
 
     Shaders::initializeShaders();
+
+    cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     world.addEntity( "cube1", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f, 3.0f, 10.0f ), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
     world.addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
@@ -89,6 +72,8 @@ void Window::initialize() {
 }
 
 void Window::clean_up() {
+
+    Camera::removeCamera( "default" );
 
     Shaders::deleteShaders();
 
@@ -158,9 +143,7 @@ void Window::resize_callback( GLFWwindow *, int newWidth, int newHeight ) {
     glViewport( 0, 0, newWidth, newHeight );
 
     if ( newHeight > 0 ) {
-        aspect = ( float ) newWidth / ( float ) newHeight;
-        P = glm::perspective( fov, aspect, nearZ, farZ );
-        setCamera();
+        Camera::setAspect( ( float ) newWidth / ( float ) newHeight );
     }
 
 }
@@ -171,9 +154,8 @@ void Window::idle_callback() {
 
     // Translate camera
     if ( ( movement.x != 0.0f ) || ( movement.y != 0.0f ) || ( movement.z != 0.0f ) ) {
-        glm::vec4 move = glm::inverse( V ) * glm::vec4( movement, 1.0f );
-        cam_pos = glm::vec3( move ); // Camera is moving.
-        setCamera();
+        glm::vec4 move = glm::inverse( cam->getV() ) * glm::vec4( movement, 1.0f );
+        cam->move( glm::vec3( move ) ); // Camera is moving.
     }
 
     // Rotate camera (trackball)
@@ -187,7 +169,7 @@ void Window::idle_callback() {
         rotateCamera( X_SPEED( ( float ) cursorX ), glm::vec3( 0.0f, -1.0f, 0.0f ) );
     }
     if ( std::abs( cursorY ) > Y_DEAD_ZONE ) {
-        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam_dir ) );
+        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
 
@@ -200,7 +182,7 @@ void Window::display_callback( GLFWwindow * ) {
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
     // Render scene.
-    world.draw( P * V );
+    world.draw( cam->getToView() );
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
@@ -247,9 +229,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
             case GLFW_KEY_R: // Reset camera position.
-                cam_pos = DEFAULT_CAMERA_POS; // Reset to default position.
-                cam_dir = DEFAULT_CAMERA_DIR; // Set direction too.
-                setCamera();
+                cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
                 break;
 
             case GLFW_KEY_P:
@@ -267,8 +247,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( ( mods & GLFW_MOD_SHIFT ) != 0 ) { // Check for shift key.
                     // std::cout << "Current light direction: " << PRINT_VECTOR( Lights::directionalDirection ) << std::endl;
                 } else {
-                    std::cout << "Current camera position: " << PRINT_VECTOR( cam_pos ) << std::endl;
-                    std::cout << "Current camera direction: " << PRINT_VECTOR( cam_dir ) << std::endl;
+                    std::cout << "Current camera position: " << PRINT_VECTOR( cam->getPos() ) << std::endl;
+                    std::cout << "Current camera direction: " << PRINT_VECTOR( cam->getDir() ) << std::endl;
                 }
                 break;
 
@@ -337,7 +317,7 @@ void Window::mouse_move_callback( GLFWwindow *, double xpos, double ypos ) {
         float velocity = glm::length( cur - last );
         if ( velocity >= ROTATION_THRESHOLD ) { // Ignore trivially small rotations
             glm::vec3 rotationAxis = glm::cross( last, cur ); // Calculate rotation axis in camera frame.
-            glm::mat4 toWorld = glm::inverse( V ); // Calculate transform from camera to world frame.
+            glm::mat4 toWorld = glm::inverse( cam->getV() ); // Calculate transform from camera to world frame.
             toWorld[3].x = 0.0f; // Remove translation component.
             toWorld[3].y = 0.0f;
             toWorld[3].z = 0.0f;
