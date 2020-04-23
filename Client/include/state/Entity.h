@@ -10,6 +10,7 @@ class Entity {
 
     public:
     Entity( const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f );
+    virtual ~Entity();
 
     const Model * const model;
 

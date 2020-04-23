@@ -14,6 +14,12 @@ Entity::Entity( const Model * const model, const glm::vec3 position, const glm::
 
 }
 
+Entity::~Entity() {
+
+    delete( model ); // For now, also delete model
+
+}
+
 /* Getters */
 
 const glm::vec3 & Entity::getPosition() const {

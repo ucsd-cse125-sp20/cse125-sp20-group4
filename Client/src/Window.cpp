@@ -86,14 +86,6 @@ void Window::initialize() {
 
 void Window::clean_up() {
 
-    Entity * cube = world.removeEntity( "cube" );
-    delete( cube->model );
-    delete( cube );
-
-    Entity * axis = world.removeEntity( "worldAxis" );
-    delete( axis->model );
-    delete( axis );
-
     Shaders::deleteShaders();
 
 }
