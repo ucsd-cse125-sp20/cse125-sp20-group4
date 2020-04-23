@@ -11,12 +11,19 @@
 #endif
 #include "spdlog/spdlog.h"
 #include "GLFW/glfw3.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 
 #include "logger.h"
 #include "Window.h"
 
+#pragma comment (lib, "Ws2_32.lib")
+
 #define LOGFILE_NAME "log/client.log"
 #define LOGLEVEL spdlog::level::debug
+#define DEFAULT_PORT "8080"
+#define DEFAULT_BUFLEN 512
 
 void setup_glew() {
 
@@ -97,6 +104,52 @@ void setup_callbacks( GLFWwindow * window ) {
 }
 
 int main_inner( void ) {
+    WSADATA wsaData;
+    SOCKET ServerSocket = INVALID_SOCKET;
+
+    int status;
+
+    //initialize Winsock
+    if ((status = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
+        spdlog::critical("WSAStartup failed with error: {0:d}", status);
+        return EXIT_FAILURE;
+    }
+    struct addrinfo* result = NULL;
+    struct addrinfo hints;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    hints.ai_flags = AI_PASSIVE;
+
+    // resolve server address and port (current server address is local host)
+    if ((status = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result)) != 0) {
+        spdlog::critical("getaddrinfo failed with error: {0:d}", status);
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+
+    ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    if (ServerSocket == INVALID_SOCKET) {
+        spdlog::critical("socket failed with error: {0:ld}", WSAGetLastError());
+        freeaddrinfo(result);
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+
+    if ((status = connect(ServerSocket, result->ai_addr, (int)result->ai_addrlen)) == SOCKET_ERROR) {
+        closesocket(ServerSocket);
+        ServerSocket = INVALID_SOCKET;
+    }
+
+    freeaddrinfo(result);
+
+    if (ServerSocket == INVALID_SOCKET) {
+        spdlog::critical("unable to connect to server!");
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
 
     // Create the GLFW window
     spdlog::info( "Creating window..." );
