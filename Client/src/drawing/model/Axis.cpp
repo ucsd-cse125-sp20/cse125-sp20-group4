@@ -38,7 +38,10 @@ static void setAxisColor( std::vector<glm::vec3> & colors, const glm::vec3 & col
 
 /* Constructor */
 
-Axis::Axis( bool enabled ) : Geometry( Shaders::flat(), GL_LINES ), normalPointSize( 0.0f ), enabled( enabled ) {
+Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ), normalPointSize( 0.0f ), enabled( enabled ) {
+
+    const float max_coord = MAX_COORD * scale;
+    const float min_coord = MIN_COORD * scale;
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> colors;
@@ -46,10 +49,10 @@ Axis::Axis( bool enabled ) : Geometry( Shaders::flat(), GL_LINES ), normalPointS
     std::vector<unsigned int> idx;
 
     // X axis
-    vertices.push_back( glm::vec3( MAX_COORD, 0.0f, 0.0f ) );
+    vertices.push_back( glm::vec3( max_coord, 0.0f, 0.0f ) );
     vertices.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
     vertices.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
-    vertices.push_back( glm::vec3( MIN_COORD, 0.0f, 0.0f ) );
+    vertices.push_back( glm::vec3( min_coord, 0.0f, 0.0f ) );
 
     // Arrow for X axis
     vertices.push_back( glm::vec3( ARROW_OFFSET, ARROW_SIZE, ARROW_SIZE ) );
@@ -60,10 +63,10 @@ Axis::Axis( bool enabled ) : Geometry( Shaders::flat(), GL_LINES ), normalPointS
     setAxisColor( colors, RED, 4 ); // Set X axis color.
 
     // Y axis
-    vertices.push_back( glm::vec3( 0.0f, MAX_COORD, 0.0f ) );
+    vertices.push_back( glm::vec3( 0.0f, max_coord, 0.0f ) );
     vertices.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
     vertices.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
-    vertices.push_back( glm::vec3( 0.0f, MIN_COORD, 0.0f ) );
+    vertices.push_back( glm::vec3( 0.0f, min_coord, 0.0f ) );
 
     // Arrow for Y axis
     vertices.push_back( glm::vec3( -ARROW_SIZE, ARROW_OFFSET, ARROW_SIZE ) );
@@ -76,10 +79,10 @@ Axis::Axis( bool enabled ) : Geometry( Shaders::flat(), GL_LINES ), normalPointS
     setAxisColor( colors, GREEN, 6 ); // Set Y axis color.
 
     // Z axis
-    vertices.push_back( glm::vec3( 0.0f, 0.0f, MAX_COORD ) );
+    vertices.push_back( glm::vec3( 0.0f, 0.0f, max_coord ) );
     vertices.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
     vertices.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
-    vertices.push_back( glm::vec3( 0.0f, 0.0f, MIN_COORD ) );
+    vertices.push_back( glm::vec3( 0.0f, 0.0f, min_coord ) );
 
     // Arrow for Z axis
     vertices.push_back( glm::vec3( -ARROW_SIZE, ARROW_SIZE, ARROW_OFFSET ) );

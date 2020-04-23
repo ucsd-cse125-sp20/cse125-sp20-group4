@@ -3,10 +3,10 @@
 
 RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float side ) : RectangularCuboid( color, side, side, side ) {}
 
-RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float height, float width, float depth ) : Geometry( Shaders::flat(), GL_TRIANGLES ) {
+RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float width, float height, float depth ) : Geometry( Shaders::flat(), GL_TRIANGLES ) {
 
-    height /= 2;
     width /= 2;
+    height /= 2;
     depth /= 2;
 
     /* Calculate vertices and normals */

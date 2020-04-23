@@ -6,7 +6,7 @@
 class Axis : public Geometry {
 
     public:
-    Axis( bool enabled = true );
+    Axis( bool enabled = true, float scale = 1.0f );
 
     static void setEnabledAll( bool enabled );
     static void toggleAll();

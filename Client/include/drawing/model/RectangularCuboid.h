@@ -7,7 +7,7 @@ class RectangularCuboid : public Geometry {
 
     public:
     RectangularCuboid( const glm::vec3 & color, float side );
-    RectangularCuboid( const glm::vec3 & color, float height, float width, float depth );
+    RectangularCuboid( const glm::vec3 & color, float width, float height, float depth );
 
 };
 

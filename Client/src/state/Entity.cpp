@@ -7,8 +7,8 @@ static const auto LOGGER = getLogger( "Entity" );
 
 /* Constructor */
 
-Entity::Entity( const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale ) : 
-        model( model ), position( position ), direction( direction ), scale( scale ) {
+Entity::Entity( const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+        model( model ), position( position ), direction( glm::normalize( direction ) ), scale( scale ), axis( axisEnabled, axisScale ) {
 
     updateModelMatrix();
 
@@ -51,7 +51,7 @@ void Entity::setPosition( const glm::vec3 & pos ) {
 
 void Entity::setDirection( const glm::vec3 & dir ) {
 
-    direction = dir;
+    direction = glm::normalize( dir );
     // Direction rotation handled by Model class so no need to update matrix
 
 }
@@ -67,8 +67,13 @@ void Entity::setScale( const float & s ) {
 
 void Entity::draw( const glm::mat4x4 & toView ) const {
 
+    const glm::mat4x4 m = toView * modelMatrix;
+
     // Delegate to model
-    model->draw( toView * modelMatrix, direction );
+    model->draw( m, direction );
+
+    // Draw debugging axis
+    axis.draw( m, direction );
 
 }
 

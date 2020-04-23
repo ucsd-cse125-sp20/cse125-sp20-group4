@@ -5,11 +5,12 @@
 #include <glm/vec3.hpp>
 
 #include "drawing/Model.h"
+#include "drawing/model/Axis.h"
 
 class Entity {
 
     public:
-    Entity( const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f );
+    Entity( const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
     virtual ~Entity();
 
     const Model * const model;
@@ -30,6 +31,8 @@ class Entity {
     glm::vec3 position;
     glm::vec3 direction;
     float scale;
+
+    const Axis axis;
 
     virtual void updateModelMatrix();
 
