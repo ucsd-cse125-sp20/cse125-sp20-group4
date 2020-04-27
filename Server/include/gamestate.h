@@ -16,6 +16,6 @@ public:
     void createObject(Object& obj);
     void deleteObject(int id);
     void updateState();
-    void applyEvent(Event& event);
+    void applyEvent(Event* event);
     std::string serialize();
 };

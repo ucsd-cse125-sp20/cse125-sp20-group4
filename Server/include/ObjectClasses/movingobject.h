@@ -7,10 +7,10 @@ class MovingObject : public Object {
 private:
     float velocityX, velocityY, velocityZ;
 public:
-    MovingObject(int id);
-    MovingObject(int id, float x, float y, float z);
-    MovingObject(int id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);
-    MovingObject(int id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ);
+    MovingObject(std::string id);
+    MovingObject(std::string id, float x, float y, float z);
+    MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);
+    MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ);
     void setVelocityX(float velX);
     void setVelocityY(float velY);
     void setVelocityZ(float velZ);

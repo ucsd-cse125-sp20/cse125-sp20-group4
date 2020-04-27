@@ -1,13 +1,13 @@
 #include "ObjectClasses/movingobject.h"
 #include "logger.h"
 
-MovingObject::MovingObject(int id) : MovingObject(id, 0.0f, 0.0f, 0.0f) {}
+MovingObject::MovingObject(std::string id) : MovingObject(id, 0.0f, 0.0f, 0.0f) {}
 
-MovingObject::MovingObject(int id, float x, float y, float z) : MovingObject(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
+MovingObject::MovingObject(std::string id, float x, float y, float z) : MovingObject(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
 
-MovingObject::MovingObject(int id, float x, float y, float z, float orientationX, float orientationY, float orientationZ) : MovingObject(id, x, y, z, orientationX, orientationY, orientationZ, 0.0f, 0.0f, 0.0f) {}
+MovingObject::MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ) : MovingObject(id, x, y, z, orientationX, orientationY, orientationZ, 0.0f, 0.0f, 0.0f) {}
 
-MovingObject::MovingObject(int id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ) : Object(id, x, y, z, orientationX, orientationY, orientationZ) {
+MovingObject::MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ) : Object(id, x, y, z, orientationX, orientationY, orientationZ) {
     auto log = getLogger("MovingObject");
     setVelocity(velX, velY, velZ);
     log->trace("Creating MovingObject with id {}, position ({}, {}, {}), orientation ({}, {}, {}), velocity ({}, {}, {})", id, x, y, z, orientationX, orientationY, orientationZ, velX, velY, velZ);

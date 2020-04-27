@@ -8,7 +8,7 @@ GameState::GameState() {
 
 void GameState::createObject(Object& obj) {
     auto log = getLogger("GameState");
-    obj.setId(this->nextId);
+    obj.setId(std::to_string(this->nextId));
     this->gameObjects.insert(std::pair<int, Object&>(nextId, obj));
     this->nextId++;
     log->trace("Created GameState object with id: {}", this->nextId);
@@ -45,10 +45,10 @@ void GameState::updateState() {
     }
 }
 
-void GameState::applyEvent(Event& event) {
-    std::map<int, Object&>::iterator it = gameObjects.find(event.getObjectId());
+void GameState::applyEvent(Event* event) {
+    std::map<int, Object&>::iterator it = gameObjects.find(event->getObjectId());
     if (it != gameObjects.end()) {
-        event.apply(it->second);
+        event->apply(it->second);
     }
 }
 

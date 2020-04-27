@@ -7,16 +7,16 @@ class Object {
 private:
     glm::vec3 position;
     glm::vec3 orientation;
-    int id;
+    std::string id;
     // mesh
 public:
     //constructor
-    Object(int id);
-    Object(int id, float x, float y, float z);
-    Object(int id, float x, float y, float z, float dirX, float dirY, float dirZ);
+    Object(std::string id);
+    Object(std::string id, float x, float y, float z);
+    Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ);
 
     //setters
-    void setId(int inputId);
+    void setId(std::string inputId);
     void setPositionX(float x);
     void setPositionY(float y);
     void setPositionZ(float z);
@@ -24,12 +24,10 @@ public:
     void setOrientationX(float orientationX);
     void setOrientationY(float orientationY);
     void setOrientationZ(float orientationZ);
-
-
     void setOrientation(float orientationX, float orientationY, float orientationZ);
 
     //getters
-    int getId();
+    std::string getId();
     float getPositionX();
     float getPositionY();
     float getPositionZ();

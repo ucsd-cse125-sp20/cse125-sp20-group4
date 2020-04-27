@@ -2,11 +2,11 @@
 #include "logger.h"
 
 
-Object::Object(int id) : Object(id, 0.0f, 0.0f, 0.0f) {}
+Object::Object(std::string id) : Object(id, 0.0f, 0.0f, 0.0f) {}
 
-Object::Object(int id, float x, float y, float z) : Object(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
+Object::Object(std::string id, float x, float y, float z) : Object(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
 
-Object::Object(int id, float x, float  y, float z, float dirX, float dirY, float dirZ) {
+Object::Object(std::string id, float x, float  y, float z, float dirX, float dirY, float dirZ) {
     auto log = getLogger("Object");
     this->id = id;
     setPosition(x, y, z);
@@ -14,7 +14,7 @@ Object::Object(int id, float x, float  y, float z, float dirX, float dirY, float
     log->trace("Creating Object with id {}, position ({}, {}, {}), and orientation ({}, {}, {})", id, x, y, z, dirX, dirY, dirZ);
 }
 
-void Object::setId(int inputId) {
+void Object::setId(std::string inputId) {
     auto log = getLogger("Object");
     this->id = inputId;
     log->trace("Setting id of Object to {}", id);
@@ -35,7 +35,7 @@ void Object::setPositionZ(float z) {
 void Object::setPosition(float x, float y, float z) {
     auto log = getLogger("Object");
     this->position = glm::vec3(x, y, z);
-    log->trace("Setting position of Object {} to {}", this->getId(), this->position);
+    log->trace("Setting position of Object {} to ({},{},{})", this->getId(), x, y, z);
 
 }
 
@@ -55,11 +55,11 @@ void Object::setOrientationZ(float orientationZ) {
 void Object::setOrientation(float orientationX, float orientationY, float orientationZ) {
     auto log = getLogger("Object");
     this->orientation = glm::vec3(orientationX, orientationY, orientationZ);
-    log->trace("Setting orientation of Object {} to {}", this->getId(), orientationX);
+    log->trace("Setting orientation of Object {} to ({},{},{})", this->getId(), orientationX, orientationY, orientationZ);
 
 }
 
-int Object::getId() {
+std::string Object::getId() {
     return this->id;
 }
 
@@ -110,7 +110,7 @@ float Object::getNextPositionZ() {
 std::string Object::serialize() {
     auto log = getLogger("Object");
     // id, x, y, z, directionX, directionY, directionZ
-    std::string res = std::to_string(getId()) + ","
+    std::string res = getId() + ","
         + std::to_string(getPositionX()) + ","
         + std::to_string(getPositionY()) + ","
         + std::to_string(getPositionZ()) + ","

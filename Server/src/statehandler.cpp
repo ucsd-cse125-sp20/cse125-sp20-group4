@@ -1,10 +1,9 @@
 #include "statehandler.h"
 
-void GameStateHandler::getNextState(GameState& gameState, concurrency::concurrent_queue<Event&>& eventQueue) {
-    Event e = Event(1);
-    Event& cur = e;//dummy
+void GameStateHandler::getNextState(GameState& gameState, concurrency::concurrent_queue<Event*>& eventQueue) {
+    Event* cur;
     while (!eventQueue.empty()) { 
-        bool success = eventQueue.try_pop(cur); //we don't want to pop, just mark, so events have to have a way of marking them
+        eventQueue.try_pop(cur); //we don't want to pop, just mark, so events have to have a way of marking them
         gameState.applyEvent(cur); 
     }
     //check integrity
