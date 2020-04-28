@@ -10,7 +10,7 @@ Player::Player(std::string id, float x, float y, float z, float orientationX, fl
 }
 std::string Player::serialize() {
     auto log = getLogger("Player");
-    std::string res = "P:" + MovingObject::serialize();
+    std::string res = "Player:" + MovingObject::serialize();
     log->trace("Serialized Player as {}", res);
     return res;
 }

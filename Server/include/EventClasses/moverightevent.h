@@ -5,4 +5,5 @@ class MoveRightEvent : MovingEvent
 {
 public:
 	MoveRightEvent(int objectId);
+	std::string serialize();
 };

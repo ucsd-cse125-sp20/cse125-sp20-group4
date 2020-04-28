@@ -56,7 +56,7 @@ std::string GameState::serialize() {
     auto log = getLogger("GameState");
     log->trace("Beginning to serialize GameState");
     std::map<int, Object&>::iterator it = this->gameObjects.begin();
-    std::string res = "";
+    std::string res = "GameState:";
     while (it != this->gameObjects.end()) {
         if (res.compare("") == 0) {
             res = it->second.serialize();
