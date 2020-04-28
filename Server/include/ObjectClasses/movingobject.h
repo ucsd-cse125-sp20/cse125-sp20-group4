@@ -5,7 +5,7 @@
 
 class MovingObject : public Object {
 private:
-    float velocityX, velocityY, velocityZ;
+    glm::vec3 velocity;
 public:
     MovingObject(std::string id);
     MovingObject(std::string id, float x, float y, float z);
@@ -15,6 +15,7 @@ public:
     void setVelocityY(float velY);
     void setVelocityZ(float velZ);
     void setVelocity(float velX, float velY, float velZ);
+    void setVelocity(glm::vec3 velocity);
     float getVelocityX();
     float getVelocityY();
     float getVelocityZ();

@@ -1,9 +1,8 @@
 #pragma once
-#include "event.h"
-class MoveLeftEvent : Event
+#include "movingevent.h"
+
+class MoveLeftEvent : MovingEvent
 {
 public:
 	MoveLeftEvent(int objectId);
-	void apply(Object& object);
-	virtual float getMovementDirection();
 };

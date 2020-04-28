@@ -11,24 +11,23 @@ MovingObject::MovingObject(std::string id, float x, float y, float z, float orie
     auto log = getLogger("MovingObject");
     setVelocity(velX, velY, velZ);
     log->trace("Creating MovingObject with id {}, position ({}, {}, {}), orientation ({}, {}, {}), velocity ({}, {}, {})", id, x, y, z, orientationX, orientationY, orientationZ, velX, velY, velZ);
-
 }
 
 void MovingObject::setVelocityX(float velX) {
     auto log = getLogger("MovingObject");
-    this->velocityX = velX;
+    this->velocity.x = velX;
     log->trace("Setting velocityX of MovingObject with id {}, with value {}", this->getId(), velX);
 }
 
 void MovingObject::setVelocityY(float velY) {
     auto log = getLogger("MovingObject");
-    this->velocityY = velY;
+    this->velocity.y = velY;
     log->trace("Setting velocityY of MovingObject with id {}, with value {}", this->getId(), velY);
 }
 
 void MovingObject::setVelocityZ(float velZ) {
     auto log = getLogger("MovingObject");
-    this->velocityZ = velZ;
+    this->velocity.z = velZ;
     log->trace("Setting velocityZ of MovingObject with id {}, with value {}", this->getId(), velZ);
 }
 
@@ -37,17 +36,22 @@ void MovingObject::setVelocity(float velX, float velY, float velZ) {
     setVelocityY(velY);
     setVelocityZ(velZ);
 }
+void MovingObject::setVelocity(glm::vec3 vel) {
+    setVelocityX(vel.x);
+    setVelocityY(vel.y);
+    setVelocityZ(vel.z);
+}
 
 float MovingObject::getVelocityX() {
-    return this->velocityX;
+    return this->velocity.x;
 }
 
 float MovingObject::getVelocityY() {
-    return this->velocityY;
+    return this->velocity.y;
 }
 
 float MovingObject::getVelocityZ() {
-    return this->velocityZ;
+    return this->velocity.z;
 }
 
 float MovingObject::getNextPositionX() {
@@ -65,9 +69,9 @@ float MovingObject::getNextPositionZ() {
 std::string MovingObject::serialize() {
     auto log = getLogger("MovingObject");
     std::string res = Object::serialize() + ","
-        + std::to_string(velocityX) + ","
-        + std::to_string(velocityY) + ","
-        + std::to_string(velocityZ);
+        + std::to_string(velocity.x) + ","
+        + std::to_string(velocity.y) + ","
+        + std::to_string(velocity.z);
     log->trace("Serialized MovingObject as {}", res);
     return res;
 }
