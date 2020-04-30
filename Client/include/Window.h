@@ -10,6 +10,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 
+#include "state/Camera.h"
+#include "state/World.h"
+
 class Window {
 
     private:
@@ -21,18 +24,11 @@ class Window {
 
     static int width;
     static int height;
-    static glm::mat4 P; // P for projection
-    static glm::mat4 V; // V for view
-    static glm::vec3 cam_pos, cam_dir; // Where the camera is and points to.
-
-    static float nearZ;
-    static float farZ;
-    static float fov;
-    static float aspect;
 
     static GLFWwindow * window;
+    static World * world;
+    static Camera * cam;
 
-    static void setCamera();
     static void initialize();
     static void clean_up();
     static GLFWwindow * create_window( int width, int height );
