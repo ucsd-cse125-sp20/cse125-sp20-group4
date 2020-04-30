@@ -4,12 +4,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-class MovingEvent : Event {
+class MovingEvent : public Event {
 private:
     glm::mat3 direction;
 
 public:
-    MovingEvent(int id, glm::mat3 direction);
+    MovingEvent(std::string id, glm::mat3 direction);
     glm::mat3 getDirection();
-    virtual void apply(Object& object);
+    virtual void apply(std::shared_ptr<Object> object);
 };

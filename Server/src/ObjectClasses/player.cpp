@@ -8,6 +8,7 @@ Player::Player(std::string id, float x, float y, float z, float orientationX, fl
     auto log = getLogger("Player");
     log->trace("Creating Player with id {}, position ({}, {}, {}), orientation ({}, {}), velocity ({}, {}, {})", id, x, y, z, orientationX, orientationY, velX, velY, velZ);
 }
+
 std::string Player::serialize() {
     auto log = getLogger("Player");
     std::string res = "Player:" + MovingObject::serialize();

@@ -4,17 +4,17 @@
 #include <iostream>
 #include "ObjectClasses/player.h"
 #include "EventClasses/event.h"
-
+#include <memory>
 class GameState
 {
 private:
-    std::map<int, Object&> gameObjects;
+    std::map<std::string, std::shared_ptr<Object>> gameObjects;
     int nextId;
 public:
     GameState();
-    void updateObject(int id);
-    void createObject(Object& obj);
-    void deleteObject(int id);
+    void createObject(std::shared_ptr<Object> obj);
+    void createObject(std::shared_ptr<Object> obj, std::string id);
+    void deleteObject(std::string id);
     void updateState();
     void applyEvent(Event* event);
     std::string serialize();

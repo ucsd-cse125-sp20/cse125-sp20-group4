@@ -1,14 +1,14 @@
 #pragma once
 #include "EventClasses/event.h"
 
-Event::Event(int objectId) {
+Event::Event(std::string objectId) {
     this->objectId = objectId;
 }
-int Event::getObjectId() {
+std::string Event::getObjectId() {
     return this->objectId;
 }
 
 std::string Event::serialize() {
-    std::string res = std::to_string(getObjectId());
+    std::string res = getObjectId();
     return res;
 }

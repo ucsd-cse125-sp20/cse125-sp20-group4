@@ -1,9 +1,9 @@
 #pragma once
 #include "movingevent.h"
 
-class MoveLeftEvent : MovingEvent
+class MoveLeftEvent : public MovingEvent
 {
 public:
-	MoveLeftEvent(int objectId);
+	MoveLeftEvent(std::string objectId);
 	std::string serialize();
 };
