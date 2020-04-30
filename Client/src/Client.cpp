@@ -16,6 +16,7 @@
 
 
 #include "logger.h"
+#include "server.h"
 #include "Window.h"
 
 #pragma comment (lib, "Ws2_32.lib")
@@ -106,7 +107,10 @@ void setup_callbacks( GLFWwindow * window ) {
 int main_inner( void ) {
     WSADATA wsaData;
     SOCKET ServerSocket = INVALID_SOCKET;
-
+    Server* server = NULL;
+    char outbuf[DEFAULT_BUFLEN] = "test";
+    char inbuf[DEFAULT_BUFLEN];
+    concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); //todo use shared data class insteads of int
     int status;
 
     //initialize Winsock
@@ -150,7 +154,11 @@ int main_inner( void ) {
         WSACleanup();
         return EXIT_FAILURE;
     }
+    spdlog::info("Connected to server");
 
+    u_long mode = 1; //enable non blocking
+    ioctlsocket(ServerSocket, FIONBIO, &mode);
+    server = new Server(ServerSocket, &eventQueue);
     // Create the GLFW window
     spdlog::info( "Creating window..." );
     GLFWwindow * window = Window::create_window( 640, 480 );
@@ -173,6 +181,19 @@ int main_inner( void ) {
 
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
+        int bytes = 0;
+        // TODO send user input to server here
+        /*bytes = server->send(outbuf, DEFAULT_BUFLEN);
+        if (bytes != SOCKET_ERROR) {
+            spdlog::info("Message sent: {0}", outbuf); //only for testing, can be removed
+        }*/
+        bytes = server->recv(inbuf, DEFAULT_BUFLEN);
+        if (bytes != SOCKET_ERROR) {
+            spdlog::info("Received message from server: {0}", inbuf); //only for testing, can be removed
+            // todo push game state onto event queue
+        }
+
+        if (bytes)
         // Main render display callback. Rendering of objects is done here.
         Window::display_callback( window );
         // Idle callback. Updating objects, etc. can be done here.
