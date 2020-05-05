@@ -24,20 +24,20 @@ int Client::recv(char* buf, int count) {
     return ::recv(this->sock, buf, count, 0);
 }
 
-void Client::pushEvent(const int& src) {
+void Client::pushEvent(const std::shared_ptr<Event>& src) {
     eventQueue->push(src);
 }
 
-void Client::pushEvent(int&& src) {
+void Client::pushEvent(std::shared_ptr<Event>&& src) {
     eventQueue->push(src);
 }
 
-bool Client::tryPopEvent(int& dst) {
+bool Client::tryPopEvent(std::shared_ptr<Event>& dst) {
     return eventQueue->try_pop(dst);
 }
 
 bool Client::sendGameState(GameState& gs){
     std::string serialized = gs.serialize();
-    char* buf = serialized.c_str();
+    const char* buf = serialized.c_str();
     this->send(buf, serialized.length());
 }
