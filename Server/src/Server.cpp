@@ -23,6 +23,7 @@
 #include "gamestate.h"
 #include "statehandler.h"
 #include "EventClasses/event.h"
+#include "deserializer.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -38,7 +39,7 @@
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
 DWORD WINAPI handleGame(void* data) {
-    GameThreadQueues* queues = (GameThreadQueues*) data;
+    ConnectionsHandler* connectionHandler = (ConnectionsHandler*) data;
 
     // ************** SETUP GAME STATE ****************
     GameState gameState;
@@ -47,23 +48,15 @@ DWORD WINAPI handleGame(void* data) {
     ConnectionsHandler* connHandler = (ConnectionsHandler*)data;
     bool exit = false;
     while (!exit) {
-        //int out;
         int signal;
         // ************** GAME LOGIC START **************
 //        printf("%d Events in the event queue\n", queues->eventQueue->unsafe_size());
         // process all events
-        gameStateHandler.getNextState(&gameState, queues->eventQueue);
+        gameStateHandler.getNextState(&gameState, connectionHandler->getEventQueue());
         // TODO: check if we have hit the tick yet
 
         // TODO: send out new gameState
-        for (int i = 0; i < MAX_CLIENTS; i++ ) {
-            if(queues->clients[i] != NULL){
-                queues->clients[i]->sendGameState(gameState);
-			}
-		}
-        while (connHandler->tryPopEvent(out)) {
-            printf("Received from client %d\n", out);
-        }
+        connectionHandler->sendGameStateToAll(gameState);
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
         if (connHandler->tryPopSignal(signal)) {
@@ -82,11 +75,13 @@ DWORD WINAPI handleConn(void* data) {
     int status;
     char buf[DEFAULT_BUFLEN];
     Client* client = *(Client**) data;
+    Deserializer deserializer;
     printf("Connected\n");
     while ((status = client->recv(buf, DEFAULT_BUFLEN)) > 0) {
         // TODO deserialize object from buffer and put on queue, no repsonse
         printf("Received %d bytes\n", status);
-        //client->pushEvent(client->getId()); //TODO changed function signatures
+        std::shared_ptr<Event> event = deserializer.deserializeEvent(std::string(buf));
+        client->pushEvent(event); //TODO changed function signatures
         int sendStatus = client->send(buf, status);
         // Echo the buffer back to the sender
         if (sendStatus == SOCKET_ERROR) {

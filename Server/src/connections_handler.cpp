@@ -1,11 +1,12 @@
 #include "connections_handler.h"
+#define MAX_CLIENTS 5
 
-ConnectionsHandler::ConnectionsHandler(Client** clients, concurrency::concurrent_queue<int>* eventQueue, concurrency::concurrent_queue<int>* signalQueue) :
+ConnectionsHandler::ConnectionsHandler(Client** clients, concurrency::concurrent_queue<std::shared_ptr<Event>>* eventQueue, concurrency::concurrent_queue<int>* signalQueue) :
 	clients(clients),
 	eventQueue(eventQueue),
 	signalQueue(signalQueue) {}
 
-bool ConnectionsHandler::tryPopEvent(int& dst) {
+bool ConnectionsHandler::tryPopEvent(std::shared_ptr<Event>& dst) {
 	return eventQueue->try_pop(dst);
 }
 
@@ -22,3 +23,18 @@ int ConnectionsHandler::sendClient(int clientId, char* buf, int count) {
 		return -1;
 	}
 }
+
+concurrency::concurrent_queue<std::shared_ptr<Event>>* ConnectionsHandler::getEventQueue()
+{
+	return this->eventQueue;
+}
+
+bool ConnectionsHandler::sendGameStateToAll(GameState& gs) {
+	for (int i = 0; i < MAX_CLIENTS; i++) {
+		if (clients[i] != NULL) {
+			clients[i]->sendGameState(gs);
+		}
+	}
+	return true;
+}
+
