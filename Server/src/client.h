@@ -5,7 +5,7 @@
 #include <concurrent_queue.h>
 
 class Client {
-private: // todo private
+private:
 	int id;
 	SOCKET sock;
 	HANDLE thread = NULL;

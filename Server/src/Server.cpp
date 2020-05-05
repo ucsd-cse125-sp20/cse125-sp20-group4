@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "client.h"
+#include "connections_handler.h"
 #include "logger.h"
 
 // Need to link with Ws2_32.lib
@@ -31,26 +32,21 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
-struct GameThreadQueues { // TODO use real class
-    concurrency::concurrent_queue<int>* eventQueue;
-    concurrency::concurrent_queue<int>* signalQueue;
-};
-
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
 DWORD WINAPI handleGame(void* data) {
-    GameThreadQueues* queues = (GameThreadQueues*) data;
+    ConnectionsHandler* connHandler = (ConnectionsHandler*)data;
     bool exit = false;
     while (!exit) {
         int out;
         int signal;
         // ************** GAME LOGIC START **************
-        while (queues->eventQueue->try_pop(out)) {
+        while (connHandler->tryPopEvent(out)) {
             printf("Received from client %d\n", out);
         }
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
-        if (queues->signalQueue->try_pop(signal)) {
+        if (connHandler->tryPopSignal(signal)) {
             // maybe case if more signals
             if (signal == 0) {
                 exit = true;
@@ -152,10 +148,10 @@ int main_inner(void) {
     int count = 0; // TODO implement better client id assignment
     concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); // TODO use shared data class instead of int
     concurrency::concurrent_queue<int> signalQueue = concurrency::concurrent_queue<int>();
-    struct GameThreadQueues queues = {&eventQueue, &signalQueue};
+    ConnectionsHandler connHandler = ConnectionsHandler(clients, &eventQueue, &signalQueue);
 
     // create thread to handle game state loop
-    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &queues, 0, NULL);
+    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &connHandler, 0, NULL);
 
     // loop to accept connections
     while (((clientSock = accept(listenSock, NULL, NULL)) != INVALID_SOCKET) && count < MAX_CLIENTS) {
