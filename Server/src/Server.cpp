@@ -51,10 +51,10 @@ DWORD WINAPI handleGame(void* data) {
     GameStateHandler gameStateHandler;
     bool exit = false;
     while (!exit) {
-        int out;
+        //int out;
         int signal;
         // ************** GAME LOGIC START **************
-        printf("%d Events in the event queue\n", queues->eventQueue->unsafe_size());
+//        printf("%d Events in the event queue\n", queues->eventQueue->unsafe_size());
         // process all events
         gameStateHandler.getNextState(&gameState, queues->eventQueue);
         // TODO: check if we have hit the tick yet
@@ -87,7 +87,7 @@ DWORD WINAPI handleConn(void* data) {
     while ((status = client->recv(buf, DEFAULT_BUFLEN)) > 0) {
         // TODO deserialize object from buffer and put on queue, no repsonse
         printf("Received %d bytes\n", status);
-        client->pushEvent(client->getId());
+        //client->pushEvent(client->getId()); //TODO changed function signatures
         int sendStatus = client->send(buf, status);
         // Echo the buffer back to the sender
         if (sendStatus == SOCKET_ERROR) {

@@ -16,12 +16,12 @@ public:
     void setVelocityZ(float velZ);
     void setVelocity(float velX, float velY, float velZ);
     void setVelocity(glm::vec3 velocity);
-    float getVelocityX();
-    float getVelocityY();
-    float getVelocityZ();
-    float getNextPositionX();
-    float getNextPositionY();
-    float getNextPositionZ();
+    float getVelocityX() const;
+    float getVelocityY() const;
+    float getVelocityZ() const;
+    float getNextPositionX() const;
+    float getNextPositionY() const;
+    float getNextPositionZ() const;
     //(de)serialize functions
     virtual std::string serialize() override;
 };

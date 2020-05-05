@@ -7,6 +7,7 @@ private:
     int disregard;
 
 public:
+    Player(const Player& player);
     Player(std::string id);
     Player(std::string id, float x, float y, float z);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);

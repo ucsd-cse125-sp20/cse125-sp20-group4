@@ -78,12 +78,12 @@ std::string GameState::serialize() {
     log->trace("Serialized GameState with state: {}", res);
     return res;
 }
-void GameState::initialize(std::string file = "") {
+void GameState::initialize(std::string file) {
     if (file.compare("") == 0) {
         // default
         // create a player
-        std::shared_ptr<Player> obj = std::make_shared(new Player("1"));
-        this->createObject()
+        std::shared_ptr<Player> obj = std::make_shared<Player>("1"); //TODO this causes xmemory to complain about copy ctor
+        //this->createObject();
     } else {
         // TODO parse file
         std::cout << "INITIALIZING FROM A FILE IS NOT IMPLEMENTED" << std::endl;

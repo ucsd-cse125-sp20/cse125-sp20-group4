@@ -59,51 +59,51 @@ void Object::setOrientation(float orientationX, float orientationY, float orient
 
 }
 
-std::string Object::getId() {
+std::string Object::getId() const {
     return this->id;
 }
 
-float Object::getPositionX() {
+float Object::getPositionX() const {
     return this->getPosition().x;
 }
 
-float Object::getPositionY() {
+float Object::getPositionY() const {
     return this->getPosition().y;
 }
 
-float Object::getPositionZ() {
+ float Object::getPositionZ() const {
     return this->getPosition().z;
 }
 
-glm::vec3 Object::getPosition() {
+glm::vec3 Object::getPosition() const{
     return this->position;
 }
 
-float Object::getOrientationX() {
+float Object::getOrientationX() const {
     return this->orientation.x;
 }
 
-float Object::getOrientationY() {
+float Object::getOrientationY() const {
     return this->orientation.y;
 }
 
-float Object::getOrientationZ() {
+float Object::getOrientationZ() const {
     return this->orientation.z;
 }
 
-glm::vec3 Object::getOrientation() {
+glm::vec3 Object::getOrientation() const {
     return this->orientation;
 }
 
-float Object::getNextPositionX() {
+float Object::getNextPositionX() const {
     return getPositionX();
 }
 
-float Object::getNextPositionY() {
+float Object::getNextPositionY() const {
     return getPositionY();
 }
 
-float Object::getNextPositionZ() {
+float Object::getNextPositionZ() const {
     return getPositionZ();
 }
 

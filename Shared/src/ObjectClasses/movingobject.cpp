@@ -42,26 +42,26 @@ void MovingObject::setVelocity(glm::vec3 vel) {
     setVelocityZ(vel.z);
 }
 
-float MovingObject::getVelocityX() {
+float MovingObject::getVelocityX() const {
     return this->velocity.x;
 }
 
-float MovingObject::getVelocityY() {
+float MovingObject::getVelocityY() const {
     return this->velocity.y;
 }
 
-float MovingObject::getVelocityZ() {
+float MovingObject::getVelocityZ() const {
     return this->velocity.z;
 }
 
-float MovingObject::getNextPositionX() {
+float MovingObject::getNextPositionX() const {
     return getPositionX() + getVelocityX() * SERVER_TICK;
 }
 
-float MovingObject::getNextPositionY() {
+float MovingObject::getNextPositionY() const {
     return getPositionY() + getVelocityY() * SERVER_TICK;
 }
-float MovingObject::getNextPositionZ() {
+float MovingObject::getNextPositionZ() const {
     return getPositionZ() + getVelocityZ() * SERVER_TICK;
 }
 

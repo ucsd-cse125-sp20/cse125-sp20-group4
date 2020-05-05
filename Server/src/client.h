@@ -5,6 +5,7 @@
 #include <concurrent_queue.h>
 #include "EventClasses/event.h"
 #include "gamestate.h"
+#include "EventClasses/event.h"
 class Client {
 private: // todo private
 	int id;
@@ -19,10 +20,10 @@ public:
 	HANDLE getHandle();
 	int getId();
 
-	int send(char*, int); // todo send shared data type, include serialization inside
-	int recv(char*, int); // todo recv shared data type, include deserialization inside
+	int send(char*, size_t); // todo send shared data type, include serialization inside
+	int recv(char*, size_t); // todo recv shared data type, include deserialization inside
 	void pushEvent(const std::shared_ptr<Event>&); // todo push shared data type
-	void pushEvent(std::shared_ptr<Event>&&); // todo push shared data type
+	//void pushEvent(std::shared_ptr<Event>&&); // todo push shared data type
 	bool tryPopEvent(std::shared_ptr<Event>&); // todo push shared data type
 	bool sendGameState(GameState& gs); //TODO change to shared ptr
 };
