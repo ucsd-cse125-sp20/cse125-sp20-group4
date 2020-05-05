@@ -3,15 +3,16 @@
 #include <winsock2.h>
 #include <processthreadsapi.h>
 #include <concurrent_queue.h>
-
+#include "EventClasses/event.h"
+#include "gamestate.h"
 class Client {
 private: // todo private
 	int id;
 	SOCKET sock;
 	HANDLE thread = NULL;
-	concurrency::concurrent_queue<int>* eventQueue; //todo use shared data class
+	concurrency::concurrent_queue<std::shared_ptr<Event>>* eventQueue; //todo use shared data class
 public:
-	Client(int, SOCKET, HANDLE, concurrency::concurrent_queue<int>*);
+	Client(int, SOCKET, HANDLE, concurrency::concurrent_queue<std::shared_ptr<Event>>*);
 	~Client();
 
 	// getters
@@ -23,4 +24,5 @@ public:
 	void pushEvent(const int&); // todo push shared data type
 	void pushEvent(int&&); // todo push shared data type
 	bool tryPopEvent(int&); // todo push shared data type
+	bool sendGameState(GameState& gs); //TODO change to shared ptr
 };

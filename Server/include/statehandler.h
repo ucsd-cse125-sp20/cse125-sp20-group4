@@ -8,5 +8,5 @@
 class GameStateHandler
 {
 public:
-    void getNextState(GameState& gameState, concurrency::concurrent_queue<Event*>& eventQueue);
+    void getNextState(GameState* gameState, concurrency::concurrent_queue<std::shared_ptr<Event>>* eventQueue);
 };

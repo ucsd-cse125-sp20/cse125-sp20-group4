@@ -16,6 +16,7 @@ public:
     void createObject(std::shared_ptr<Object> obj, std::string id);
     void deleteObject(std::string id);
     void updateState();
-    void applyEvent(Event* event);
+    void applyEvent(std::shared_ptr<Event> event);
     std::string serialize();
+    void initialize(std::string file = "");
 };

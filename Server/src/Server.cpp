@@ -19,6 +19,9 @@
 
 #include "client.h"
 #include "logger.h"
+#include "gamestate.h"
+#include "statehandler.h"
+#include "EventClasses/event.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -32,22 +35,36 @@
 #define DEFAULT_PORT "8080"
 
 struct GameThreadQueues { // TODO use real class
-    concurrency::concurrent_queue<int>* eventQueue;
+    concurrency::concurrent_queue<std::shared_ptr<Event>>* eventQueue;
     concurrency::concurrent_queue<int>* signalQueue;
+    Client** clients; //TODO do this in more concurrency safe fashion
 };
 
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
 DWORD WINAPI handleGame(void* data) {
     GameThreadQueues* queues = (GameThreadQueues*) data;
+
+    // ************** SETUP GAME STATE ****************
+    GameState gameState;
+    gameState.initialize();
+    GameStateHandler gameStateHandler;
     bool exit = false;
     while (!exit) {
         int out;
         int signal;
         // ************** GAME LOGIC START **************
-        while (queues->eventQueue->try_pop(out)) {
-            printf("Received from client %d\n", out);
-        }
+        printf("%d Events in the event queue\n", queues->eventQueue->unsafe_size());
+        // process all events
+        gameStateHandler.getNextState(&gameState, queues->eventQueue);
+        // TODO: check if we have hit the tick yet
+
+        // TODO: send out new gameState
+        for (int i = 0; i < MAX_CLIENTS; i++ ) {
+            if(queues->clients[i] != NULL){
+                queues->clients[i]->sendGameState(gameState);
+			}
+		}
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
         if (queues->signalQueue->try_pop(signal)) {
@@ -150,9 +167,9 @@ int main_inner(void) {
     SOCKET clientSock = INVALID_SOCKET;
     Client* clients[MAX_CLIENTS] = { NULL };
     int count = 0; // TODO implement better client id assignment
-    concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); // TODO use shared data class instead of int
+    concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); // TODO use shared data class instead of int
     concurrency::concurrent_queue<int> signalQueue = concurrency::concurrent_queue<int>();
-    struct GameThreadQueues queues = {&eventQueue, &signalQueue};
+    struct GameThreadQueues queues = {&eventQueue, &signalQueue, clients};
 
     // create thread to handle game state loop
     HANDLE gameThread = CreateThread(NULL, 0, handleGame, &queues, 0, NULL);

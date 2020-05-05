@@ -52,7 +52,7 @@ void GameState::updateState() {
     }
 }
 
-void GameState::applyEvent(Event* event) {
+void GameState::applyEvent(std::shared_ptr<Event> event) {
     std::map<std::string, std::shared_ptr<Object>>::iterator it = gameObjects.find(event->getObjectId());
     if (it != gameObjects.end()) {
         event->apply(it->second);
@@ -78,3 +78,14 @@ std::string GameState::serialize() {
     log->trace("Serialized GameState with state: {}", res);
     return res;
 }
+void GameState::initialize(std::string file = "") {
+    if (file.compare("") == 0) {
+        // default
+        // create a player
+        std::shared_ptr<Player> obj = std::make_shared(new Player("1"));
+        this->createObject()
+    } else {
+        // TODO parse file
+        std::cout << "INITIALIZING FROM A FILE IS NOT IMPLEMENTED" << std::endl;
+    }
+ }
