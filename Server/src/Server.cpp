@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "client.h"
+#include "connections_handler.h"
 #include "logger.h"
 #include "gamestate.h"
 #include "statehandler.h"
@@ -34,12 +35,6 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
-struct GameThreadQueues { // TODO use real class
-    concurrency::concurrent_queue<std::shared_ptr<Event>>* eventQueue;
-    concurrency::concurrent_queue<int>* signalQueue;
-    Client** clients; //TODO do this in more concurrency safe fashion
-};
-
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
 DWORD WINAPI handleGame(void* data) {
@@ -49,6 +44,7 @@ DWORD WINAPI handleGame(void* data) {
     GameState gameState;
     gameState.initialize();
     GameStateHandler gameStateHandler;
+    ConnectionsHandler* connHandler = (ConnectionsHandler*)data;
     bool exit = false;
     while (!exit) {
         //int out;
@@ -65,9 +61,12 @@ DWORD WINAPI handleGame(void* data) {
                 queues->clients[i]->sendGameState(gameState);
 			}
 		}
+        while (connHandler->tryPopEvent(out)) {
+            printf("Received from client %d\n", out);
+        }
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
-        if (queues->signalQueue->try_pop(signal)) {
+        if (connHandler->tryPopSignal(signal)) {
             // maybe case if more signals
             if (signal == 0) {
                 exit = true;
@@ -169,10 +168,10 @@ int main_inner(void) {
     int count = 0; // TODO implement better client id assignment
     concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); // TODO use shared data class instead of int
     concurrency::concurrent_queue<int> signalQueue = concurrency::concurrent_queue<int>();
-    struct GameThreadQueues queues = {&eventQueue, &signalQueue, clients};
+    ConnectionsHandler connHandler = ConnectionsHandler(clients, &eventQueue, &signalQueue);
 
     // create thread to handle game state loop
-    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &queues, 0, NULL);
+    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &connHandler, 0, NULL);
 
     // loop to accept connections
     while (((clientSock = accept(listenSock, NULL, NULL)) != INVALID_SOCKET) && count < MAX_CLIENTS) {

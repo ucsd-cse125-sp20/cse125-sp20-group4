@@ -7,7 +7,7 @@
 #include "gamestate.h"
 #include "EventClasses/event.h"
 class Client {
-private: // todo private
+private:
 	int id;
 	SOCKET sock;
 	HANDLE thread = NULL;
