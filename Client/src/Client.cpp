@@ -11,12 +11,20 @@
 #endif
 #include "spdlog/spdlog.h"
 #include "GLFW/glfw3.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 
 #include "logger.h"
+#include "server.h"
 #include "Window.h"
+
+#pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
 #define LOGLEVEL spdlog::level::debug
+#define DEFAULT_PORT "8080"
+#define DEFAULT_BUFLEN 512
 
 void setup_glew() {
 
@@ -97,7 +105,60 @@ void setup_callbacks( GLFWwindow * window ) {
 }
 
 int main_inner( void ) {
+    WSADATA wsaData;
+    SOCKET ServerSocket = INVALID_SOCKET;
+    Server* server = NULL;
+    char outbuf[DEFAULT_BUFLEN] = "test";
+    char inbuf[DEFAULT_BUFLEN];
+    concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); //todo use shared data class insteads of int
+    int status;
 
+    //initialize Winsock
+    if ((status = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
+        spdlog::critical("WSAStartup failed with error: {0:d}", status);
+        return EXIT_FAILURE;
+    }
+    struct addrinfo* result = NULL;
+    struct addrinfo hints;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    hints.ai_flags = AI_PASSIVE;
+
+    // resolve server address and port (current server address is local host)
+    if ((status = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result)) != 0) {
+        spdlog::critical("getaddrinfo failed with error: {0:d}", status);
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+
+    ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    if (ServerSocket == INVALID_SOCKET) {
+        spdlog::critical("socket failed with error: {0:ld}", WSAGetLastError());
+        freeaddrinfo(result);
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+
+    if ((status = connect(ServerSocket, result->ai_addr, (int)result->ai_addrlen)) == SOCKET_ERROR) {
+        closesocket(ServerSocket);
+        ServerSocket = INVALID_SOCKET;
+    }
+
+    freeaddrinfo(result);
+
+    if (ServerSocket == INVALID_SOCKET) {
+        spdlog::critical("unable to connect to server!");
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+    spdlog::info("Connected to server");
+
+    u_long mode = 1; //enable non blocking
+    ioctlsocket(ServerSocket, FIONBIO, &mode);
+    server = new Server(ServerSocket, &eventQueue);
     // Create the GLFW window
     spdlog::info( "Creating window..." );
     GLFWwindow * window = Window::create_window( 640, 480 );
@@ -120,6 +181,19 @@ int main_inner( void ) {
 
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
+        int bytes = 0;
+        // TODO send user input to server here
+        /*bytes = server->send(outbuf, DEFAULT_BUFLEN);
+        if (bytes != SOCKET_ERROR) {
+            spdlog::info("Message sent: {0}", outbuf); //only for testing, can be removed
+        }*/
+        bytes = server->recv(inbuf, DEFAULT_BUFLEN);
+        if (bytes != SOCKET_ERROR) {
+            spdlog::info("Received message from server: {0}", inbuf); //only for testing, can be removed
+            // todo push game state onto event queue
+        }
+
+        if (bytes)
         // Main render display callback. Rendering of objects is done here.
         Window::display_callback( window );
         // Idle callback. Updating objects, etc. can be done here.
