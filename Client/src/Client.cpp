@@ -1,4 +1,4 @@
-﻿// Client.cpp : Defines the entry point for the application.
+﻿// Cli+.cpp : Defines the entry point for the application.
 //
 
 #include <iostream>
@@ -18,6 +18,8 @@
 #include "logger.h"
 #include "server.h"
 #include "Window.h"
+#include "ObjectClasses/object.h"
+#include "deserializer.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -181,6 +183,7 @@ int main_inner( void ) {
 
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
+        Deserializer deserializer;
         int bytes = 0;
         // TODO send user input to server here
         /*bytes = server->send(outbuf, DEFAULT_BUFLEN);
@@ -191,6 +194,8 @@ int main_inner( void ) {
         if (bytes != SOCKET_ERROR) {
             spdlog::info("Received message from server: {0}", inbuf); //only for testing, can be removed
             // todo push game state onto event queue
+            std::string in_str(inbuf, bytes);
+            std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map = deserializer.deserializeUpdate(in_str);
         }
 
         if (bytes)
