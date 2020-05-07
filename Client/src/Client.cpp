@@ -195,7 +195,8 @@ int main_inner( void ) {
             spdlog::info("Received message from server: {0}", inbuf); //only for testing, can be removed
             // todo push game state onto event queue
             std::string in_str(inbuf, bytes);
-            std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map = deserializer.deserializeUpdate(in_str);
+            std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map = deserializer.deserializeUpdates(in_str);
+            //@Thiago this pointer to unordered map gives you ID to object mappings, and objects give you position/direction TODO
         }
 
         if (bytes)
