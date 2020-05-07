@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include <map>
 #include <memory>
 #include "gamestate.h"
@@ -9,7 +10,7 @@ class Deserializer
 {
 public:
 	Deserializer();
-	std::shared_ptr<GameState> deserializeGameState(std::string serial);
+	std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> deserializeUpdates(std::string serial);
 	std::shared_ptr<Event> deserializeEvent(std::string serial);
 private:
 	std::map<std::string, std::unique_ptr<IObjectFactory>> gameMapping;
