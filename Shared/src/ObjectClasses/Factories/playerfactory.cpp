@@ -43,6 +43,6 @@ std::shared_ptr<Object> PlayerFactory::create(std::string serial) {
     pos = serial.find(",", last);
     float velz = std::stof(serial.substr(last));
 
-    std::shared_ptr<Player> player = std::shared_ptr<Player>(new Player(id, posx, posy, posz, orx, ory, orz, velx, vely, velz));
+    std::shared_ptr<Player> player = std::make_shared<Player>(id, posx, posy, posz, orx, ory, orz, velx, vely, velz);
     return player;
 }

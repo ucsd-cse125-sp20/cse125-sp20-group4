@@ -54,6 +54,11 @@ float MovingObject::getVelocityZ() const {
     return this->velocity.z;
 }
 
+glm::vec3 MovingObject::getVelocity() const {
+    return this->velocity;
+}
+
+
 float MovingObject::getNextPositionX() const {
     return getPositionX() + getVelocityX() * SERVER_TICK;
 }

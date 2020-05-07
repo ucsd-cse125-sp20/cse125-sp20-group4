@@ -30,7 +30,7 @@ std::shared_ptr<std::unordered_map<std::string,std::shared_ptr<Object>>> Deseria
         //error
         throw "Deserializer: Non gamestate serialization passed in";
     }
-    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res = std::make_shared< std::unordered_map<std::string, std::shared_ptr<Object>>>(new std::unordered_map<std::string, std::shared_ptr<Object>>);
+    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res = std::make_shared< std::unordered_map<std::string, std::shared_ptr<Object>>>();
     std::string delimiter = ";";
     std::string token;
     // loop over the string while there is still a delimiter
@@ -39,7 +39,8 @@ std::shared_ptr<std::unordered_map<std::string,std::shared_ptr<Object>>> Deseria
         last = pos + 1;
         //deserialize the object
         std::shared_ptr<Object> obj = deserializeObject(token);
-        res->insert(std::make_pair(obj->getId(), obj));
+        std::pair < std::string, std::shared_ptr<Object>> pair(std::string(obj->getId()), obj);
+        res->insert(pair);
     }
     return res;
 }

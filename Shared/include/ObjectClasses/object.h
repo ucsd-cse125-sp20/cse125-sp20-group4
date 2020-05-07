@@ -11,6 +11,7 @@ private:
     // mesh
 public:
     //constructor
+    Object(const Object& obj);
     Object(std::string id);
     Object(std::string id, float x, float y, float z);
     Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ);
