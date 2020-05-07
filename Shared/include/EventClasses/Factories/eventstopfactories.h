@@ -1,22 +1,22 @@
 #pragma once
 #include "eventfactory.h"
 
-class MoveLeftEventFactory : public IEventFactory {
+class StopLeftEventFactory : public IEventFactory {
 public:
     std::shared_ptr<Event> create(std::string serial);
 };
 
-class MoveRightEventFactory : public IEventFactory {
+class StopRightEventFactory : public IEventFactory {
 public:
     std::shared_ptr<Event> create(std::string serial);
 };
 
-class MoveForwardEventFactory : public IEventFactory {
+class StopForwardEventFactory : public IEventFactory {
 public:
     std::shared_ptr<Event> create(std::string serial);
 };
 
-class MoveBackwardEventFactory : public IEventFactory {
+class StopBackwardEventFactory : public IEventFactory {
 public:
     std::shared_ptr<Event> create(std::string serial);
 };

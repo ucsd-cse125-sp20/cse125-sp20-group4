@@ -2,5 +2,5 @@
 
 MoveRightEvent::MoveRightEvent(std::string objectId) : MovingEvent(objectId, glm::mat3(0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f)) {}
 std::string MoveRightEvent::serialize() {
-    return "MoveRightEvent:" + Event::serialize();
+    return "MoveRight:" + Event::serialize();
 }

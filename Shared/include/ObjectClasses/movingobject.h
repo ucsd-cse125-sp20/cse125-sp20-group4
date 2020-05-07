@@ -19,6 +19,7 @@ public:
     float getVelocityX() const;
     float getVelocityY() const;
     float getVelocityZ() const;
+    glm::vec3 getVelocity() const;
     float getNextPositionX() const;
     float getNextPositionY() const;
     float getNextPositionZ() const;

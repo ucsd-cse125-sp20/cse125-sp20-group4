@@ -4,6 +4,8 @@
 #include "EventClasses/event.h"
 #include "ObjectClasses/Factories/playerfactory.h"
 #include "EventClasses/Factories/eventmovementfactories.h"
+#include "EventClasses/Factories/eventstopfactories.h"
+
 #include <cstddef>
 
 Deserializer::Deserializer() {
@@ -12,6 +14,10 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair("MoveRight", std::unique_ptr<MoveRightEventFactory>(new MoveRightEventFactory())));
     this->eventMapping.insert(std::make_pair("MoveForward", std::unique_ptr<MoveForwardEventFactory>(new MoveForwardEventFactory())));
     this->eventMapping.insert(std::make_pair("MoveBackward", std::unique_ptr<MoveBackwardEventFactory>(new MoveBackwardEventFactory())));
+    this->eventMapping.insert(std::make_pair("StopLeft", std::unique_ptr<StopLeftEventFactory>(new StopLeftEventFactory())));
+    this->eventMapping.insert(std::make_pair("StopRight", std::unique_ptr<StopRightEventFactory>(new StopRightEventFactory())));
+    this->eventMapping.insert(std::make_pair("StopForward", std::unique_ptr<StopForwardEventFactory>(new StopForwardEventFactory())));
+    this->eventMapping.insert(std::make_pair("StopBackward", std::unique_ptr<StopBackwardEventFactory>(new StopBackwardEventFactory())));
 }
 
 std::shared_ptr<std::unordered_map<std::string,std::shared_ptr<Object>>> Deserializer::deserializeUpdates(std::string serial) {
