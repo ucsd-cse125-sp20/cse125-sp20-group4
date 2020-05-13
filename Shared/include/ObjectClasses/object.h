@@ -8,8 +8,10 @@ private:
     glm::vec3 position;
     glm::vec3 orientation;
     std::string id;
+    
     // mesh
 public:
+    bool dirty;
     //constructor
     Object(const Object& obj);
     Object(std::string id);

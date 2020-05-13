@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <stdio.h>
 #include "ObjectClasses/object.h"
 #include "gamestate.h"
 #include "EventClasses/event.h"

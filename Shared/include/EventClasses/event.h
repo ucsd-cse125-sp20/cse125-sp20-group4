@@ -9,6 +9,6 @@ private:
 public:
 	Event(std::string objectId);
 	std::string getObjectId();
-	std::string serialize();
+	virtual std::string serialize();
 	virtual void apply(std::shared_ptr<Object> object) = 0;
 };

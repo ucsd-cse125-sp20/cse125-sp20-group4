@@ -10,10 +10,11 @@ class Deserializer
 {
 public:
 	Deserializer();
-	std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> deserializeUpdates(std::string serial);
+	void deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res);
 	std::shared_ptr<Event> deserializeEvent(std::string serial);
 private:
 	std::map<std::string, std::unique_ptr<IObjectFactory>> gameMapping;
 	std::map<std::string, std::unique_ptr<IEventFactory>> eventMapping;
 	std::shared_ptr <Object> deserializeObject(std::string serial);
+	std::unordered_map<std::string, std::shared_ptr<Object>> updates;
 };

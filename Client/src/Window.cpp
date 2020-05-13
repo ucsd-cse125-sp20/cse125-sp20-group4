@@ -45,6 +45,8 @@ const char * window_title = "CSE 125 Project";
 
 Camera * Window::cam;
 World * Window::world;
+EventHandler * Window::eventHandler;
+Server* Window::server;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -58,11 +60,12 @@ GLFWwindow * Window::window = nullptr;
 int Window::width;
 int Window::height;
 
-void Window::initialize() {
+void Window::initialize(Server* ser) {
 
     Shaders::initializeShaders();
     world = new World();
-
+    eventHandler = new EventHandler();
+    server = ser;
     cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     world->addEntity( "cube1", new CameraEntity( "player", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
@@ -199,7 +202,7 @@ void Window::display_callback( GLFWwindow * ) {
 static float pointSize = 1.0f;
 
 void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, int mods ) {
-
+    /*
     // Check for a key press
     if ( action == GLFW_PRESS ) {
         // Check if escape was pressed
@@ -291,8 +294,14 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
         }
+    }*/
+    std::cout << mods << focusWindow << std::endl;
+    std::shared_ptr<Event> event = eventHandler->createEvent(key, action, "cube1");
+    if (event != nullptr) {
+        std::cout << event->serialize() << std::endl;
+        std::string serialized = event->serialize();
+        server->send(&serialized[0], serialized.length());
     }
-
 }
 
 glm::vec3 Window::trackBallMapping( float x, float y ) {

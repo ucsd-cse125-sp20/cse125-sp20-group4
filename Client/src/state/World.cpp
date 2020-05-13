@@ -67,3 +67,17 @@ Entity * World::removeEntity( const std::string & key ) {
     return e;
 
 }
+
+void World::handleUpdates(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map) {
+    std::unordered_map<std::string, std::shared_ptr<Object>>::iterator it;
+    for (it = map->begin(); it != map->end(); it++) {
+        auto entity = this->getEntity(it->second->getId());
+        if (entity != nullptr) {
+            LOGGER->debug("Updating entity '{}'.", it->second->getId());
+            //entity->setDirection(it->second->getOrientation());
+            entity->setPosition(it->second->getPosition());
+        } else {
+            LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
+        }
+    }
+}

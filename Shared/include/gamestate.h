@@ -10,6 +10,8 @@ class GameState
 private:
     std::map<std::string, std::shared_ptr<Object>> gameObjects;
     int nextId;
+    bool dirty;
+
 public:
     GameState();
     void createObject(std::shared_ptr<Object> obj);
@@ -19,4 +21,7 @@ public:
     void applyEvent(std::shared_ptr<Event> event);
     std::string serialize();
     void initialize(std::string file = "");
+    std::string getUpdates();
+    bool isDirty();
+    void setDirty(bool dty);
 };
