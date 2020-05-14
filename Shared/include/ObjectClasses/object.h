@@ -8,6 +8,9 @@ private:
     glm::vec3 position;
     glm::vec3 orientation;
     std::string id;
+    float length;
+    float width;
+    float height;
     // mesh
 public:
     //constructor
@@ -40,6 +43,9 @@ public:
     virtual float getNextPositionX() const;
     virtual float getNextPositionY() const;
     virtual float getNextPositionZ() const;
+    float getLength() const;
+    float getWidth() const;
+    float getHeight() const;
 
     //(de)serialize functions
     virtual std::string serialize();

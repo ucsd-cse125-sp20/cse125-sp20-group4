@@ -108,6 +108,18 @@ float Object::getNextPositionZ() const {
     return getPositionZ();
 }
 
+float Object::getLength() const {
+    return this->length;
+}
+
+float Object::getWidth() const {
+    return this->width;
+}
+
+float Object::getHeight() const {
+    return this->height;
+}
+
 std::string Object::serialize() {
     auto log = getLogger("Object");
     // id, x, y, z, directionX, directionY, directionZ
