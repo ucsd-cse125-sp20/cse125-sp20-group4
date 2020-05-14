@@ -61,7 +61,7 @@ std::shared_ptr<Event> EventHandler::createReleaseEvent(int key, std::string id)
     return event;
 }
 
-std::shared_ptr<Event> EventHandler::createMouseEvent(glm::vec3 direction, std::string id) {
-    std::shared_ptr<Event> event =  std::shared_ptr<MouseEvent>(new MouseEvent(id,direction));
+std::shared_ptr<Event> EventHandler::createMouseEvent(std::string id, float angle, glm::vec3 axis) {
+    std::shared_ptr<Event> event =  std::shared_ptr<MouseEvent>(new MouseEvent(id,angle, axis));
     return event;
 }

@@ -41,7 +41,7 @@ const char * window_title = "CSE 125 Project";
 #define X_SPEED( xPos ) ( ( ( std::abs( xPos ) - X_DEAD_ZONE ) / X_MOVE_SIZE ) * ( ( xPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 #define Y_SPEED( yPos ) ( ( ( std::abs( yPos ) - Y_DEAD_ZONE ) / Y_MOVE_SIZE ) * ( ( yPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 
-#define ROTATE( direction, angle, axis ) ( glm::rotate( glm::mat4( 1.0f ), ( angle ), ( axis ) ) * glm::vec4( ( direction ), 1.0f ) )
+//#define ROTATE( direction, angle, axis ) ( glm::rotate( glm::mat4( 1.0f ), ( angle ), ( axis ) ) * glm::vec4( ( direction ), 1.0f ) )
 
 Camera * Window::cam;
 World * Window::world;
@@ -50,9 +50,9 @@ Server* Window::server;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
-    glm::vec3 newDir = ROTATE( cam->getDir() , angle, axis );
+    //glm::vec3 newDir = ROTATE( cam->getDir() , angle, axis );
     //cam->rotate( newDir );
-    auto event = eventHandler->createMouseEvent( newDir, "cube1");
+    auto event = eventHandler->createMouseEvent("cube1", angle, axis);
     if (event != nullptr) {
         std::cout << event->serialize() << std::endl;
         std::string serialized = event->serialize();

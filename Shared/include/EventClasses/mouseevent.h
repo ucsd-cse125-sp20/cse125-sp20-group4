@@ -4,11 +4,10 @@
 #include "event.h"
 class MouseEvent : public Event
 {
-private:
-    glm::vec3 direction;
 public:
-    MouseEvent(std::string id, glm::vec3 direction);
-    glm::vec3 getDirection();
+    float angle;
+    glm::vec3 axis;
+    MouseEvent(std::string id, float angle, glm::vec3 axis);
     virtual void apply(std::shared_ptr<Object> object);
     std::string serialize();
 };

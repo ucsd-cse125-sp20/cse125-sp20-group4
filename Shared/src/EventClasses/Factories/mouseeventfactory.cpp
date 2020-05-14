@@ -8,19 +8,23 @@ std::shared_ptr<Event> MouseEventFactory::create(std::string serial)
     // id
     pos = serial.find(",", last);
     std::string id = serial.substr(last, pos - last);
+    // angle
+    last = pos + 1;
+    pos = serial.find(",", last);
+    float angle = std::stof(serial.substr(last, pos - last));
     // x
     last = pos + 1;
     pos = serial.find(",", last);
-    float orx = std::stof(serial.substr(last, pos - last));
+    float axisX = std::stof(serial.substr(last, pos - last));
     // y
     last = pos + 1;
     pos = serial.find(",", last);
-    float ory = std::stof(serial.substr(last, pos - last));
+    float axisY = std::stof(serial.substr(last, pos - last));
     // z
     last = pos + 1;
     pos = serial.find(",", last);
-    float orz = std::stof(serial.substr(last, pos - last));
+    float axisZ = std::stof(serial.substr(last, pos - last));
 
-    std::shared_ptr<Event> event = std::shared_ptr<MouseEvent>(new MouseEvent(id,glm::vec3(orx,ory,orz)));
+    std::shared_ptr<Event> event = std::shared_ptr<MouseEvent>(new MouseEvent(id,angle,glm::vec3(axisX,axisY,axisZ)));
     return event;
 }
