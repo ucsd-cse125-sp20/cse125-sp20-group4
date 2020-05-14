@@ -58,6 +58,12 @@ void Object::setOrientation(float orientationX, float orientationY, float orient
     auto log = getLogger("Object");
     this->orientation = glm::vec3(orientationX, orientationY, orientationZ);
     log->trace("Setting orientation of Object {} to ({},{},{})", this->getId(), orientationX, orientationY, orientationZ);
+}
+
+void Object::setOrientation(glm::vec3 ori) {
+    auto log = getLogger("Object");
+    this->orientation = glm::vec3(ori);
+    log->trace("Setting orientation of Object {} to ({},{},{})", this->getId(), orientation.x, orientation.y, orientation.z);
 
 }
 

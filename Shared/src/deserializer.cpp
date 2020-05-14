@@ -5,6 +5,7 @@
 #include "ObjectClasses/Factories/playerfactory.h"
 #include "EventClasses/Factories/eventmovementfactories.h"
 #include "EventClasses/Factories/eventstopfactories.h"
+#include "EventClasses/Factories/mouseeventfactory.h"
 
 #include <cstddef>
 
@@ -18,6 +19,7 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair("StopRight", std::unique_ptr<StopRightEventFactory>(new StopRightEventFactory())));
     this->eventMapping.insert(std::make_pair("StopForward", std::unique_ptr<StopForwardEventFactory>(new StopForwardEventFactory())));
     this->eventMapping.insert(std::make_pair("StopBackward", std::unique_ptr<StopBackwardEventFactory>(new StopBackwardEventFactory())));
+    this->eventMapping.insert(std::make_pair("MouseEvent", std::unique_ptr<MouseEventFactory>(new MouseEventFactory())));
 }
 
 void Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
