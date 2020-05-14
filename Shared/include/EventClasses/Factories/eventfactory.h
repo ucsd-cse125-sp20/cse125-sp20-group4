@@ -5,6 +5,5 @@ class IEventFactory
 {
 public:
     virtual std::shared_ptr<Event> create(std::string serial)=0;
-
     virtual ~IEventFactory() {};
 };

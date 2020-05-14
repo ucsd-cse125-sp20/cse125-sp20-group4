@@ -29,10 +29,10 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::debug
+#define LOGLEVEL spdlog::level::trace
 
 #define MAX_CLIENTS 5
-#define SERVER_TICK 50
+//#define SERVER_TICK 500
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
@@ -50,13 +50,19 @@ DWORD WINAPI handleGame(void* data) {
     while (!exit) {
         int signal;
         // ************** GAME LOGIC START **************
-//        printf("%d Events in the event queue\n", queues->eventQueue->unsafe_size());
+        if (!connectionHandler->getEventQueue()->empty()) {
+            fprintf(stderr, "%d Events in the event queue\n", (int)connectionHandler->getEventQueue()->unsafe_size());
+        }
         // process all events
         gameStateHandler.getNextState(&gameState, connectionHandler->getEventQueue());
         // TODO: check if we have hit the tick yet
 
-        // TODO: send out new gameState
-        connectionHandler->sendGameStateToAll(gameState);
+        // TODO: send out new gameState if gamestate has changed
+        if (gameState.isDirty()) {
+            connectionHandler->sendGameStateToAll(gameState);
+            gameState.setDirty(false);
+        }
+        
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
         if (connHandler->tryPopSignal(signal)) {
@@ -73,7 +79,7 @@ DWORD WINAPI handleGame(void* data) {
 // data passed as pointer into array of pointers to Clients
 DWORD WINAPI handleConn(void* data) {
     int status;
-    char buf[DEFAULT_BUFLEN];
+    char buf[DEFAULT_BUFLEN] = { 0 };
     Client* client = *(Client**) data;
     Deserializer deserializer;
     printf("Connected\n");
@@ -81,14 +87,16 @@ DWORD WINAPI handleConn(void* data) {
         // TODO deserialize object from buffer and put on queue, no repsonse
         printf("Received %d bytes\n", status);
         std::shared_ptr<Event> event = deserializer.deserializeEvent(std::string(buf));
+        memset(buf, 0, sizeof(buf));
+        fprintf(stderr, "Event Recieved: %s\n", ((event->serialize()).c_str()));
         client->pushEvent(event); //TODO changed function signatures
-        int sendStatus = client->send(buf, status);
+        /*int sendStatus = client->send(buf, status);
         // Echo the buffer back to the sender
         if (sendStatus == SOCKET_ERROR) {
             printf("send failed with error: %d\n", WSAGetLastError());
             return 1;
         }
-        printf("Echoed %d bytes\n", sendStatus);
+        printf("Echoed %d bytes\n", sendStatus);*/
     }
     if (status == 0) {
         printf("Connection closed\n");

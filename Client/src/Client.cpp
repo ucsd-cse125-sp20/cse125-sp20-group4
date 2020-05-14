@@ -110,9 +110,9 @@ int main_inner( void ) {
     WSADATA wsaData;
     SOCKET ServerSocket = INVALID_SOCKET;
     Server* server = NULL;
-    char outbuf[DEFAULT_BUFLEN] = "test";
-    char inbuf[DEFAULT_BUFLEN];
-    concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); //todo use shared data class insteads of int
+    char outbuf[DEFAULT_BUFLEN] = { 0 };
+    char inbuf[DEFAULT_BUFLEN] = { 0 };
+    concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); //todo use shared data class insteads of int
     int status;
 
     //initialize Winsock
@@ -179,24 +179,23 @@ int main_inner( void ) {
     // Setup OpenGL settings, including lighting, materials, etc.
     setup_opengl_settings();
     // Initialize objects/pointers for rendering
-    Window::initialize();
-
+    Window::initialize(server);
+    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> updates = std::make_shared<std::unordered_map<std::string, std::shared_ptr<Object>>>();
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
         Deserializer deserializer;
         int bytes = 0;
-        // TODO send user input to server here
-        /*bytes = server->send(outbuf, DEFAULT_BUFLEN);
-        if (bytes != SOCKET_ERROR) {
-            spdlog::info("Message sent: {0}", outbuf); //only for testing, can be removed
-        }*/
         bytes = server->recv(inbuf, DEFAULT_BUFLEN);
         if (bytes != SOCKET_ERROR) {
-            spdlog::info("Received message from server: {0}", inbuf); //only for testing, can be removed
-            // todo push game state onto event queue
             std::string in_str(inbuf, bytes);
-            std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map = deserializer.deserializeUpdates(in_str);
+            memset(inbuf, 0, sizeof(inbuf));
+            spdlog::info("Received message from server: {0}", in_str); //only for testing, can be removed
+            // todo push game state onto event queue
+            deserializer.deserializeUpdates(in_str, updates);
             //@Thiago this pointer to unordered map gives you ID to object mappings, and objects give you position/direction TODO
+            spdlog::info("Number of updates: {}", updates->size());
+            Window::world->handleUpdates(updates);
+            updates->clear();
         }
 
         if (bytes)

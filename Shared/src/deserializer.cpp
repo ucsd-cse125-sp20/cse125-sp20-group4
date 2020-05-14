@@ -20,9 +20,10 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair("StopBackward", std::unique_ptr<StopBackwardEventFactory>(new StopBackwardEventFactory())));
 }
 
-std::shared_ptr<std::unordered_map<std::string,std::shared_ptr<Object>>> Deserializer::deserializeUpdates(std::string serial) {
+void Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
     // get the tag
     size_t pos = serial.find(":");
+    size_t end = serial.find("|");
     size_t last = pos + 1;
     std::string tag = serial.substr(0, pos);
     
@@ -30,11 +31,10 @@ std::shared_ptr<std::unordered_map<std::string,std::shared_ptr<Object>>> Deseria
         //error
         throw "Deserializer: Non gamestate serialization passed in";
     }
-    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res = std::make_shared< std::unordered_map<std::string, std::shared_ptr<Object>>>();
     std::string delimiter = ";";
     std::string token;
     // loop over the string while there is still a delimiter
-    while ((pos = serial.find(delimiter,last)) != std::string::npos) {
+    while ((pos = serial.find(delimiter,last)) != std::string::npos && pos<end) {
         token = serial.substr(last, pos-last);
         last = pos + 1;
         //deserialize the object
@@ -42,11 +42,11 @@ std::shared_ptr<std::unordered_map<std::string,std::shared_ptr<Object>>> Deseria
         std::pair < std::string, std::shared_ptr<Object>> pair(std::string(obj->getId()), obj);
         res->insert(pair);
     }
-    return res;
 }
 std::shared_ptr<Event> Deserializer::deserializeEvent(std::string serial) {
     std::string tag = serial.substr(0, serial.find(":"));
-    return this->eventMapping.find(tag)->second->create(serial);
+    std::string input(serial);
+    return this->eventMapping.find(tag)->second->create(input);
 }
 std::shared_ptr <Object> Deserializer::deserializeObject(std::string serial) {
     //get the object tag

@@ -1,7 +1,7 @@
 #pragma once
 #include "object.h"
 #include <glm/glm.hpp>
-#define SERVER_TICK 50
+#define SERVER_TICK 500
 
 class MovingObject : public Object {
 private:

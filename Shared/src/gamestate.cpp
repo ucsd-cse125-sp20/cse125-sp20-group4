@@ -5,11 +5,12 @@
 GameState::GameState() {
     this->nextId = 0;
     this->gameObjects = std::map<std::string, std::shared_ptr<Object>>();
+    this->dirty = true;
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
     auto log = getLogger("GameState");
-    obj->setId(std::to_string(this->nextId));
+    //obj->setId(std::to_string(this->nextId));
     this->gameObjects.insert(std::make_pair(obj->getId(), obj));
     this->nextId++;
     log->trace("Created GameState object with id: {}", this->nextId);
@@ -36,6 +37,7 @@ void GameState::deleteObject(std::string id) {
 }
 
 void GameState::updateState() {
+    auto log = getLogger("GameState");
     //loop through all objects
     std::map<std::string, std::shared_ptr<Object>>::iterator it = this->gameObjects.begin();
     float x;
@@ -47,12 +49,23 @@ void GameState::updateState() {
         y = it->second->getNextPositionY();
         z = it->second->getNextPositionZ();
         // TODO check for collisions
+        glm::vec3 cpos = it->second->getPosition();
+        if (x != cpos.x || y != cpos.y || z != cpos.z) {
+            it->second->dirty = true;
+            setDirty(true);
+            log->trace("Set dirty bit of object with id: {} to true", it->second->getId());
+        }
+
         // set new state
         it->second->setPosition(x, y, z);
+        
+        it++;
     }
 }
 
 void GameState::applyEvent(std::shared_ptr<Event> event) {
+    auto log = getLogger("GameState");
+    log->info("Applying an Event: {}", event->serialize());
     std::map<std::string, std::shared_ptr<Object>>::iterator it = gameObjects.find(event->getObjectId());
     if (it != gameObjects.end()) {
         event->apply(it->second);
@@ -62,19 +75,14 @@ void GameState::applyEvent(std::shared_ptr<Event> event) {
 std::string GameState::serialize() {
     auto log = getLogger("GameState");
     log->trace("Beginning to serialize GameState");
-    //std::map<std::string, shared_ptr<Object>>::iterator it = this->gameObjects.begin();
     auto it = this->gameObjects.begin();
 
     std::string res = "GameState:";
     while (it != this->gameObjects.end()) {
-        if (res.compare("") == 0) {
-            res = it->second->serialize();
-        }
-        else {
-            res = res + ";" + it->second->serialize();
-        }
+        res = res + it->second->serialize() + ";";
         it++;
     }
+    res = res + "|";
     log->trace("Serialized GameState with state: {}", res);
     return res;
 }
@@ -82,10 +90,43 @@ void GameState::initialize(std::string file) {
     if (file.compare("") == 0) {
         // default
         // create a player
-        std::shared_ptr<Player> obj = std::make_shared<Player>("1"); //TODO this causes xmemory to complain about copy ctor
-        //this->createObject();
+        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube1",0,0,0,0.0f,0.0f,1.0f,0.0f,0.0f,0.0f));
+        std::cout << "INITIALIZING DEFAULT" << std::endl;
+        this->createObject(obj);
+        std::cout << this->serialize() << std::endl;
     } else {
         // TODO parse file
         std::cout << "INITIALIZING FROM A FILE IS NOT IMPLEMENTED" << std::endl;
     }
  }
+
+std::string GameState::getUpdates() {
+    // loop over all objects and build string
+    auto log = getLogger("GameState");
+    log->trace("Beginning to get updates from GameState");
+    auto it = this->gameObjects.begin();
+
+    std::string res = "";
+    while (it != this->gameObjects.end()) {
+        if (it->second->dirty == true) {
+            if (res.compare("") == 0) {
+                res = it->second->serialize();
+            } else {
+                res = res + ";" + it->second->serialize();
+            }
+            it->second->dirty = false;
+        }
+        it++;
+    }
+    setDirty(false);
+    log->trace("Updates: {}", res);
+    return res;
+}
+
+bool GameState::isDirty() {
+    return this->dirty;
+}
+
+void GameState::setDirty(bool dty) {
+    this->dirty = dty;
+}
