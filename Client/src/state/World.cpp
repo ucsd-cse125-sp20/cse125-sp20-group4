@@ -74,7 +74,7 @@ void World::handleUpdates(std::shared_ptr<std::unordered_map<std::string, std::s
         auto entity = this->getEntity(it->second->getId());
         if (entity != nullptr) {
             LOGGER->debug("Updating entity '{}'.", it->second->getId());
-            //entity->setDirection(it->second->getOrientation());
+            entity->setDirection(it->second->getOrientation());
             entity->setPosition(it->second->getPosition());
         } else {
             LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
