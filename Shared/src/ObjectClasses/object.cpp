@@ -5,13 +5,14 @@ Object::Object(const Object& obj) : Object(obj.getId(), obj.getPositionX(), obj.
 
 Object::Object(std::string id) : Object(id, 0.0f, 0.0f, 0.0f) {}
 
-Object::Object(std::string id, float x, float y, float z) : Object(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
+Object::Object(std::string id, float x, float y, float z) : Object(id, x, y, z, 0.0f, 1.0f, 0.0f) {} //was 1.0f, 0.0f, 0.0f
 
 Object::Object(std::string id, float x, float  y, float z, float dirX, float dirY, float dirZ) {
     auto log = getLogger("Object");
     this->id = id;
     setPosition(x, y, z);
     setOrientation(dirX, dirY, dirZ);
+    dirty = true;
     log->trace("Creating Object with id {}, position ({}, {}, {}), and orientation ({}, {}, {})", id, x, y, z, dirX, dirY, dirZ);
 }
 

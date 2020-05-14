@@ -45,6 +45,8 @@ const char * window_title = "CSE 125 Project";
 
 Camera * Window::cam;
 World * Window::world;
+EventHandler * Window::eventHandler;
+Server* Window::server;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -58,21 +60,22 @@ GLFWwindow * Window::window = nullptr;
 int Window::width;
 int Window::height;
 
-void Window::initialize() {
+void Window::initialize(Server* ser) {
 
     Shaders::initializeShaders();
     world = new World();
-
+    eventHandler = new EventHandler();
+    server = ser;
     cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     world->addEntity( "cube1", new CameraEntity( "player", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
     world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
     world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
-    world->addEntity( "cube4", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) ) );
+    world->addEntity( "cube4", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f, 0.0f, 3.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
     cam = Camera::getCamera( "player" );
 
     // Debugging entities
-    world->addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, false ) );
+    world->addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
 
 }
 
@@ -199,7 +202,7 @@ void Window::display_callback( GLFWwindow * ) {
 static float pointSize = 1.0f;
 
 void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, int mods ) {
-
+    /*
     // Check for a key press
     if ( action == GLFW_PRESS ) {
         // Check if escape was pressed
@@ -291,8 +294,14 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
         }
+    }*/
+    std::cout << mods << focusWindow << std::endl;
+    std::shared_ptr<Event> event = eventHandler->createEvent(key, action, "cube1");
+    if (event != nullptr) {
+        std::cout << event->serialize() << std::endl;
+        std::string serialized = event->serialize();
+        server->send(&serialized[0], serialized.length());
     }
-
 }
 
 glm::vec3 Window::trackBallMapping( float x, float y ) {

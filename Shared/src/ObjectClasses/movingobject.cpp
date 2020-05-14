@@ -60,14 +60,14 @@ glm::vec3 MovingObject::getVelocity() const {
 
 
 float MovingObject::getNextPositionX() const {
-    return getPositionX() + getVelocityX() * SERVER_TICK;
+    return getPositionX() + getVelocityX()/20;
 }
 
 float MovingObject::getNextPositionY() const {
-    return getPositionY() + getVelocityY() * SERVER_TICK;
+    return getPositionY() + getVelocityY() / 20;
 }
 float MovingObject::getNextPositionZ() const {
-    return getPositionZ() + getVelocityZ() * SERVER_TICK;
+    return getPositionZ() + getVelocityZ() / 20;
 }
 
 //(de)serialize functions
