@@ -32,7 +32,7 @@
 #define LOGLEVEL spdlog::level::trace
 
 #define MAX_CLIENTS 5
-#define SERVER_TICK 20
+//#define SERVER_TICK 500
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
