@@ -69,9 +69,10 @@ void Window::initialize(Server* ser) {
     cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     world->addEntity( "cube1", new CameraEntity( "player", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
-    world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
-    world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
+    //world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
+    //world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
     world->addEntity( "cube4", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f, 0.0f, 3.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
+    world->addEntity( "cube5", new Entity(new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
     cam = Camera::getCamera( "player" );
 
     // Debugging entities
@@ -296,7 +297,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
         }
     }*/
     std::cout << mods << focusWindow << std::endl;
-    std::shared_ptr<Event> event = eventHandler->createEvent(key, action, "cube1");
+    std::shared_ptr<Event> event = eventHandler->createEvent(key, action, "cube4");
     if (event != nullptr) {
         std::cout << event->serialize() << std::endl;
         std::string serialized = event->serialize();

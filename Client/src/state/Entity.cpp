@@ -44,6 +44,8 @@ const float & Entity::getScale() const {
 
 void Entity::setPosition( const glm::vec3 & pos ) {
 
+    auto log = getLogger("Entity");
+    log->info("Setting position from ({}, {}, {}) to ({}, {}, {})", position.x, position.y, position.z, pos.x, pos.y, pos.z);
     position = pos;
     updateModelMatrix();
 

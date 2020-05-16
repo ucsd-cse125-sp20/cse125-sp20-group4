@@ -19,6 +19,7 @@ public:
     Object(std::string id);
     Object(std::string id, float x, float y, float z);
     Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ);
+    Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ, float width, float height, float length);
 
     //setters
     void setId(std::string inputId);
@@ -30,6 +31,9 @@ public:
     void setOrientationY(float orientationY);
     void setOrientationZ(float orientationZ);
     void setOrientation(float orientationX, float orientationY, float orientationZ);
+    void setWidth(float newWidth);
+    void setHeight(float newHeight);
+    void setLength(float newLength);
 
     //getters
     std::string getId() const;
@@ -48,6 +52,10 @@ public:
     float getWidth() const;
     float getHeight() const;
 
+    //utility
+    virtual bool contains(const glm::vec3 pt) const;
+    virtual bool collides(const Object obj) const;
+
     //(de)serialize functions
-    virtual std::string serialize();
+    virtual std::string serialize() const;
 };

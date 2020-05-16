@@ -24,4 +24,6 @@ public:
     std::string getUpdates();
     bool isDirty();
     void setDirty(bool dty);
+    void checkCollisions(std::string id, std::shared_ptr<MovingObject> object);
+
 };

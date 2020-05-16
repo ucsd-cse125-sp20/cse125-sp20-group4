@@ -5,8 +5,10 @@
 #include "ObjectClasses/Factories/playerfactory.h"
 #include "EventClasses/Factories/eventmovementfactories.h"
 #include "EventClasses/Factories/eventstopfactories.h"
+#include "logger.h"
 
 #include <cstddef>
+
 
 Deserializer::Deserializer() {
     this->gameMapping.insert(std::make_pair("Player", std::unique_ptr<PlayerFactory>(new PlayerFactory())));
@@ -22,11 +24,12 @@ Deserializer::Deserializer() {
 
 void Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
     // get the tag
+    auto log = getLogger("Deserialize");
     size_t pos = serial.find(":");
     size_t end = serial.find("|");
     size_t last = pos + 1;
     std::string tag = serial.substr(0, pos);
-    
+    log->trace("Deserializing Updates");
     if (tag.compare("GameState") != 0) {
         //error
         throw "Deserializer: Non gamestate serialization passed in";
@@ -49,7 +52,9 @@ std::shared_ptr<Event> Deserializer::deserializeEvent(std::string serial) {
     return this->eventMapping.find(tag)->second->create(input);
 }
 std::shared_ptr <Object> Deserializer::deserializeObject(std::string serial) {
+    auto log = getLogger("Deserialize");
     //get the object tag
     std::string tag = serial.substr(0, serial.find(":"));
+    log->trace("Deserializing {}", tag);
     return this->gameMapping.find(tag)->second->create(serial);
 }

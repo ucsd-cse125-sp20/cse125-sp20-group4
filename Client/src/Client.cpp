@@ -24,7 +24,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
-#define LOGLEVEL spdlog::level::debug
+#define LOGLEVEL spdlog::level::trace //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
 
@@ -196,6 +196,9 @@ int main_inner( void ) {
             spdlog::info("Number of updates: {}", updates->size());
             Window::world->handleUpdates(updates);
             updates->clear();
+        }
+        else {
+            spdlog::info("Socket error: {}", WSAGetLastError());
         }
 
         if (bytes)
