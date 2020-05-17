@@ -34,6 +34,7 @@ public:
     void setWidth(float newWidth);
     void setHeight(float newHeight);
     void setLength(float newLength);
+    void setOrientation(glm::vec3 orientation);
 
     //getters
     std::string getId() const;
