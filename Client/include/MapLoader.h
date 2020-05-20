@@ -7,21 +7,20 @@
 #include <vector>
 #include <fstream>
 
+#include "state/Entity.h"
+#include "drawing/model/RectangularCuboid.h"
+#include "drawing/model/LoadedModel.h"
+#include "drawing/Shaders.h"
+
 class MapLoader {
 
 private:
-	std::vector<std::string> modelFiles;
-	std::vector<glm::vec3> positions;
-	std::vector<glm::vec3> directions;
-	std::vector<float> scales;
+	std::vector<Entity *> entities;
 
 public:
     MapLoader(const std::string file);
 
-	std::vector<std::string> getModelFiles();
-	std::vector<glm::vec3> getPositions();
-	std::vector<glm::vec3> getDirections();
-	std::vector<float> getScales();
+	std::vector<Entity *> getEntities();
 };
 
 #endif // !RECTANGULAR_CUBOID_H

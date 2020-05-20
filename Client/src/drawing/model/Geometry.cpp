@@ -46,7 +46,7 @@ Geometry::~Geometry() {
 
 /* Public functions */
 
-void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) const {
+void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const glm::vec3 & direction ) const {
 
     if ( !initialized ) { // Check that is already initialized
         throw std::runtime_error( "Attempted to draw geometry before initializing it." );
@@ -65,7 +65,9 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
 
     const glm::vec3 horizontalDirection = glm::normalize( glm::vec3( direction.x, 0.0f, direction.z ) );
     float horizontalAngle = glm::acos( glm::dot( FOWARD, horizontalDirection ) );
-    glm::vec3 horizontalAxis = glm::normalize( glm::cross( FOWARD, horizontalDirection ) );
+    glm::vec3 horizontalAxis = glm::cross( FOWARD, horizontalDirection );
+    if (horizontalAxis.y <= 0.01f && horizontalAxis.y >= -0.01f) horizontalAxis = glm::vec3(0, 1.0f, 0);
+    horizontalAxis = glm::normalize(horizontalAxis);
     glm::mat4x4 horizontalRotate = ROTATE( I, horizontalAngle, horizontalAxis );
 
     float verticalAngle = glm::acos( glm::dot( horizontalDirection, direction ) );
@@ -73,8 +75,9 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
     glm::mat4x4 verticalRotate = ROTATE( I, verticalAngle, verticalAxis );
 
     // Send combined projection-view=model matrix to shader programs.
-    glm::mat4x4 model = toView * verticalRotate * horizontalRotate;
-    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "model" ), 1, GL_FALSE, &model[0][0] );
+    glm::mat4x4 m = model * verticalRotate * horizontalRotate;
+    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "model" ), 1, GL_FALSE, &m[0][0] );
+    glUniformMatrix4fv( glGetUniformLocation( shaderProgram, "pv" ), 1, GL_FALSE, &view[0][0] );
 
     // Bind vertex array.
     glBindVertexArray( VAO );
@@ -116,6 +119,10 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
 
     // Buffer drawing order.
     glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof( unsigned int ), indices.data(), GL_STREAM_DRAW );
+
+    // Blender export is dumb so some of the triangles are CW for some reason
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_CW);
 
     // Tell OpenGL to draw with triangles, using the recorded amount of indices and no offset.
     glDrawElements( drawMode, ( GLsizei ) indices.size(), GL_UNSIGNED_INT, 0 );

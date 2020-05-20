@@ -23,7 +23,7 @@ class Entity {
     virtual void setDirection( const glm::vec3 & direction );
     virtual void setScale( const float & scale );
 
-    virtual void draw( const glm::mat4x4 & toView ) const;
+    virtual void draw( const glm::mat4x4 & view ) const;
 
     protected:
     glm::mat4x4 modelMatrix;
