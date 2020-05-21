@@ -1,14 +1,19 @@
 #pragma once
-#include <string>
-#include "ObjectClasses/object.h"
 #include <memory>
-class Event
-{
-private:
-	std::string objectId;
-public:
-	Event(std::string objectId);
-	std::string getObjectId();
-	virtual std::string serialize();
-	virtual void apply(std::shared_ptr<Object> object) = 0;
+#include <string>
+
+#include "ObjectClasses/object.h"
+
+class Event {
+
+    private:
+    const std::string objectId;
+
+    public:
+    Event( const std::string & objectId );
+
+    const std::string & getObjectId() const;
+    virtual std::string serialize() const;
+    virtual void apply( std::shared_ptr<Object> object ) const = 0;
+
 };

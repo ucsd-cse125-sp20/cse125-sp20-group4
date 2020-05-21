@@ -1,7 +1,9 @@
 #include "EventClasses/moveforwardevent.h"
 
-MoveForwardEvent::MoveForwardEvent(std::string objectId) : MovingEvent(objectId, glm::mat3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f)) {}
+MoveForwardEvent::MoveForwardEvent( const std::string & objectId ) : MovingEvent( objectId, glm::vec3( 0.0f, 0.0f, 1.0f ) ) {}
 
-std::string MoveForwardEvent::serialize() {
-    return "MoveForward:"+Event::serialize();
+std::string MoveForwardEvent::serialize() const {
+
+    return "MoveForward:" + Event::serialize();
+
 }

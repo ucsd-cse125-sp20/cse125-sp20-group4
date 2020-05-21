@@ -1,6 +1,9 @@
 #include "EventClasses/stopleftevent.h"
 
-StopLeftEvent::StopLeftEvent(std::string objectId) : StoppingEvent(objectId, glm::mat3(0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f)){}
-std::string StopLeftEvent::serialize() {
+StopLeftEvent::StopLeftEvent( const std::string & objectId ) : StoppingEvent( objectId, glm::vec3( -1.0f, 0.0f, 0.0f ) ) {}
+
+std::string StopLeftEvent::serialize() const {
+
     return "StopLeft:" + Event::serialize();
+
 }

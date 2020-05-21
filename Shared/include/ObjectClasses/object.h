@@ -8,7 +8,9 @@ private:
     glm::vec3 position;
     glm::vec3 orientation;
     std::string id;
-    
+    float length;
+    float width;
+    float height;
     // mesh
 public:
     bool dirty;
@@ -17,6 +19,7 @@ public:
     Object(std::string id);
     Object(std::string id, float x, float y, float z);
     Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ);
+    Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ, float width, float height, float length);
 
     //setters
     void setId(std::string inputId);
@@ -28,7 +31,10 @@ public:
     void setOrientationY(float orientationY);
     void setOrientationZ(float orientationZ);
     void setOrientation(float orientationX, float orientationY, float orientationZ);
-    void setOrientation(glm::vec3 orientation);
+    void setWidth(float newWidth);
+    void setHeight(float newHeight);
+    void setLength(float newLength);
+    virtual void setOrientation( const glm::vec3 & orientation );
 
     //getters
     std::string getId() const;
@@ -43,7 +49,14 @@ public:
     virtual float getNextPositionX() const;
     virtual float getNextPositionY() const;
     virtual float getNextPositionZ() const;
+    float getLength() const;
+    float getWidth() const;
+    float getHeight() const;
+
+    //utility
+    virtual bool contains(const glm::vec3 pt) const;
+    virtual bool collides(const Object & obj) const;
 
     //(de)serialize functions
-    virtual std::string serialize();
+    virtual std::string serialize() const;
 };

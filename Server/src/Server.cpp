@@ -24,6 +24,7 @@
 #include "statehandler.h"
 #include "EventClasses/event.h"
 #include "deserializer.h"
+#include "logger.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -32,7 +33,7 @@
 #define LOGLEVEL spdlog::level::trace
 
 #define MAX_CLIENTS 5
-//#define SERVER_TICK 500
+#define SERVER_TICK 500
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
@@ -40,7 +41,7 @@
 // data passed as pointer to GameThreadQueues struct
 DWORD WINAPI handleGame(void* data) {
     ConnectionsHandler* connectionHandler = (ConnectionsHandler*) data;
-
+    auto log = getLogger("Server");
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     gameState.initialize();
@@ -50,6 +51,7 @@ DWORD WINAPI handleGame(void* data) {
     while (!exit) {
         int signal;
         // ************** GAME LOGIC START **************
+        log->trace("Start of gameplay loop");
         if (!connectionHandler->getEventQueue()->empty()) {
             fprintf(stderr, "%d Events in the event queue\n", (int)connectionHandler->getEventQueue()->unsafe_size());
         }
@@ -58,10 +60,10 @@ DWORD WINAPI handleGame(void* data) {
         // TODO: check if we have hit the tick yet
 
         // TODO: send out new gameState if gamestate has changed
-        if (gameState.isDirty()) {
+       // if (gameState.isDirty()) {
             connectionHandler->sendGameStateToAll(gameState);
             gameState.setDirty(false);
-        }
+        //}
         
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
