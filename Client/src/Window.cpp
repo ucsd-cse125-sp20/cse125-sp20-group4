@@ -1,3 +1,5 @@
+#define NOMINMAX // Stop stupid library from defining max() as a macro
+
 #pragma warning(disable:4201)
 
 #include <algorithm>
@@ -5,6 +7,8 @@
 #include <vector>
 
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <EventClasses/events.h>
 
 #include "Window.h"
 #include "MapLoader.h"
@@ -45,15 +49,26 @@ const char * window_title = "CSE 125 Project";
 #define X_SPEED( xPos ) ( ( ( std::abs( xPos ) - X_DEAD_ZONE ) / X_MOVE_SIZE ) * ( ( xPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 #define Y_SPEED( yPos ) ( ( ( std::abs( yPos ) - Y_DEAD_ZONE ) / Y_MOVE_SIZE ) * ( ( yPos ) > 0 ? 1 : -1 ) * BASE_PAN_SPEED )
 
+#define SPECTATOR_CAMERA "spectator"
+
 #define ROTATE( direction, angle, axis ) ( glm::rotate( glm::mat4( 1.0f ), ( angle ), ( axis ) ) * glm::vec4( ( direction ), 1.0f ) )
 
 Camera * Window::cam;
 World * Window::world;
+Server* Window::server;
+
+std::string Window::playerName = "cube4"; 
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
-    glm::vec3 newDir = ROTATE( cam->getDir() , angle, axis );
-    cam->rotate( newDir );
+    bool isPlayer = cam->name == Window::playerName;
+    if ( cam->isFreeCamera() || isPlayer ) {
+        glm::vec3 newDir = ROTATE( cam->getDir(), angle, axis );
+        cam->rotate( newDir );
+        if ( isPlayer ) { // Send player movement to server
+            server->pushEvent( std::make_shared<RotateEvent>( playerName, newDir ) );
+        }
+    }
 
 }
 
@@ -62,37 +77,37 @@ GLFWwindow * Window::window = nullptr;
 int Window::width;
 int Window::height;
 
-void Window::initialize() {
+void Window::initialize( Server * ser ) {
 
     Shaders::initializeShaders();
     world = new World();
+    server = ser;
+    cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world->addEntity( "cube1", new CameraEntity( "player", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+    world->addEntity( new CameraEntity( "cube4", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
 
     MapLoader* loader = new MapLoader("Maps/map1");
 
     std::vector<Entity*> entities = loader->getEntities();
 
-    int i = 0;
-    for (auto it = entities.begin(); it != entities.end(); it++, i++) {
+    for (auto it = entities.begin(); it != entities.end(); it++) {
     
-        world->addEntity( "entity" + std::to_string(i), *it);
+        world->addEntity(*it);
     
     }
 
-    cam = Camera::getCamera( "player" );
+    cam = Camera::getCamera( "cube4" );
 
     // Debugging entities
-    world->addEntity( "worldAxis", new Entity( new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, false ) );
-    
+    world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
 
 }
 
 void Window::clean_up() {
 
-    Camera::removeCamera( "default" );
+    Camera::removeCamera( "spectator" );
 
     delete( world );
     Shaders::deleteShaders();
@@ -213,7 +228,7 @@ void Window::display_callback( GLFWwindow * ) {
 static float pointSize = 1.0f;
 
 void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, int mods ) {
-
+    
     // Check for a key press
     if ( action == GLFW_PRESS ) {
         // Check if escape was pressed
@@ -225,31 +240,53 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
             case GLFW_KEY_W: // Start moving forward.
-                movement.z -= CAMERA_MOVEMENT_SPEED;
+                if ( cam->isFreeCamera() ) {
+                    movement.z -= CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                }
                 break;
 
             case GLFW_KEY_S: // Start moving backward.
-                movement.z += CAMERA_MOVEMENT_SPEED;
+                if ( cam->isFreeCamera() ) {
+                    movement.z += CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                }
                 break;
 
             case GLFW_KEY_A: // Start moving left.
-                movement.x -= CAMERA_MOVEMENT_SPEED;
+                if ( cam->isFreeCamera() ) {
+                    movement.x -= CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                }
                 break;
 
             case GLFW_KEY_D: // Start moving right.
-                movement.x += CAMERA_MOVEMENT_SPEED;
+                if ( cam->isFreeCamera() ) {
+                    movement.x += CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                }
                 break;
 
             case GLFW_KEY_Q: // Start moving down.
-                movement.y -= CAMERA_MOVEMENT_SPEED;
+                if ( cam->isFreeCamera() ) {
+                    movement.y -= CAMERA_MOVEMENT_SPEED;
+                }
                 break;
 
             case GLFW_KEY_E: // Start moving up.
-                movement.y += CAMERA_MOVEMENT_SPEED;
+                if ( cam->isFreeCamera() ) {
+                    movement.y += CAMERA_MOVEMENT_SPEED;
+                }
                 break;
 
             case GLFW_KEY_R: // Reset camera position.
-                cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
+                if ( cam->isFreeCamera() ) {
+                    cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
+                }
                 break;
 
             case GLFW_KEY_P:
@@ -272,6 +309,10 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 }
                 break;
 
+            case GLFW_KEY_C: // Switch to spectator mode
+                cam = Camera::getCamera( cam->name == SPECTATOR_CAMERA ? playerName : SPECTATOR_CAMERA );
+                break;
+
             case GLFW_KEY_X:
                 Axis::toggleAll();
                 break;
@@ -280,28 +321,48 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
     } else if ( action == GLFW_RELEASE ) { // Check for a key release.
         switch ( key ) {
 
-            case GLFW_KEY_W: // Stop moving forward.
-                movement.z += CAMERA_MOVEMENT_SPEED;
+            case GLFW_KEY_W: // Start moving forward.
+                if ( cam->isFreeCamera() ) {
+                    movement.z += CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                }
                 break;
 
-            case GLFW_KEY_S: // Stop moving backward.
-                movement.z -= CAMERA_MOVEMENT_SPEED;
+            case GLFW_KEY_S: // Start moving backward.
+                if ( cam->isFreeCamera() ) {
+                    movement.z -= CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                }
                 break;
 
-            case GLFW_KEY_A: // Stop moving left.
-                movement.x += CAMERA_MOVEMENT_SPEED;
+            case GLFW_KEY_A: // Start moving left.
+                if ( cam->isFreeCamera() ) {
+                    movement.x += CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                }
                 break;
 
-            case GLFW_KEY_D: // Stop moving right.
-                movement.x -= CAMERA_MOVEMENT_SPEED;
+            case GLFW_KEY_D: // Start moving right.
+                if ( cam->isFreeCamera() ) {
+                    movement.x -= CAMERA_MOVEMENT_SPEED;
+                } else if ( cam->name == Window::playerName ) {
+                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                }
                 break;
 
-            case GLFW_KEY_Q: // Stop moving down.
-                movement.y += CAMERA_MOVEMENT_SPEED;
+            case GLFW_KEY_Q: // Start moving down.
+                if ( cam->isFreeCamera() ) {
+                    movement.y += CAMERA_MOVEMENT_SPEED;
+                }
                 break;
 
-            case GLFW_KEY_E: // Stop moving up.
-                movement.y -= CAMERA_MOVEMENT_SPEED;
+            case GLFW_KEY_E: // Start moving up.
+                if ( cam->isFreeCamera() ) {
+                    movement.y -= CAMERA_MOVEMENT_SPEED;
+                }
                 break;
 
         }

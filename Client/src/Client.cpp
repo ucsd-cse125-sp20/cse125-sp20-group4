@@ -1,4 +1,4 @@
-﻿// Client.cpp : Defines the entry point for the application.
+﻿// Cli+.cpp : Defines the entry point for the application.
 //
 
 #include <iostream>
@@ -11,12 +11,22 @@
 #endif
 #include "spdlog/spdlog.h"
 #include "GLFW/glfw3.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 
 #include "logger.h"
+#include "server.h"
 #include "Window.h"
+#include "ObjectClasses/object.h"
+#include "deserializer.h"
+
+#pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
-#define LOGLEVEL spdlog::level::debug
+#define LOGLEVEL spdlog::level::trace //was debug
+#define DEFAULT_PORT "8080"
+#define DEFAULT_BUFLEN 512
 
 void setup_glew() {
 
@@ -97,7 +107,60 @@ void setup_callbacks( GLFWwindow * window ) {
 }
 
 int main_inner( void ) {
+    WSADATA wsaData;
+    SOCKET ServerSocket = INVALID_SOCKET;
+    Server* server = NULL;
+    char outbuf[DEFAULT_BUFLEN] = { 0 };
+    char inbuf[DEFAULT_BUFLEN] = { 0 };
+    concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); //todo use shared data class insteads of int
+    int status;
 
+    //initialize Winsock
+    if ((status = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
+        spdlog::critical("WSAStartup failed with error: {0:d}", status);
+        return EXIT_FAILURE;
+    }
+    struct addrinfo* result = NULL;
+    struct addrinfo hints;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    hints.ai_flags = AI_PASSIVE;
+
+    // resolve server address and port (current server address is local host)
+    if ((status = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result)) != 0) {
+        spdlog::critical("getaddrinfo failed with error: {0:d}", status);
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+
+    ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    if (ServerSocket == INVALID_SOCKET) {
+        spdlog::critical("socket failed with error: {0:ld}", WSAGetLastError());
+        freeaddrinfo(result);
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+
+    if ((status = connect(ServerSocket, result->ai_addr, (int)result->ai_addrlen)) == SOCKET_ERROR) {
+        closesocket(ServerSocket);
+        ServerSocket = INVALID_SOCKET;
+    }
+
+    freeaddrinfo(result);
+
+    if (ServerSocket == INVALID_SOCKET) {
+        spdlog::critical("unable to connect to server!");
+        WSACleanup();
+        return EXIT_FAILURE;
+    }
+    spdlog::info("Connected to server");
+
+    u_long mode = 1; //enable non blocking
+    ioctlsocket(ServerSocket, FIONBIO, &mode);
+    server = new Server(ServerSocket, &eventQueue);
     // Create the GLFW window
     spdlog::info( "Creating window..." );
     GLFWwindow * window = Window::create_window( 640, 480 );
@@ -116,10 +179,34 @@ int main_inner( void ) {
     // Setup OpenGL settings, including lighting, materials, etc.
     setup_opengl_settings();
     // Initialize objects/pointers for rendering
-    Window::initialize();
-
+    Window::initialize(server);
+    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> updates = std::make_shared<std::unordered_map<std::string, std::shared_ptr<Object>>>();
     // Loop while GLFW window should stay open
+    std::string leftover = "";
     while ( !glfwWindowShouldClose( window ) ) {
+        Deserializer deserializer;
+       
+        int bytes = server->recv( inbuf, DEFAULT_BUFLEN );
+        if ( bytes == SOCKET_ERROR ) {
+            spdlog::info( "Socket error: {}", WSAGetLastError() );
+        } else {
+            std::string in_str( inbuf, bytes );
+            memset( inbuf, 0, sizeof( inbuf ) );
+            spdlog::trace( "Received message from server: {0}", in_str ); //only for testing, can be removed
+
+            // todo push game state onto event queue
+            std::string message = leftover + in_str;
+            spdlog::trace( "Full message: {0}", message ); //only for testing, can be removed
+            leftover = deserializer.deserializeUpdates( message, updates );
+            spdlog::trace( "Message leftover: {}", leftover );
+            if ( !updates->empty() ) {
+                //@Thiago this pointer to unordered map gives you ID to object mappings, and objects give you position/direction TODO
+                spdlog::debug( "Number of updates: {}", updates->size() );
+                Window::world->handleUpdates( updates );
+                updates->clear();
+            }
+        }
+
         // Main render display callback. Rendering of objects is done here.
         Window::display_callback( window );
         // Idle callback. Updating objects, etc. can be done here.

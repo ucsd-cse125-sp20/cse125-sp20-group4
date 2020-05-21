@@ -7,27 +7,36 @@ const auto LOGGER = getLogger( "CameraEntity" );
 
 /* Constructor and destructor */
 
-CameraEntity::CameraEntity( const std::string & cameraName, float camY, const Model * const model, const glm::vec3 position, 
+CameraEntity::CameraEntity( const std::string & name, float camY, const Model * const model, const glm::vec3 position, 
                             const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
-        Camera( position + glm::vec3( 0.0f, camY, 0.0f ), direction ), Entity( model, position, direction, scale, axisEnabled, axisScale ), 
-        camOffset( 0.0f, camY, 0.0f ), cameraName( cameraName ) {
+        Camera( name, position + glm::vec3( 0.0f, camY, 0.0f ), direction ),
+        Entity( name, model, position, direction, scale, axisEnabled, axisScale ), 
+        camOffset( 0.0f, camY, 0.0f ) {
 
-    LOGGER->info( "Creating new camera entity '{}'.", cameraName );
+    LOGGER->info( "Creating new camera entity '{}'.", name );
 
-    if ( cameras.count( cameraName ) > 0 ) {
+    if ( cameras.count( name ) > 0 ) {
         throw std::invalid_argument( "A camera with that name already exists." );
     }
-    cameras[cameraName] = std::make_pair( this, true );
+    cameras[name] = this;
 
 }
 
 CameraEntity::~CameraEntity() {
 
-    LOGGER->info( "Deleting camera entity '{}'.", cameraName );
+    LOGGER->info( "Deleting camera entity '{}'.", name );
 
-    if ( cameras.erase( cameraName ) == 0 ) {
+    if ( cameras.erase( name ) == 0 ) {
         LOGGER->error( "Entity-attached camera '{}' was unexpectedly deleted." );
     }
+
+}
+
+/* Meta methods */
+
+bool CameraEntity::isFreeCamera() const {
+
+    return false;
 
 }
 

@@ -7,6 +7,8 @@
 #include <GL/glew.h>
 #endif
 
+#include "server.h"
+
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 
@@ -28,8 +30,10 @@ class Window {
     static GLFWwindow * window;
     static World * world;
     static Camera * cam;
+    static Server * server;
+    static std::string playerName;
 
-    static void initialize();
+    static void initialize(Server* server);
     static void clean_up();
     static GLFWwindow * create_window( int width, int height );
     static void resize_callback( GLFWwindow * window, int width, int height );

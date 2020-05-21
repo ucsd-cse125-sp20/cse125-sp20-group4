@@ -8,6 +8,14 @@
 class Camera {
 
     public:
+    const std::string name;
+
+    /*
+     * Identifies if the camera instance is a free camera, that is, if it should
+     * be moved on its own or if it is attached to some other entity.
+     */
+    virtual bool isFreeCamera() const;
+
     const glm::vec3 & getPos() const;
     const glm::vec3 & getDir() const;
     const glm::mat4x4 & getV() const;
@@ -26,7 +34,7 @@ class Camera {
     static void removeCamera( const std::string & name );
 
     protected:
-    Camera( const glm::vec3 & pos, const glm::vec3 & dir );
+    Camera( const std::string & name, const glm::vec3 & pos, const glm::vec3 & dir );
     virtual ~Camera() {};
 
     glm::vec3 pos, dir;
@@ -39,12 +47,10 @@ class Camera {
 
     static float nearZ, farZ, fov, aspect;
     static glm::mat4x4 P;
-    // If the boolean is true, camera is managed by something and should not be manually deleted
-    static std::unordered_map<std::string, std::pair<Camera *, bool>> cameras;
+    static std::unordered_map<std::string, Camera *> cameras;
 
     static void updateAll();
     static void updateP();
-
 
 };
 

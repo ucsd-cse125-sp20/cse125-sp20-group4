@@ -18,39 +18,56 @@
 #include <vector>
 
 #include "client.h"
+#include "connections_handler.h"
+#include "logger.h"
+#include "gamestate.h"
+#include "statehandler.h"
+#include "EventClasses/event.h"
+#include "deserializer.h"
 #include "logger.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::debug
+#define LOGLEVEL spdlog::level::trace
 
 #define MAX_CLIENTS 5
-#define SERVER_TICK 50
+#define SERVER_TICK 500
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
-
-struct GameThreadQueues { // TODO use real class
-    concurrency::concurrent_queue<int>* eventQueue;
-    concurrency::concurrent_queue<int>* signalQueue;
-};
 
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
 DWORD WINAPI handleGame(void* data) {
-    GameThreadQueues* queues = (GameThreadQueues*) data;
+    ConnectionsHandler* connectionHandler = (ConnectionsHandler*) data;
+    auto log = getLogger("Server");
+    // ************** SETUP GAME STATE ****************
+    GameState gameState;
+    gameState.initialize();
+    GameStateHandler gameStateHandler;
+    ConnectionsHandler* connHandler = (ConnectionsHandler*)data;
     bool exit = false;
     while (!exit) {
-        int out;
         int signal;
         // ************** GAME LOGIC START **************
-        while (queues->eventQueue->try_pop(out)) {
-            printf("Received from client %d\n", out);
+        log->trace("Start of gameplay loop");
+        if (!connectionHandler->getEventQueue()->empty()) {
+            fprintf(stderr, "%d Events in the event queue\n", (int)connectionHandler->getEventQueue()->unsafe_size());
         }
+        // process all events
+        gameStateHandler.getNextState(&gameState, connectionHandler->getEventQueue());
+        // TODO: check if we have hit the tick yet
+
+        // TODO: send out new gameState if gamestate has changed
+       // if (gameState.isDirty()) {
+            connectionHandler->sendGameStateToAll(gameState);
+            gameState.setDirty(false);
+        //}
+        
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);
-        if (queues->signalQueue->try_pop(signal)) {
+        if (connHandler->tryPopSignal(signal)) {
             // maybe case if more signals
             if (signal == 0) {
                 exit = true;
@@ -64,20 +81,24 @@ DWORD WINAPI handleGame(void* data) {
 // data passed as pointer into array of pointers to Clients
 DWORD WINAPI handleConn(void* data) {
     int status;
-    char buf[DEFAULT_BUFLEN];
+    char buf[DEFAULT_BUFLEN] = { 0 };
     Client* client = *(Client**) data;
+    Deserializer deserializer;
     printf("Connected\n");
     while ((status = client->recv(buf, DEFAULT_BUFLEN)) > 0) {
         // TODO deserialize object from buffer and put on queue, no repsonse
         printf("Received %d bytes\n", status);
-        client->pushEvent(client->getId());
-        int sendStatus = client->send(buf, status);
+        std::shared_ptr<Event> event = deserializer.deserializeEvent(std::string(buf));
+        memset(buf, 0, sizeof(buf));
+        fprintf(stderr, "Event Recieved: %s\n", ((event->serialize()).c_str()));
+        client->pushEvent(event); //TODO changed function signatures
+        /*int sendStatus = client->send(buf, status);
         // Echo the buffer back to the sender
         if (sendStatus == SOCKET_ERROR) {
             printf("send failed with error: %d\n", WSAGetLastError());
             return 1;
         }
-        printf("Echoed %d bytes\n", sendStatus);
+        printf("Echoed %d bytes\n", sendStatus);*/
     }
     if (status == 0) {
         printf("Connection closed\n");
@@ -150,12 +171,12 @@ int main_inner(void) {
     SOCKET clientSock = INVALID_SOCKET;
     Client* clients[MAX_CLIENTS] = { NULL };
     int count = 0; // TODO implement better client id assignment
-    concurrency::concurrent_queue<int> eventQueue = concurrency::concurrent_queue<int>(); // TODO use shared data class instead of int
+    concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); // TODO use shared data class instead of int
     concurrency::concurrent_queue<int> signalQueue = concurrency::concurrent_queue<int>();
-    struct GameThreadQueues queues = {&eventQueue, &signalQueue};
+    ConnectionsHandler connHandler = ConnectionsHandler(clients, &eventQueue, &signalQueue);
 
     // create thread to handle game state loop
-    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &queues, 0, NULL);
+    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &connHandler, 0, NULL);
 
     // loop to accept connections
     while (((clientSock = accept(listenSock, NULL, NULL)) != INVALID_SOCKET) && count < MAX_CLIENTS) {

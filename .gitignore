@@ -359,3 +359,9 @@ MigrationBackup/
 
 # CMake files
 .cmake/
+
+#some cache stuff
+cache*.json
+index*.json
+.ninja_deps
+.ninja_log

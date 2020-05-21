@@ -24,7 +24,9 @@ MapLoader::MapLoader(const std::string mapFile) {
     glm::vec3 direction;
     float scale;
 
-    entities.push_back(new Entity(new RectangularCuboid(glm::vec3(1.0f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    entities.push_back(new Entity("floor", new RectangularCuboid(glm::vec3(1.0f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+
+    int i = 0;
 
     int z = 0;
     for (std::string line; getline(input, line); z++)
@@ -101,7 +103,8 @@ MapLoader::MapLoader(const std::string mapFile) {
                 default:
                     continue;
             }
-            entities.push_back(new Entity((model), position, direction, scale));
+            entities.push_back(new Entity("entity" + std::to_string(i), (model), position, direction, scale));
+            i++;
         }
     }
 

@@ -7,8 +7,8 @@ static const auto LOGGER = getLogger( "Entity" );
 
 /* Constructor */
 
-Entity::Entity( const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
-        model( model ), position( position ), direction( glm::normalize( direction ) ), scale( scale ), axis( axisEnabled, axisScale ) {
+Entity::Entity( const std::string & name, const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+        name( name ), model( model ), position( position ), direction( glm::normalize( direction ) ), scale( scale ), axis( axisEnabled, axisScale ) {
 
     updateModelMatrix();
 
@@ -44,6 +44,8 @@ const float & Entity::getScale() const {
 
 void Entity::setPosition( const glm::vec3 & pos ) {
 
+    auto log = getLogger("Entity");
+    log->info("Setting position from ({}, {}, {}) to ({}, {}, {})", position.x, position.y, position.z, pos.x, pos.y, pos.z);
     position = pos;
     updateModelMatrix();
 
