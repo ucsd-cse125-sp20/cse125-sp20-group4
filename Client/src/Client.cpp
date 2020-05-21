@@ -7,12 +7,16 @@
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
 #else
-#include "GL/glew.h"
+#include <GL/glew.h>
 #endif
-#include "spdlog/spdlog.h"
-#include "GLFW/glfw3.h"
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <combaseapi.h>
+
+#include <fmod_studio.hpp>
+#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 
 #include "logger.h"
@@ -27,6 +31,9 @@
 #define LOGLEVEL spdlog::level::trace //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
+
+// FMOD constants
+#define AUDIO_CHANNELS_MAX 100
 
 void setup_glew() {
 
@@ -114,6 +121,21 @@ int main_inner( void ) {
     char inbuf[DEFAULT_BUFLEN] = { 0 };
     concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); //todo use shared data class insteads of int
     int status;
+
+    spdlog::info( "Initializing COM." );
+    HRESULT hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+    if ( FAILED( hr ) ) {
+        spdlog::critical( "Failed to initialize COM, error code {}.", hr );
+        return 1;
+    }
+
+    spdlog::info( "Initializing FMOD." );
+    FMOD::Studio::System * audioSystem;
+    FMOD_RESULT res = FMOD::Studio::System::create( &audioSystem );
+    if ( res != FMOD_RESULT::FMOD_OK ) {
+        spdlog::critical( "Could not initialize FMOD ({}).", res );
+    }
+    audioSystem->initialize( AUDIO_CHANNELS_MAX, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr );
 
     //initialize Winsock
     if ((status = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
@@ -218,6 +240,12 @@ int main_inner( void ) {
     glfwDestroyWindow( window );
     // Terminate GLFW
     glfwTerminate();
+
+    spdlog::info( "Uninitializing FMOD." );
+    audioSystem->release();
+
+    spdlog::info( "Uninitializing COM." );
+    CoUninitialize();
 
     return EXIT_SUCCESS;
 
