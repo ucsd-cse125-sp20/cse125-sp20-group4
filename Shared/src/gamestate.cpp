@@ -65,10 +65,11 @@ void GameState::updateState() {
 
 void GameState::applyEvent(std::shared_ptr<Event> event) {
     auto log = getLogger("GameState");
-    log->info("Applying an Event: {}", event->serialize());
     std::map<std::string, std::shared_ptr<Object>>::iterator it = gameObjects.find(event->getObjectId());
     if (it != gameObjects.end()) {
+        log->info("Applying an Event: {}", event->serialize());
         event->apply(it->second);
+        setDirty(true);
     }
 }
 

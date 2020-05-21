@@ -28,6 +28,7 @@ public:
     void setOrientationY(float orientationY);
     void setOrientationZ(float orientationZ);
     void setOrientation(float orientationX, float orientationY, float orientationZ);
+    void setOrientation(glm::vec3 orientation);
 
     //getters
     std::string getId() const;

@@ -9,7 +9,8 @@ class EventHandler
 public:
 	int c;
 	EventHandler();
-	std::shared_ptr<Event> createEvent(int key, int action, std::string id);
+	std::shared_ptr<Event> createKeyEvent(int key, int action, std::string id);
 	std::shared_ptr<Event> createPressEvent(int key, std::string id);
 	std::shared_ptr<Event> createReleaseEvent(int key, std::string id);
+	std::shared_ptr<Event> createMouseEvent(std::string id, float angle, glm::vec3 axis);
 };
