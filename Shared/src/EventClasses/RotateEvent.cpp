@@ -12,6 +12,4 @@ void RotateEvent::apply( std::shared_ptr<Object> object ) const {
 
     object->setOrientation( newDirection );
 
-    // TODO: Change velocity
-
 }

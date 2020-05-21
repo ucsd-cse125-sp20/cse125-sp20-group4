@@ -3,15 +3,15 @@
 
 #include <EventClasses/event.h>
 
-#include <EventClasses/moveforwardevent.h>
-#include <EventClasses/movebackwardevent.h>
-#include <EventClasses/moverightevent.h>
-#include <EventClasses/moveleftevent.h>
+#include <EventClasses/Movement/moveforwardevent.h>
+#include <EventClasses/Movement/movebackwardevent.h>
+#include <EventClasses/Movement/moverightevent.h>
+#include <EventClasses/Movement/moveleftevent.h>
 
-#include <EventClasses/stopforwardevent.h>
-#include <EventClasses/stopbackwardevent.h>
-#include <EventClasses/stoprightevent.h>
-#include <EventClasses/stopleftevent.h>
+#include <EventClasses/Movement/stopforwardevent.h>
+#include <EventClasses/Movement/stopbackwardevent.h>
+#include <EventClasses/Movement/stoprightevent.h>
+#include <EventClasses/Movement/stopleftevent.h>
 
 #include <EventClasses/RotateEvent.h>
 

@@ -1,6 +1,6 @@
 #include "EventClasses/Movement/moveleftevent.h"
 
-MoveLeftEvent::MoveLeftEvent(std::string objectId) : MovingEvent(objectId, glm::mat3(0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f)){}
-std::string MoveLeftEvent::serialize() {
+MoveLeftEvent::MoveLeftEvent(const std::string & objectId) : MovingEvent(objectId, glm::vec3(-1.0f, 0.0f, 0.0f)) {}
+std::string MoveLeftEvent::serialize() const {
     return "MoveLeft:" + Event::serialize();
 }

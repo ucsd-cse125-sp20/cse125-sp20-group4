@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <glm/gtc/epsilon.hpp>
 
-#include "EventClasses/movingevent.h"
+#include "EventClasses/Movement/movingevent.h"
 
 #define BASE_MOVEMENT 5
 #define EPSILON 0.0005f
