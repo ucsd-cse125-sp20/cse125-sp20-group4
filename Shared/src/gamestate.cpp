@@ -1,10 +1,12 @@
+#include <ctime>
+
 #include "gameState.h"
 #include "logger.h"
-
 
 GameState::GameState() {
     this->nextId = 0;
     this->gameObjects = std::map<std::string, std::shared_ptr<Object>>();
+    this->timers = std::map<std::string, std::shared_ptr<Timer>>();
     this->dirty = true;
 }
 
@@ -34,6 +36,36 @@ void GameState::deleteObject(std::string id) {
     else {
         log->trace("Attempted to delete object with id: {} but did not find", id);
     }
+}
+
+void GameState::createTimer(std::string id, double duration, std::function<void()> callback) {
+    time_t now = time(NULL);
+    timers[id] = std::shared_ptr<Timer>(new Timer(now, duration, callback));
+}
+
+void GameState::deleteTimer(std::string id) {
+    timers.erase(id);
+}
+
+std::map<std::string, std::function<void()>> GameState::updateTimers() {
+    auto log = getLogger("GameState");
+    std::map<std::string, std::function<void()>> callbacks = std::map<std::string, std::function<void()>>();
+    time_t now = time(NULL);
+
+    // iterate over timers
+    for (auto it = timers.begin(), itNext = it; it != timers.end(); it = itNext) {
+        // increment before check/delete so that active iterator not deleted
+        itNext++;
+        std::function<void()> callback = it->second->update(now);
+        // if callback is not null, timer expired
+        if (callback) {
+            callbacks[it->first] = callback;
+            timers.erase(it);
+        }
+    }
+    log->info("Finished updating timers");
+    log->trace("{} timers expired of {}", callbacks.size(), timers.size());
+    return callbacks;
 }
 
 void GameState::updateState() {

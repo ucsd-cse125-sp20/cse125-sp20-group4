@@ -20,7 +20,7 @@ public:
     void setVelocityFromCmd();
 
     //(de)serialize functions
-    virtual std::string serialize() override;
+    virtual std::string serialize() const override;
 
     static Enemy& deserialize(std::string serial);
 };

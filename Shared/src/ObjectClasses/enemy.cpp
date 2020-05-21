@@ -22,7 +22,7 @@ void Enemy::setVelocityFromCmd() {
     setVelocityY(baseSpeed * dispY / dispTotal);
 }
 
-std::string Enemy::serialize() {
+std::string Enemy::serialize() const {
     auto log = getLogger("Enemy");
     std::string res = "Enemy:" + MovingObject::serialize();
     log->trace("Serialized Enemy as {}", res);

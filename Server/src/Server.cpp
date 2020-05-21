@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "gamestate.h"
 #include "statehandler.h"
+#include "wavehandler.h"
 #include "EventClasses/event.h"
 #include "deserializer.h"
 #include "logger.h"
@@ -45,6 +46,8 @@ DWORD WINAPI handleGame(void* data) {
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     gameState.initialize();
+    WaveHandler waveHandler = WaveHandler(gameState); // TODO move this into gamestate
+    waveHandler.init();
     GameStateHandler gameStateHandler;
     ConnectionsHandler* connHandler = (ConnectionsHandler*)data;
     bool exit = false;
