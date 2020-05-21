@@ -14,7 +14,6 @@ public:
 	int send(char*, size_t); //todo send shared data type, include serialization
 	int recv(char*, size_t); //todo recv shared data type, include deserialization
 	void pushEvent(const std::shared_ptr<Event>&); // todo push shared data type
-	void pushEvent(std::shared_ptr<Event>&&); // todo push shared data type
 	bool tryPopEvent(std::shared_ptr<Event>&); // todo push shared data type
 
 };

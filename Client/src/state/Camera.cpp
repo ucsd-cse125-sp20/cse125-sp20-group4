@@ -17,17 +17,23 @@ float Camera::fov = RADIANS( 45.0f );
 float Camera::aspect = 0.0f;
 
 glm::mat4x4 Camera::P( 0.0f );
-std::unordered_map<std::string, std::pair<Camera *, bool>> Camera::cameras;
+std::unordered_map<std::string, Camera *> Camera::cameras;
 
 /* Constructor */
 
-Camera::Camera( const glm::vec3 & pos, const glm::vec3 & dir ) : pos( pos ), dir( dir ), V( 0.0f ), toView( 0.0f ) {
+Camera::Camera( const std::string & name, const glm::vec3 & pos, const glm::vec3 & dir ) : name( name ), pos( pos ), dir( dir ), V( 0.0f ), toView( 0.0f ) {
 
     updateV();
 
 }
 
 /* Getters */
+
+bool Camera::isFreeCamera() const {
+
+    return true;
+
+}
 
 const glm::vec3 & Camera::getPos() const {
 
@@ -106,7 +112,7 @@ Camera * Camera::getCamera( const std::string & name ) {
     if ( it == cameras.end() ) {
         throw std::invalid_argument( "Camera not found." );
     }
-    return it->second.first;
+    return it->second;
 
 }
 
@@ -118,8 +124,8 @@ Camera * Camera::addCamera( const std::string & name, const glm::vec3 & pos, con
         throw std::invalid_argument( "A camera with that name already exists." );
     }
 
-    Camera * cam = new Camera( pos, dir );
-    cameras[name] = std::make_pair( cam, false );
+    Camera * cam = new Camera( name, pos, dir );
+    cameras[name] = cam;
     return cam;
 
 }
@@ -133,11 +139,11 @@ void Camera::removeCamera( const std::string & name ) {
         throw std::invalid_argument( "Camera not found." );
     }
 
-    if ( it->second.second ) {
+    Camera * cam = it->second;
+    if ( !cam->isFreeCamera() ) {
         throw std::invalid_argument( "Cannot manually delete a managed camera." );
     }
 
-    Camera * cam = it->second.first;
     cameras.erase( name );
     delete( cam );
 
@@ -166,7 +172,7 @@ void Camera::updateAll() {
 
     for ( auto it = cameras.begin(); it != cameras.end(); it++ ) {
 
-        it->second.first->update();
+        it->second->update();
 
     }
 

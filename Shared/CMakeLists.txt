@@ -24,7 +24,7 @@ find_package(glm CONFIG REQUIRED)
 
 # Link dependencies
 target_link_libraries(Shared PUBLIC spdlog::spdlog_header_only)
-target_link_libraries(Shared PRIVATE glm)
+target_link_libraries(Shared PUBLIC glm)
 
 
 # Configure compiler

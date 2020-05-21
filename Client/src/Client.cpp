@@ -24,7 +24,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
-#define LOGLEVEL spdlog::level::debug
+#define LOGLEVEL spdlog::level::trace //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
 
@@ -182,23 +182,31 @@ int main_inner( void ) {
     Window::initialize(server);
     std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> updates = std::make_shared<std::unordered_map<std::string, std::shared_ptr<Object>>>();
     // Loop while GLFW window should stay open
+    std::string leftover = "";
     while ( !glfwWindowShouldClose( window ) ) {
         Deserializer deserializer;
-        int bytes = 0;
-        bytes = server->recv(inbuf, DEFAULT_BUFLEN);
-        if (bytes != SOCKET_ERROR) {
-            std::string in_str(inbuf, bytes);
-            memset(inbuf, 0, sizeof(inbuf));
-            spdlog::info("Received message from server: {0}", in_str); //only for testing, can be removed
+       
+        int bytes = server->recv( inbuf, DEFAULT_BUFLEN );
+        if ( bytes == SOCKET_ERROR ) {
+            spdlog::info( "Socket error: {}", WSAGetLastError() );
+        } else {
+            std::string in_str( inbuf, bytes );
+            memset( inbuf, 0, sizeof( inbuf ) );
+            spdlog::trace( "Received message from server: {0}", in_str ); //only for testing, can be removed
+
             // todo push game state onto event queue
-            deserializer.deserializeUpdates(in_str, updates);
-            //@Thiago this pointer to unordered map gives you ID to object mappings, and objects give you position/direction TODO
-            spdlog::info("Number of updates: {}", updates->size());
-            Window::world->handleUpdates(updates);
-            updates->clear();
+            std::string message = leftover + in_str;
+            spdlog::trace( "Full message: {0}", message ); //only for testing, can be removed
+            leftover = deserializer.deserializeUpdates( message, updates );
+            spdlog::trace( "Message leftover: {}", leftover );
+            if ( !updates->empty() ) {
+                //@Thiago this pointer to unordered map gives you ID to object mappings, and objects give you position/direction TODO
+                spdlog::debug( "Number of updates: {}", updates->size() );
+                Window::world->handleUpdates( updates );
+                updates->clear();
+            }
         }
 
-        if (bytes)
         // Main render display callback. Rendering of objects is done here.
         Window::display_callback( window );
         // Idle callback. Updating objects, etc. can be done here.

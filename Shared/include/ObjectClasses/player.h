@@ -11,9 +11,10 @@ public:
     Player(std::string id);
     Player(std::string id, float x, float y, float z);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);
-    Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ);
+    Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length);
+    Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ);
     //(de)serialize functions
-    virtual std::string serialize() override;
+    virtual std::string serialize() const override;
 
     static Player& deserialize(std::string serial);
 };

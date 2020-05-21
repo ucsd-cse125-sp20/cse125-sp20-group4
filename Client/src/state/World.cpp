@@ -33,37 +33,37 @@ void World::draw( const glm::mat4x4 & toView ) const {
 
 }
 
-Entity * World::getEntity( const std::string & key ) const {
+Entity * World::getEntity( const std::string & name ) const {
 
-    auto found = entities.find( key );
+    auto found = entities.find( name );
     return found == entities.end() ? nullptr : found->second;
 
 }
 
-void World::addEntity( const std::string & key, Entity * const entity ) {
+void World::addEntity( Entity * const entity ) {
 
     if ( entity == nullptr ) {
         throw std::invalid_argument( "Entity cannot be a null pointer." );
     }
-    if ( entities.count( key ) > 0 ) {
-        throw std::invalid_argument( "An entitiy with the given key already exists." );
+    if ( entities.count( entity->name ) > 0 ) {
+        throw std::invalid_argument( "An entitiy with that name already exists." );
     }
 
-    LOGGER->debug( "Adding entity '{}' to world.", key );
-    entities[key] = entity;
+    LOGGER->debug( "Adding entity '{}' to world.", entity->name );
+    entities[entity->name] = entity;
 
 }
 
-Entity * World::removeEntity( const std::string & key ) {
+Entity * World::removeEntity( const std::string & name ) {
 
-    auto found = entities.find( key );
+    auto found = entities.find( name );
     if ( found == entities.end() ) {
         return nullptr;
     }
 
-    LOGGER->debug( "Removing entity '{}' to world.", key );
+    LOGGER->debug( "Removing entity '{}' to world.", name );
     Entity * e = found->second;
-    entities.erase( key );
+    entities.erase( name );
     return e;
 
 }
@@ -71,7 +71,9 @@ Entity * World::removeEntity( const std::string & key ) {
 void World::handleUpdates(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map) {
     std::unordered_map<std::string, std::shared_ptr<Object>>::iterator it;
     for (it = map->begin(); it != map->end(); it++) {
-        auto entity = this->getEntity(it->second->getId());
+        //auto entity = this->getEntity(it->second->getId());
+        auto entity = this->getEntity(it->first);
+
         if (entity != nullptr) {
             LOGGER->debug("Updating entity '{}'.", it->second->getId());
             entity->setDirection(it->second->getOrientation());

@@ -1,13 +1,15 @@
 #include "deserializer.h"
 #include "gamestate.h"
+#include "logger.h"
 #include "ObjectClasses/object.h"
 #include "EventClasses/event.h"
 #include "ObjectClasses/Factories/playerfactory.h"
 #include "EventClasses/Factories/eventmovementfactories.h"
 #include "EventClasses/Factories/eventstopfactories.h"
-#include "EventClasses/Factories/mouseeventfactory.h"
+#include "EventClasses/Factories/RotateEventFactory.h"
 
 #include <cstddef>
+
 
 Deserializer::Deserializer() {
     this->gameMapping.insert(std::make_pair("Player", std::unique_ptr<PlayerFactory>(new PlayerFactory())));
@@ -19,16 +21,20 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair("StopRight", std::unique_ptr<StopRightEventFactory>(new StopRightEventFactory())));
     this->eventMapping.insert(std::make_pair("StopForward", std::unique_ptr<StopForwardEventFactory>(new StopForwardEventFactory())));
     this->eventMapping.insert(std::make_pair("StopBackward", std::unique_ptr<StopBackwardEventFactory>(new StopBackwardEventFactory())));
-    this->eventMapping.insert(std::make_pair("MouseEvent", std::unique_ptr<MouseEventFactory>(new MouseEventFactory())));
+    this->eventMapping.insert( std::make_pair( "RotateEvent", std::unique_ptr<RotateEventFactory>( new RotateEventFactory() ) ) );
 }
 
-void Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
+std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
     // get the tag
+    auto log = getLogger("Deserialize");
     size_t pos = serial.find(":");
     size_t end = serial.find("|");
+    if ( end == std::string::npos ) {
+        return serial; // Not a full message
+    }
     size_t last = pos + 1;
     std::string tag = serial.substr(0, pos);
-    
+    log->trace("Deserializing Updates");
     if (tag.compare("GameState") != 0) {
         //error
         throw "Deserializer: Non gamestate serialization passed in";
@@ -44,6 +50,7 @@ void Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::u
         std::pair < std::string, std::shared_ptr<Object>> pair(std::string(obj->getId()), obj);
         res->insert(pair);
     }
+    return serial.substr( end + 1 ); // Tail end of the message may be part of the next message
 }
 std::shared_ptr<Event> Deserializer::deserializeEvent(std::string serial) {
     std::string tag = serial.substr(0, serial.find(":"));
@@ -51,7 +58,9 @@ std::shared_ptr<Event> Deserializer::deserializeEvent(std::string serial) {
     return this->eventMapping.find(tag)->second->create(input);
 }
 std::shared_ptr <Object> Deserializer::deserializeObject(std::string serial) {
+    auto log = getLogger("Deserialize");
     //get the object tag
     std::string tag = serial.substr(0, serial.find(":"));
+    log->trace("Deserializing {}", tag);
     return this->gameMapping.find(tag)->second->create(serial);
 }

@@ -1,10 +1,10 @@
 #pragma once
 #include "movingevent.h"
 
-class MoveForwardEvent : public MovingEvent
-{
-public:
-	MoveForwardEvent(std::string objectId);
-	std::string serialize();
+class MoveForwardEvent : public MovingEvent {
+
+    public:
+    MoveForwardEvent( const std::string & objectId );
+    std::string serialize() const;
 
 };

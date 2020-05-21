@@ -44,11 +44,18 @@ void GameState::updateState() {
     float y;
     float z;
     while (it != this->gameObjects.end()) {
+        // check for collisions
+        
+        if (std::dynamic_pointer_cast<MovingObject>(it->second) != NULL) {
+            checkCollisions(it->first, std::dynamic_pointer_cast<MovingObject>(it->second));
+        }
+
         // calculate next position
         x = it->second->getNextPositionX();
         y = it->second->getNextPositionY();
         z = it->second->getNextPositionZ();
-        // TODO check for collisions
+        
+
         glm::vec3 cpos = it->second->getPosition();
         if (x != cpos.x || y != cpos.y || z != cpos.z) {
             it->second->dirty = true;
@@ -61,6 +68,7 @@ void GameState::updateState() {
         
         it++;
     }
+    log->info("Finished updating state");
 }
 
 void GameState::applyEvent(std::shared_ptr<Event> event) {
@@ -91,9 +99,12 @@ void GameState::initialize(std::string file) {
     if (file.compare("") == 0) {
         // default
         // create a player
-        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube1",0,0,0,0.0f,0.0f,1.0f,0.0f,0.0f,0.0f));
+        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 2.0f, 2.0f, 2.0f, 0.0f,0.0f,0.0f));
         std::cout << "INITIALIZING DEFAULT" << std::endl;
         this->createObject(obj);
+        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Player("cube5", 3.0f, 0.0f, 3.0f, 0.0f, 0.0f, 1.0f, 2.0f, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f));
+        std::cout << "INITIALIZING CUBE2" << std::endl;
+        this->createObject(obj2);
         std::cout << this->serialize() << std::endl;
     } else {
         // TODO parse file
@@ -130,4 +141,23 @@ bool GameState::isDirty() {
 
 void GameState::setDirty(bool dty) {
     this->dirty = dty;
+}
+
+void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> object) {
+    auto log = getLogger("GameState");
+    auto it = this->gameObjects.begin();
+    while (it != this->gameObjects.end()) {
+        if (id != it->first) {
+            std::shared_ptr<Object> currObj = it->second; //TODO make sure this resolves to MovingObject if currObj actually moves
+            if (object->collidesNext(*currObj)) {
+                object->handleXCollision(*currObj);
+                object->handleYCollision(*currObj);
+                object->handleZCollision(*currObj);
+            }
+
+        }
+        it++;
+        
+    }
+    log->trace("Finished checking collisions");
 }
