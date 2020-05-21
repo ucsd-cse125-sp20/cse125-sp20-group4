@@ -5,11 +5,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 class StoppingEvent : public Event {
-private:
-    glm::mat3 direction;
 
-public:
-    StoppingEvent(std::string id, glm::mat3 direction);
-    glm::mat3 getDirection();
-    virtual void apply(std::shared_ptr<Object> object);
+    private:
+    const glm::vec3 direction;
+
+    public:
+    StoppingEvent( const std::string & id, const glm::vec3 & direction );
+    const glm::vec3 & getDirection() const;
+    virtual void apply( std::shared_ptr<Object> object ) const;
+
 };

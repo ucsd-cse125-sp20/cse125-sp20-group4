@@ -1,3 +1,5 @@
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "ObjectClasses/movingobject.h"
 #include "logger.h"
 
@@ -16,48 +18,70 @@ MovingObject::MovingObject(std::string id, float x, float y, float z, float orie
 }
 
 void MovingObject::setVelocityX(float velX) {
-    auto log = getLogger("MovingObject");
-    this->velocity.x = velX;
-    log->trace("Setting velocityX of MovingObject with id {}, with value {}", this->getId(), velX);
+    setVelocity( velX, getVelocity().y, getVelocity().z );
 }
 
 void MovingObject::setVelocityY(float velY) {
-    auto log = getLogger("MovingObject");
-    this->velocity.y = velY;
-    log->trace("Setting velocityY of MovingObject with id {}, with value {}", this->getId(), velY);
+    setVelocity( getVelocity().x, velY, getVelocity().z );
 }
 
 void MovingObject::setVelocityZ(float velZ) {
-    auto log = getLogger("MovingObject");
-    this->velocity.z = velZ;
-    log->trace("Setting velocityZ of MovingObject with id {}, with value {}", this->getId(), velZ);
+    setVelocity( getVelocity().x, getVelocity().y, velZ );
 }
 
 void MovingObject::setVelocity(float velX, float velY, float velZ) {
-    setVelocityX(velX);
-    setVelocityY(velY);
-    setVelocityZ(velZ);
+    setVelocity( glm::vec3( velX, velY, velZ ) );
 }
 void MovingObject::setVelocity(glm::vec3 vel) {
-    setVelocityX(vel.x);
-    setVelocityY(vel.y);
-    setVelocityZ(vel.z);
+    getLogger( "MovingObject" )->trace( "Setting velocity of {} to ({},{},{})", this->getId(), vel.x, vel.y, vel.z );
+    this->velocity = vel;
+    this->relativeVelocity = fromWorld * glm::vec4( vel, 1.0f );
 }
 
 float MovingObject::getVelocityX() const {
-    return this->velocity.x;
+    return this->getVelocity().x;
 }
 
 float MovingObject::getVelocityY() const {
-    return this->velocity.y;
+    return this->getVelocity().y;
 }
 
 float MovingObject::getVelocityZ() const {
-    return this->velocity.z;
+    return this->getVelocity().z;
 }
 
-glm::vec3 MovingObject::getVelocity() const {
+const glm::vec3 & MovingObject::getVelocity() const {
     return this->velocity;
+}
+
+void MovingObject::setOrientation( const glm::vec3 & newOrientation ) {
+
+    Object::setOrientation( newOrientation );
+
+    static const glm::vec3 FOWARD( 0.0f, 0.0f, 1.0f ); // Foward direction
+    static const glm::mat4x4 I( 1.0f );
+
+    const glm::vec3 horizontalOrientation = glm::normalize( glm::vec3( newOrientation.x, 0.0f, newOrientation.z ) );
+    const float angle = glm::acos( glm::dot( FOWARD, horizontalOrientation ) );
+    const glm::vec3 axis = glm::normalize( glm::cross( FOWARD, horizontalOrientation ) );
+
+    toWorld = glm::rotate( I, angle, axis );
+    fromWorld = glm::inverse( toWorld );
+
+}
+
+void MovingObject::setRelativeVelocity( const glm::vec3 & newVelocity ) {
+
+    getLogger( "MovingObject" )->trace( "Setting relative velocity of {} to ({},{},{})", this->getId(), newVelocity.x, newVelocity.y, newVelocity.z );
+    relativeVelocity = newVelocity;
+    velocity = toWorld * glm::vec4( newVelocity, 1.0f );
+
+}
+
+const glm::vec3 & MovingObject::getRelativeVelocity() const {
+
+    return relativeVelocity;
+
 }
 
 
@@ -94,15 +118,15 @@ bool MovingObject::contains(const glm::vec3 pt) const {
     return this->containsNext(pt);
 }
 
-bool MovingObject::collides(const Object obj) const {
+bool MovingObject::collides(const Object & obj) const {
     return collidesNext(obj);
 }
 
-bool MovingObject::collides(const MovingObject obj) const {
+bool MovingObject::collides(const MovingObject & obj) const {
     return collidesNext(obj);
 }
 
-bool MovingObject::collidesNext(const Object obj) const {
+bool MovingObject::collidesNext(const Object & obj) const {
     auto log = getLogger("MovingObject");
 
     if ((obj.getPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2)) && (obj.getPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2))) {
@@ -119,7 +143,7 @@ bool MovingObject::collidesNext(const Object obj) const {
 
 }
 
-bool MovingObject::collidesNext(const MovingObject obj) const {
+bool MovingObject::collidesNext(const MovingObject & obj) const {
     auto log = getLogger("MovingObject");
     if (obj.getNextPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2) && obj.getNextPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2)) {
         if (obj.getNextPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getNextPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
@@ -135,7 +159,7 @@ bool MovingObject::collidesNext(const MovingObject obj) const {
 
 }
 
-void MovingObject::handleXCollision(const Object obj) {
+void MovingObject::handleXCollision(const Object & obj) {
     auto log = getLogger("MovingObject");
 
     if (obj.getPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2) && obj.getPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2)) {
@@ -146,7 +170,7 @@ void MovingObject::handleXCollision(const Object obj) {
 
 }
 
-void MovingObject::handleXCollision(const MovingObject obj) {
+void MovingObject::handleXCollision(const MovingObject & obj) {
     auto log = getLogger("MovingObject");
 
     if (obj.getNextPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2) && obj.getNextPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2)) {
@@ -157,7 +181,7 @@ void MovingObject::handleXCollision(const MovingObject obj) {
 
 }
 
-void MovingObject::handleYCollision(const Object obj) {
+void MovingObject::handleYCollision(const Object & obj) {
     auto log = getLogger("MovingObject");
     if (obj.getPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
         this->setVelocityY(0);
@@ -166,7 +190,7 @@ void MovingObject::handleYCollision(const Object obj) {
     }
 }
 
-void MovingObject::handleYCollision(const MovingObject obj) {
+void MovingObject::handleYCollision(const MovingObject & obj) {
     auto log = getLogger("MovingObject");
 
     if (obj.getNextPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getNextPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
@@ -177,7 +201,7 @@ void MovingObject::handleYCollision(const MovingObject obj) {
 
 }
 
-void MovingObject::handleZCollision(const Object obj) {
+void MovingObject::handleZCollision(const Object & obj) {
     auto log = getLogger("MovingObject");
 
     if (obj.getPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
@@ -188,7 +212,7 @@ void MovingObject::handleZCollision(const Object obj) {
 
 }
 
-void MovingObject::handleZCollision(const MovingObject obj) {
+void MovingObject::handleZCollision(const MovingObject & obj) {
     auto log = getLogger("MovingObject");
 
     if (obj.getNextPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getNextPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
