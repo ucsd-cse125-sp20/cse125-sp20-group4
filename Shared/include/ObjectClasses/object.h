@@ -11,6 +11,7 @@ private:
     float length;
     float width;
     float height;
+    bool collide;
     // mesh
 public:
     bool dirty;
@@ -19,7 +20,7 @@ public:
     Object(std::string id);
     Object(std::string id, float x, float y, float z);
     Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ);
-    Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ, float width, float height, float length);
+    Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ, float width, float height, float length, bool isCollidable = false);
 
     //setters
     void setId(std::string inputId);
@@ -35,6 +36,7 @@ public:
     void setHeight(float newHeight);
     void setLength(float newLength);
     void setOrientation(glm::vec3 orientation);
+    void setCanCollide(bool newValue);
 
     //getters
     std::string getId() const;
@@ -52,6 +54,7 @@ public:
     float getLength() const;
     float getWidth() const;
     float getHeight() const;
+    bool canCollide() const;
 
     //utility
     virtual bool contains(const glm::vec3 pt) const;

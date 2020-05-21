@@ -302,7 +302,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
         }
     }*/
     std::cout << mods << focusWindow << std::endl;
-    std::shared_ptr<Event> event = eventHandler->createEvent(key, action, "cube4");
+    std::shared_ptr<Event> event = eventHandler->createKeyEvent(key, action, "cube4");
     if (event != nullptr) {
         std::cout << event->serialize() << std::endl;
         std::string serialized = event->serialize();
