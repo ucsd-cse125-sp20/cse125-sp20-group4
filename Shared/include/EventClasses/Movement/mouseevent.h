@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "event.h"
+#include "EventClasses/event.h"
 class MouseEvent : public Event
 {
 public:

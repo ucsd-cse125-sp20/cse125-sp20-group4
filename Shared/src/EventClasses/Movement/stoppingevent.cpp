@@ -1,4 +1,4 @@
-#include "EventClasses/stoppingevent.h"
+#include "EventClasses/Movement/stoppingevent.h"
 #include "glm/gtc/epsilon.hpp"
 #define BASE_MOVEMENT 5
 
