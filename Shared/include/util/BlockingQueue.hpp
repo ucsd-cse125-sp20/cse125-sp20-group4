@@ -51,7 +51,7 @@ class BlockingQueue {
      * @param timeout The maximum amount of time to block while waiting for an element
      *                to become available, in milliseconds. If 0, waits indefinitely.
      * @return True if an element was successfully popped, false if a timeout occurred
-               before an element became available.
+     *         before an element became available.
      */
     bool pop( T & dest, const unsigned long timeout = 0 ) {
 
@@ -74,6 +74,26 @@ class BlockingQueue {
         dest = queue.front();
         queue.pop_front();
         return true;
+
+    }
+
+    /**
+     * Pops the next element from the queue, if one is available.
+     *
+     * @param dest Where to place the popped element.
+     * @return True if an element was successfully popped, false if there are no
+     *         elements available.
+     */
+    bool tryPop( T & dest ) {
+
+        std::unique_lock<std::mutex> lck( mtx );
+        if ( hasElement() ) {
+            dest = queue.front();
+            queue.pop_front();
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
