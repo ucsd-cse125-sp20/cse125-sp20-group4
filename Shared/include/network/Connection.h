@@ -28,7 +28,7 @@ class Connection {
      * @param message The message to send.
      * @throws std::runtime_error if an error occured while sending.
      */
-    void send( const std::string & message );
+    void send( const std::string & message ) const;
     /**
      * Receives a message from the socket.
      * The call will block until a full message is read from the socket.

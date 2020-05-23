@@ -11,9 +11,9 @@
  * A thread-safe queue that blocks on pop() until an element is available.
  *
  * @tparam T Type of object stored in the queue.
- * @tparam T Allocator for new objects.
+ * @tparam Alloc Allocator for new objects.
  */
-template <class T, class Alloc = allocator<T>> 
+template <class T, class Alloc = std::allocator<T>> 
 class BlockingQueue {
 
     public:
@@ -22,7 +22,7 @@ class BlockingQueue {
      */
     BlockingQueue() {}
 
-    using std::deque::size_type;
+    using size_type = typename std::deque<T, Alloc>::size_type;
 
     /**
      * Pushes a new element into the queue.
@@ -31,7 +31,7 @@ class BlockingQueue {
      */
     void push( const T & e ) {
 
-        std::unique_lock<std::mutex> lck( mtx );
+        std::unique_lock<std::timed_mutex> lck( mtx );
         queue.push_back( e );
         cv.notify_one();
 
@@ -56,16 +56,16 @@ class BlockingQueue {
     bool pop( T & dest, const unsigned long timeout = 0 ) {
 
         const std::chrono::time_point maxTime = std::chrono::steady_clock::now() + std::chrono::milliseconds( timeout );
-        std::unique_lock<std::mutex> lck( mtx, maxTime );
+        std::unique_lock<std::timed_mutex> lck( mtx, maxTime );
         if ( !lck ) {
             return false; // Timed out before obtaining lock
         }
 
         // Wait until there is an element to return
         if ( timeout == 0L ) {
-            cv.wait( lck, this->hasElement );
+            cv.wait( lck, [this]() -> bool { return this->hasElement(); } );
         } else {
-            if ( !cv.wait_until( lck, maxTime, this->hasElement ) ) {
+            if ( !cv.wait_until( lck, maxTime, [this]() -> bool { return this->hasElement(); } ) ) {
                 return false; // Timed out
             }
         }
@@ -86,7 +86,7 @@ class BlockingQueue {
      */
     bool tryPop( T & dest ) {
 
-        std::unique_lock<std::mutex> lck( mtx );
+        std::unique_lock<std::timed_mutex> lck( mtx );
         if ( hasElement() ) {
             dest = queue.front();
             queue.pop_front();
@@ -106,7 +106,7 @@ class BlockingQueue {
      */
     void popAll( std::deque<T> & dest ) {
 
-        std::unique_lock<std::mutex> lck( mtx );
+        std::unique_lock<std::timed_mutex> lck( mtx );
         while ( hasElement() ) {
             dest.push_back( queue.front() );
             queue.pop_front();
@@ -125,16 +125,16 @@ class BlockingQueue {
      */
     size_type size() const {
 
-        std::unique_lock<std::mutex> lck( mtx );
+        std::unique_lock<std::timed_mutex> lck( mtx );
         return queue.size();
 
     }
 
     protected:
     /* Mutex that synchronizes the queue */
-    std::mutex mtx;
+    std::timed_mutex mtx;
     /* Condition Variable popping threads wait on */
-    std::condition_variable cv;
+    std::condition_variable_any cv;
     /* Internal storage queue */
     std::deque<T, Alloc> queue;
 

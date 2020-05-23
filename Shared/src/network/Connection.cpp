@@ -34,7 +34,7 @@ Connection::~Connection() {
 
 /* Public interface */
 
-void Connection::send( const std::string & message ) {
+void Connection::send( const std::string & message ) const {
 
     std::string buf;
     insertMessage( message, buf );

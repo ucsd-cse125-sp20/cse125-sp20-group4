@@ -51,7 +51,7 @@ class ThreadWorker {
      * @param allowEmptyAct If false, does not allow an emtpy act to be given.
      * @throws std::invalid_argument if allowEmptyAct is false and act is empty.
      */
-    ThreadWorker( const std::function<bool()> act = nullptr, bool allowEmptyAct = true );
+    ThreadWorker( const std::function<bool()> act, bool allowEmptyAct );
 
     /**
      * Executes one work action.
