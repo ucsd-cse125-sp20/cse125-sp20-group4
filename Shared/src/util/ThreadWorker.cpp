@@ -5,9 +5,9 @@
 
 const auto LOGGER = getLogger( "ThreadWorker" );
 
-ThreadWorker::ThreadWorker( const std::function<void()> act ) : ThreadWorker( act, false ) {}
+ThreadWorker::ThreadWorker( const std::function<bool()> act ) : ThreadWorker( act, false ) {}
 
-ThreadWorker::ThreadWorker( const std::function<void()> act, bool allowEmptyAct ) : ready( false ), running( true ), act( act ), worker( [this]() -> void { this->run(); } ) {
+ThreadWorker::ThreadWorker( const std::function<bool()> act, bool allowEmptyAct ) : ready( false ), running( true ), act( act ), worker( [this]() -> void { this->run(); } ) {
 
     if ( !allowEmptyAct && act == nullptr ) {
         throw std::invalid_argument( "Action function cannot be empty." );
@@ -23,11 +23,7 @@ void ThreadWorker::run() {
     LOGGER->info( "Worker starting." );
 
     try {
-        while ( running ) { // Repeat until stop signal
-
-            action(); // Execute work action
-
-        }
+        while ( running && action() ); // Repeat until stop signal
     } catch ( std::exception & e ) {
         LOGGER->error( "Unhandled exception in worker: {}", e.what() );
     }
@@ -36,9 +32,9 @@ void ThreadWorker::run() {
 
 }
 
-void ThreadWorker::action() {
+bool ThreadWorker::action() {
 
-    act(); // Run registered function
+    return act(); // Run registered function
 
 }
 

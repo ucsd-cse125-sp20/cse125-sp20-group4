@@ -21,7 +21,7 @@ class ThreadWorker {
      * @param act The action to execute.
      * @throws std::invalid_argument if act is empty.
      */
-    ThreadWorker( const std::function<void()> act );
+    ThreadWorker( const std::function<bool()> act );
 
     /**
      * Starts execution.
@@ -51,17 +51,19 @@ class ThreadWorker {
      * @param allowEmptyAct If false, does not allow an emtpy act to be given.
      * @throws std::invalid_argument if allowEmptyAct is false and act is empty.
      */
-    ThreadWorker( const std::function<void()> act = nullptr, bool allowEmptyAct = true );
+    ThreadWorker( const std::function<bool()> act = nullptr, bool allowEmptyAct = true );
 
     /**
      * Executes one work action.
      *
      * By default, calls the action defined by act.
+     *
+     * @return If false, signals that the worker should stop.
      */
-    virtual void action();
+    virtual bool action();
 
     /* (by default) the action to execute at each iteration. */
-    const std::function<void()> act;
+    const std::function<bool()> act;
 
     private:
     std::thread worker;
