@@ -98,6 +98,23 @@ class BlockingQueue {
     }
 
     /**
+     * Pops all elements currently in the queue.
+     *
+     * @param dest The queue to place the popped events into.
+     *             Elements are placed so that the oldest element is at
+     *             the front of the queue.
+     */
+    void popAll( std::deque<T> & dest ) {
+
+        std::unique_lock<std::mutex> lck( mtx );
+        while ( hasElement() ) {
+            dest.push_back( queue.front() );
+            queue.pop_front();
+        }
+
+    }
+
+    /**
      * Retrieves the current amount of elements in the queue. 
      * 
      * Note that, while this is thread-safe, it only represents the size of the queue 
