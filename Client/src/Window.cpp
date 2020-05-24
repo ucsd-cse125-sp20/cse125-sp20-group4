@@ -80,11 +80,11 @@ void Window::initialize( Server * ser ) {
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world->addEntity( new CameraEntity( playerName, 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+    world->addEntity( new CameraEntity( playerName, 0.0f, new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
     //world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
     //world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
     //world->addEntity( new Entity( "cube4", new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f, 0.0f, 3.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
-    world->addEntity( new Entity( "cube5", new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+    world->addEntity( new Entity( "cube5", new RectangularCuboid(glm::vec3(0.0f, 1.0f, 1.0f), 1.0f), glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
     cam = Camera::getCamera( playerName );
 
     // Debugging entities
@@ -258,6 +258,12 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 }
                 break;
 
+            case GLFW_KEY_SPACE: // Start moving forward.
+                if (cam->name == Window::playerName) {
+                    server->pushEvent(std::make_shared<PlaceBarricadeEvent>(playerName));
+                }
+                break;
+
             case GLFW_KEY_Q: // Start moving down.
                 if ( cam->isFreeCamera() ) {
                     movement.y -= CAMERA_MOVEMENT_SPEED;
@@ -312,7 +318,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                    server->pushEvent( std::make_shared<StopForwardEvent>( playerName ) );
                 }
                 break;
 
@@ -320,7 +326,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                    server->pushEvent( std::make_shared<StopBackwardEvent>( playerName ) );
                 }
                 break;
 
@@ -328,7 +334,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                    server->pushEvent( std::make_shared<StopLeftEvent>( playerName ) );
                 }
                 break;
 
@@ -336,7 +342,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                    server->pushEvent( std::make_shared<StopRightEvent>( playerName ) );
                 }
                 break;
 

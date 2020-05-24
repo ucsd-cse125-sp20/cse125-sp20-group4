@@ -214,8 +214,10 @@ int main_inner( void ) {
     }
 
     Window::clean_up();
+
     // Destroy the window
     glfwDestroyWindow( window );
+
     // Terminate GLFW
     glfwTerminate();
 

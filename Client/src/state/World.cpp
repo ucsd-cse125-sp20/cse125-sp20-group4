@@ -2,6 +2,7 @@
 
 #include "logger.h"
 #include "state/World.h"
+#include "Drawing/model/RectangularCuboid.h"
 
 static const auto LOGGER = getLogger( "World" );
 
@@ -76,10 +77,11 @@ void World::handleUpdates(std::shared_ptr<std::unordered_map<std::string, std::s
 
         if (entity != nullptr) {
             LOGGER->debug("Updating entity '{}'.", it->second->getId());
-            entity->setDirection(it->second->getOrientation());
+            //entity->setDirection(it->second->getOrientation());
             entity->setPosition(it->second->getPosition());
         } else {
-            LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
+            LOGGER->debug("Creating entity '{}'.", it->second->getId());
+            addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getOrientation(), it->second->getPosition()));
         }
     }
 }

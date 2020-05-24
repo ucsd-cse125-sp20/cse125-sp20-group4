@@ -1,4 +1,4 @@
-#include "EventClasses/Movement/stopforwardevent.h"
+#include "EventClasses/Object/Movement/stopforwardevent.h"
 
 StopForwardEvent::StopForwardEvent( const std::string & objectId ) : StoppingEvent( objectId, glm::vec3( 0.0f, 0.0f, 1.0f ) ) {}
 

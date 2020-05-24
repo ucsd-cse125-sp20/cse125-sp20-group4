@@ -3,9 +3,9 @@
 
 #include <glm/vec3.hpp>
 
-#include "event.h"
+#include "EventClasses/Object/objectevent.h"
 
-class RotateEvent : public Event {
+class RotateEvent : public ObjectEvent {
 
     public:
     RotateEvent( const std::string & id, const glm::vec3 & newDirection );

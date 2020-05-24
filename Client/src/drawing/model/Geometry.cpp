@@ -117,6 +117,8 @@ void Geometry::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) c
     // Buffer drawing order.
     glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof( unsigned int ), indices.data(), GL_STREAM_DRAW );
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
     // Tell OpenGL to draw with triangles, using the recorded amount of indices and no offset.
     glDrawElements( drawMode, ( GLsizei ) indices.size(), GL_UNSIGNED_INT, 0 );
 

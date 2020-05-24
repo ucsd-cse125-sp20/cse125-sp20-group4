@@ -8,6 +8,10 @@ private:
     glm::vec3 velocity;
     glm::vec3 relativeVelocity;
     glm::mat4x4 toWorld, fromWorld;
+    bool isCollidedX = false;
+    bool isCollidedY = false;
+    bool isCollidedZ = false;
+
 public:
     MovingObject(std::string id);
     MovingObject(std::string id, float x, float y, float z);
@@ -28,6 +32,11 @@ public:
     float getNextPositionY() const;
     float getNextPositionZ() const;
     glm::vec3 getNextPosition() const;
+
+    float getNextPositionCollisionX();
+    float getNextPositionCollisionY();
+    float getNextPositionCollisionZ();
+    glm::vec3 getNextPositionCollision();
 
     void setOrientation( const glm::vec3 & orientation );
     void setRelativeVelocity( const glm::vec3 & newVelocity );

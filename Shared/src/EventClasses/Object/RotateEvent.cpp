@@ -1,6 +1,6 @@
-#include "EventClasses/RotateEvent.h"
+#include "EventClasses/Object/RotateEvent.h"
 
-RotateEvent::RotateEvent( const std::string & id, const glm::vec3 & newDirection ) : Event( id ), newDirection( glm::normalize( newDirection ) ) {}
+RotateEvent::RotateEvent( const std::string & id, const glm::vec3 & newDirection ) : ObjectEvent( id ), newDirection( glm::normalize( newDirection ) ) {}
 
 std::string RotateEvent::serialize() const {
 

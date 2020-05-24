@@ -30,10 +30,10 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::trace
+#define LOGLEVEL spdlog::level::info
 
 #define MAX_CLIENTS 5
-#define SERVER_TICK 500
+#define SERVER_TICK 20
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
@@ -59,11 +59,11 @@ DWORD WINAPI handleGame(void* data) {
         gameStateHandler.getNextState(&gameState, connectionHandler->getEventQueue());
         // TODO: check if we have hit the tick yet
 
-        // TODO: send out new gameState if gamestate has changed
-       // if (gameState.isDirty()) {
+        // send out new gameState if gamestate has changed
+        if (gameState.isDirty()) {
             connectionHandler->sendGameStateToAll(gameState);
             gameState.setDirty(false);
-        //}
+        }
         
         // *************** GAME LOGIC END ***************
         Sleep(SERVER_TICK);

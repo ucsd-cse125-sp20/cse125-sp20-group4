@@ -1,9 +1,9 @@
 
 #include "EventClasses/Factories/eventstopfactories.h"
-#include "EventClasses/Movement/stopleftevent.h"
-#include "EventClasses/Movement/stoprightevent.h"
-#include "EventClasses/Movement/stopforwardevent.h"
-#include "EventClasses/Movement/stopbackwardevent.h"
+#include "EventClasses/Object/Movement/stopleftevent.h"
+#include "EventClasses/Object/Movement/stoprightevent.h"
+#include "EventClasses/Object/Movement/stopforwardevent.h"
+#include "EventClasses/Object/Movement/stopbackwardevent.h"
 
 
 std::shared_ptr<Event> StopLeftEventFactory::create(std::string serial) {

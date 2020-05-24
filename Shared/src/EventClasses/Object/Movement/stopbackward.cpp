@@ -1,4 +1,4 @@
-#include "EventClasses/Movement/stopbackwardevent.h"
+#include "EventClasses/Object/Movement/stopbackwardevent.h"
 
 StopBackwardEvent::StopBackwardEvent( const std::string & objectId ) : StoppingEvent( objectId, glm::vec3( 0.0f, 0.0f, -1.0f ) ) {}
 

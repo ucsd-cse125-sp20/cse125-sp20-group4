@@ -7,6 +7,7 @@
 #include "EventClasses/Factories/eventmovementfactories.h"
 #include "EventClasses/Factories/eventstopfactories.h"
 #include "EventClasses/Factories/RotateEventFactory.h"
+#include "EventClasses/Factories/gamestateeventfactories.h"
 
 #include <cstddef>
 
@@ -22,6 +23,7 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair("StopForward", std::unique_ptr<StopForwardEventFactory>(new StopForwardEventFactory())));
     this->eventMapping.insert(std::make_pair("StopBackward", std::unique_ptr<StopBackwardEventFactory>(new StopBackwardEventFactory())));
     this->eventMapping.insert( std::make_pair( "RotateEvent", std::unique_ptr<RotateEventFactory>( new RotateEventFactory() ) ) );
+    this->eventMapping.insert(std::make_pair("PlaceBarricade", std::unique_ptr<PlaceEventFactory>(new PlaceEventFactory())));
 }
 
 std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {

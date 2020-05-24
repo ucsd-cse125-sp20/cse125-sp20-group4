@@ -1,4 +1,4 @@
-#include "EventClasses/Movement/movebackwardevent.h"
+#include "EventClasses/Object/Movement/movebackwardevent.h"
 
 MoveBackwardEvent::MoveBackwardEvent( const std::string & objectId ) : MovingEvent( objectId, glm::vec3( 0.0f, 0.0f, -1.0f ) ) {}
 

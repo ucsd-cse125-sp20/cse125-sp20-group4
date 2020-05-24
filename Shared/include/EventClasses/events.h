@@ -3,16 +3,16 @@
 
 #include <EventClasses/event.h>
 
-#include <EventClasses/Movement/moveforwardevent.h>
-#include <EventClasses/Movement/movebackwardevent.h>
-#include <EventClasses/Movement/moverightevent.h>
-#include <EventClasses/Movement/moveleftevent.h>
+#include <EventClasses/Object/Movement/moveforwardevent.h>
+#include <EventClasses/Object/Movement/movebackwardevent.h>
+#include <EventClasses/Object/Movement/moverightevent.h>
+#include <EventClasses/Object/Movement/moveleftevent.h>
 
-#include <EventClasses/Movement/stopforwardevent.h>
-#include <EventClasses/Movement/stopbackwardevent.h>
-#include <EventClasses/Movement/stoprightevent.h>
-#include <EventClasses/Movement/stopleftevent.h>
+#include <EventClasses/Object/Movement/stopforwardevent.h>
+#include <EventClasses/Object/Movement/stopbackwardevent.h>
+#include <EventClasses/Object/Movement/stoprightevent.h>
+#include <EventClasses/Object/Movement/stopleftevent.h>
 
-#include <EventClasses/RotateEvent.h>
-
+#include <EventClasses/Object/RotateEvent.h>
+#include <EventClasses/GameState/place.h>
 #endif

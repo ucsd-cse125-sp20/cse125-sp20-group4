@@ -1,9 +1,9 @@
 #pragma once
-#include "EventClasses/event.h"
+#include "EventClasses/Object/objectevent.h"
 #include "ObjectClasses/movingobject.h"
 #include <glm/glm.hpp>
 
-class MovingEvent : public Event {
+class MovingEvent : public ObjectEvent {
 
     private:
     const glm::vec3 direction;

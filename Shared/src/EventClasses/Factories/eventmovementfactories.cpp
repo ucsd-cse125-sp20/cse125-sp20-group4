@@ -1,8 +1,8 @@
 #include "EventClasses/Factories/eventmovementfactories.h"
-#include "EventClasses/Movement/moveleftevent.h"
-#include "EventClasses/Movement/moverightevent.h"
-#include "EventClasses/Movement/moveforwardevent.h"
-#include "EventClasses/Movement/movebackwardevent.h"
+#include "EventClasses/Object/Movement/moveleftevent.h"
+#include "EventClasses/Object/Movement/moverightevent.h"
+#include "EventClasses/Object/Movement/moveforwardevent.h"
+#include "EventClasses/Object/Movement/movebackwardevent.h"
 
 std::shared_ptr<Event> MoveLeftEventFactory::create(std::string serial) {
     size_t pos = serial.find(":");
