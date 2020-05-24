@@ -1,46 +1,76 @@
-#define GAMESTATE_SEND_BUFFER_SIZE 4096
-#include "client.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
-Client::Client(int id, SOCKET sock, HANDLE thread, concurrency::concurrent_queue<std::shared_ptr<Event>>* eventQueue) : id(id), sock(sock), thread(thread), eventQueue(eventQueue) {}
+#include <stdexcept>
 
-Client::~Client() {
-    closesocket(sock);
-    CloseHandle(thread);
+#include <logger.h>
+
+#include "Client.h"
+
+const auto LOGGER = getLogger( "Client" );
+
+/* Constructor and destructor */
+
+Client::Client( SOCKET sock, const Qptr & inQueue, 
+                std::function<std::string( const std::string & )> idAssigner,
+                std::function<void( const std::string & )> closeCallback ) :
+    conn( sock, inQueue,
+          [this, idAssigner]( const Cptr & c, const Qptr & q ) -> void { this->setup( c, q, idAssigner ); },
+          [this]( const Cptr & c, const Qptr & q ) -> void { this->teardown( c, q ); } ), 
+    closeCallback( closeCallback ) {}
+
+/* Protected methods */
+
+void Client::setup( const Cptr & /* conn */, const Qptr & /* inQueue */, 
+                    std::function<std::string( const std::string & )> idAssigner ) {
+
+    // Do nothing
+    std::string requestedName = "cube4"; // Try to use this name if possible
+
+    // Store client ID
+    clientID = idAssigner( requestedName );
+    LOGGER->info( "Established connection with client '{}'.", clientID );
+
 }
 
-HANDLE Client::getHandle() {
-    return thread;
+void Client::teardown( const Cptr & /* conn */, const Qptr & /* inQueue */ ) {
+
+    // Do nothing
+
+    LOGGER->info( "Closed connection with client '{}'.", clientID );
+    
+    closeCallback( clientID );
+
 }
 
-int Client::getId() {
-    return id;
+/* Public methods */
+
+const std::string & Client::getID() const {
+
+    return clientID;
+
 }
 
-int Client::send(char* buf, size_t count) {
-    return ::send(this->sock, buf, (int)count, 0);
+void Client::send( const Eptr & e ) {
+
+    conn.send( e );
+
 }
 
-int Client::recv(char* buf, size_t count) {
-    return ::recv(this->sock, buf, (int)count, 0);
+bool Client::receive( Eptr & dest, const unsigned long timeout ) {
+
+    return conn.receive( dest, timeout );
+
 }
 
-void Client::pushEvent(const std::shared_ptr<Event>& src) {
-    eventQueue->push(src);
-}
-/*
-void Client::pushEvent(std::shared_ptr<Event>&& src) {
-    eventQueue->push(src);
-}*/
+bool Client::tryReceive( Eptr & dest ) {
 
-bool Client::tryPopEvent(std::shared_ptr<Event>& dst) {
-    return eventQueue->try_pop(dst);
+    return conn.tryReceive( dest );
+
 }
 
-bool Client::sendGameState(GameState& gs){
-    std::string serialized = gs.serialize();
-    //std::string serialized = "";
-    //const char* buf = serialized.c_str();
-    //char* yeet = buf;
-    this->send(&serialized[0], serialized.length());
-    return true; //TODO make this dependent on send result
+void Client::receiveAll( std::deque<Eptr> & dest ) {
+
+    conn.receiveAll( dest );
+
 }
