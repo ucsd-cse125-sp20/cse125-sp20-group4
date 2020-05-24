@@ -39,21 +39,6 @@ class Connection {
     std::string receive();
 
     /**
-     * Sanitizes a string for insertion in a packet.
-     *
-     * @param message The message to sanitize.
-     * @return The sanitized message.
-     */
-    static std::string sanitize( const std::string & message );
-    /**
-     * Restores the original message from its sanitized version.
-     * 
-     * @param sanitized The sanitized message.
-     * @return The original message.
-     */
-    static std::string restore( const std::string & sanitized );
-
-    /**
      * Appends the given message to the buffer in a format ready to be sent over
      * the socket.
      *

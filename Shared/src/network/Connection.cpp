@@ -1,26 +1,34 @@
-#include <regex>
 #include <stdexcept>
+#include <vector>
 
 #include "logger.h"
 #include "network/Connection.h"
 #include "network/ConnectionClosedException.h"
+#include "util/Sanitizer.h"
 
 /* Size of the receive buffer */
-constexpr int BUFLEN = BUFSIZ;
+static constexpr int BUFLEN = BUFSIZ;
 
-/* Character used to mark the start of a special expression */
-constexpr char MARKER_CHAR = '&';
-#define SEQUENCE( s ) ( MARKER_CHAR + std::string( s ) + ';' )
-
-static const std::string MARKER = std::string() + MARKER_CHAR;
-static const std::string MARKER_SEQ = SEQUENCE( "amp" );
-static const std::string BEGIN_SEQ = SEQUENCE( "begin" );
-static const std::string END_SEQ = SEQUENCE( "end" );
-
-static const std::regex MARKER_REGEX( std::string() + MARKER );
-static const std::regex MARKER_SEQ_REGEX( MARKER_SEQ );
+static constexpr char START_MSG = '^';
+static constexpr char END_MSG = '$';
 
 static const auto LOGGER = getLogger( "Connection" );
+
+/* Static helpers */
+
+static std::vector<Sanitizer::CharMapping> specialCharacters() {
+
+    std::vector<Sanitizer::CharMapping> charMap;
+
+    ADD_CHAR_MAPPING( charMap, START_MSG, "crt" );
+    ADD_CHAR_MAPPING( charMap, END_MSG, "dlr" );
+
+    return charMap;
+
+}
+
+/* Used to sanitize messages */
+static const Sanitizer sanitizer( specialCharacters() );
 
 /* Constructor and destructor */
 
@@ -80,36 +88,18 @@ std::string Connection::receive() {
 
 /* Internal helpers */
 
-std::string Connection::sanitize( const std::string & message ) {
-
-    return std::regex_replace( message, MARKER_REGEX, MARKER_SEQ );
-
-}
-
-std::string Connection::restore( const std::string & sanitized ) {
-
-    return std::regex_replace( sanitized, MARKER_SEQ_REGEX, MARKER );
-
-}
-
 void  Connection::insertMessage( const std::string & message, std::string & buffer ) {
 
-    buffer += BEGIN_SEQ + sanitize( message ) + END_SEQ;
+    buffer += START_MSG + sanitizer.sanitize( message ) + END_MSG;
 
 }
 
-#define MESSAGE_START( pos ) ( ( pos ) + BEGIN_SEQ.size() )
-#define MESSAGE_END( pos ) ( ( pos ) + END_SEQ.size() )
+#define MESSAGE_START( pos ) ( ( pos ) + 1 )
+#define MESSAGE_END( pos ) ( ( pos ) + 1 )
 
 bool  Connection::extractMessage( std::string & buffer, std::string & message ) {
 
-    size_t startPos = buffer.find( BEGIN_SEQ ); // Find message start
-    if ( startPos == std::string::npos ) { // No message started
-        size_t markerPos = buffer.rfind( MARKER_CHAR );
-        if ( markerPos != std::string::npos && buffer.size() - markerPos < BEGIN_SEQ.size() && BEGIN_SEQ.find( buffer.substr( markerPos ) ) != std::string::npos ) {
-            startPos = markerPos; // May be a partial start tag, don't ignore
-        }
-    }
+    size_t startPos = buffer.find( START_MSG ); // Find message start
     if ( startPos != 0 ) {
         LOGGER->warn( "Unstarted data received, ignoring: '{}'", buffer.substr( 0, startPos ) );
     }
@@ -119,13 +109,13 @@ bool  Connection::extractMessage( std::string & buffer, std::string & message ) 
         return false;
     }
 
-    size_t endPos = buffer.find( END_SEQ, MESSAGE_START( startPos ) );
+    size_t endPos = buffer.find( END_MSG, MESSAGE_START( startPos ) );
 
-    size_t otherStart = buffer.find( BEGIN_SEQ, MESSAGE_START( startPos ) );
+    size_t otherStart = buffer.find( START_MSG, MESSAGE_START( startPos ) );
     while ( otherStart < endPos ) { // Check for multiple starts before an end
         LOGGER->warn( "Unterminated data received, ignoring: '{}'", buffer.substr( startPos, otherStart - startPos ) );
         startPos = otherStart;
-        otherStart = buffer.find( BEGIN_SEQ, MESSAGE_START( startPos ) );
+        otherStart = buffer.find( START_MSG, MESSAGE_START( startPos ) );
     }
 
     if ( endPos == std::string::npos ) { // Not a complete message
@@ -135,7 +125,7 @@ bool  Connection::extractMessage( std::string & buffer, std::string & message ) 
     }
 
     startPos = MESSAGE_START( startPos ); // Skip start marker
-    message = restore( buffer.substr( startPos, endPos - startPos ) );
+    message = sanitizer.restore( buffer.substr( startPos, endPos - startPos ) );
     buffer = buffer.substr( MESSAGE_END( endPos ) ); // Keep trailing content
     return true;
 
