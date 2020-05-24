@@ -14,7 +14,6 @@
 
 #include "state/Camera.h"
 #include "state/World.h"
-#include "eventhandler.h"
 
 class Window {
 
@@ -30,9 +29,9 @@ class Window {
 
     static GLFWwindow * window;
     static World * world;
-    static EventHandler * eventHandler;
     static Camera * cam;
     static Server * server;
+    static std::string playerName;
 
     static void initialize(Server* server);
     static void clean_up();

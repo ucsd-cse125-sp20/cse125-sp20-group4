@@ -1,25 +1,26 @@
+#include <ctime>
+
 #include "gameState.h"
 #include "logger.h"
-
+#include <EventClasses\Object\ObjectEvent.h>
+#include <EventClasses\GameState\gamestateevent.h>
 
 GameState::GameState() {
     this->nextId = 0;
     this->gameObjects = std::map<std::string, std::shared_ptr<Object>>();
+    this->timers = std::map<std::string, std::shared_ptr<Timer>>();
     this->dirty = true;
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
-    auto log = getLogger("GameState");
-    //obj->setId(std::to_string(this->nextId));
-    this->gameObjects.insert(std::make_pair(obj->getId(), obj));
-    this->nextId++;
-    log->trace("Created GameState object with id: {}", this->nextId);
+    createObject(obj, std::to_string(this->nextId++));
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj, std::string id) {
     auto log = getLogger("GameState");
+    obj->setId(id);
     this->gameObjects.insert(std::pair<std::string, std::shared_ptr<Object>>(id, obj));
-    log->trace("Created GameState object with id: {}", this->nextId);
+    log->trace("Created GameState object with id: {}", id);
 }
 
 void GameState::deleteObject(std::string id) {
@@ -36,6 +37,36 @@ void GameState::deleteObject(std::string id) {
     }
 }
 
+void GameState::createTimer(std::string id, double duration, std::function<void()> callback) {
+    time_t now = time(NULL);
+    timers[id] = std::shared_ptr<Timer>(new Timer(now, duration, callback));
+}
+
+void GameState::deleteTimer(std::string id) {
+    timers.erase(id);
+}
+
+std::map<std::string, std::function<void()>> GameState::updateTimers() {
+    auto log = getLogger("GameState");
+    std::map<std::string, std::function<void()>> callbacks = std::map<std::string, std::function<void()>>();
+    time_t now = time(NULL);
+
+    // iterate over timers
+    for (auto it = timers.begin(), itNext = it; it != timers.end(); it = itNext) {
+        // increment before check/delete so that active iterator not deleted
+        itNext++;
+        std::function<void()> callback = it->second->update(now);
+        // if callback is not null, timer expired
+        if (callback) {
+            callbacks[it->first] = callback;
+            timers.erase(it);
+        }
+    }
+    log->info("Finished updating timers");
+    log->trace("{} timers expired of {}", callbacks.size(), timers.size());
+    return callbacks;
+}
+
 void GameState::updateState() {
     auto log = getLogger("GameState");
     //loop through all objects
@@ -46,15 +77,19 @@ void GameState::updateState() {
     while (it != this->gameObjects.end()) {
         // check for collisions
         
-        if (std::dynamic_pointer_cast<MovingObject>(it->second) != NULL) {
-            checkCollisions(it->first, std::dynamic_pointer_cast<MovingObject>(it->second));
+        if (std::dynamic_pointer_cast<MovingObject>(it->second) != NULL) {           
+            std::shared_ptr<MovingObject> temp = std::dynamic_pointer_cast<MovingObject>(it->second);
+            checkCollisions(it->first, temp);
+            x = temp->getNextPositionCollisionX();
+            y = temp->getNextPositionCollisionY();
+            z = temp->getNextPositionCollisionZ();
         }
-
+        else{
         // calculate next position
-        x = it->second->getNextPositionX();
-        y = it->second->getNextPositionY();
-        z = it->second->getNextPositionZ();
-        
+            x = it->second->getNextPositionX();
+            y = it->second->getNextPositionY();
+            z = it->second->getNextPositionZ();
+        }
 
         glm::vec3 cpos = it->second->getPosition();
         if (x != cpos.x || y != cpos.y || z != cpos.z) {
@@ -73,12 +108,22 @@ void GameState::updateState() {
 
 void GameState::applyEvent(std::shared_ptr<Event> event) {
     auto log = getLogger("GameState");
-    std::map<std::string, std::shared_ptr<Object>>::iterator it = gameObjects.find(event->getObjectId());
-    if (it != gameObjects.end()) {
-        log->info("Applying an Event: {}", event->serialize());
-        event->apply(it->second);
-        setDirty(true);
+    std::map<std::string, std::shared_ptr<Object>>::iterator it;
+    switch (event->getType()) {
+    case Event::EventType::OEvent:
+        log->info("Applying an Object Event: {}", event->serialize());
+        it = gameObjects.find(event->getObjectId());
+        if (it != gameObjects.end()) {
+            std::dynamic_pointer_cast<ObjectEvent>(event)->apply(it->second);
+            setDirty(true);
+        }
+        break;
+    case Event::EventType::GEvent:
+        log->info("Applying a GameState Event: {}", std::dynamic_pointer_cast<GameStateEvent>(event)->serialize());
+        std::dynamic_pointer_cast<GameStateEvent>(event)->apply(this);
+        break;
     }
+    
 }
 
 std::string GameState::serialize() {
@@ -100,12 +145,12 @@ void GameState::initialize(std::string file) {
     if (file.compare("") == 0) {
         // default
         // create a player
-        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 2.0f, 2.0f, 2.0f, 0.0f,0.0f,0.0f));
+        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f));
         std::cout << "INITIALIZING DEFAULT" << std::endl;
-        this->createObject(obj);
-        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Player("cube5", 3.0f, 0.0f, 3.0f, 0.0f, 0.0f, 1.0f, 2.0f, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f));
+        this->createObject(obj, obj->getId());
+        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Player("cube5", 3.0f, 0.0f, 3.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f));
         std::cout << "INITIALIZING CUBE2" << std::endl;
-        this->createObject(obj2);
+        this->createObject(obj2, obj->getId());
         std::cout << this->serialize() << std::endl;
     } else {
         // TODO parse file
@@ -127,11 +172,10 @@ std::string GameState::getUpdates() {
             } else {
                 res = res + ";" + it->second->serialize();
             }
-            it->second->dirty = false;
         }
         it++;
     }
-    setDirty(false);
+    res = res + "|";
     log->trace("Updates: {}", res);
     return res;
 }
@@ -141,6 +185,11 @@ bool GameState::isDirty() {
 }
 
 void GameState::setDirty(bool dty) {
+    auto it = this->gameObjects.begin();
+    while (it != this->gameObjects.end()) {
+        it->second->dirty = false;
+        it++;
+    }
     this->dirty = dty;
 }
 
@@ -161,4 +210,12 @@ void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> ob
         
     }
     log->trace("Finished checking collisions");
+}
+
+std::shared_ptr<Object> GameState::getObject(std::string id) {
+    std::map<std::string, std::shared_ptr<Object>>::iterator it = gameObjects.find(id);
+    if (it != gameObjects.end()) {
+        return it->second;
+    }
+    return nullptr;
 }

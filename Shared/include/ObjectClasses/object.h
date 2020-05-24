@@ -35,7 +35,7 @@ public:
     void setWidth(float newWidth);
     void setHeight(float newHeight);
     void setLength(float newLength);
-    void setOrientation(glm::vec3 orientation);
+    virtual void setOrientation( const glm::vec3 & orientation );
     void setCanCollide(bool newValue);
 
     //getters
@@ -58,7 +58,7 @@ public:
 
     //utility
     virtual bool contains(const glm::vec3 pt) const;
-    virtual bool collides(const Object obj) const;
+    virtual bool collides(const Object & obj) const;
 
     //(de)serialize functions
     virtual std::string serialize() const;

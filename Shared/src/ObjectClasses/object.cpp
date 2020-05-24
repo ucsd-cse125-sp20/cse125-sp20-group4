@@ -61,15 +61,14 @@ void Object::setOrientationZ(float orientationZ) {
 }
 
 void Object::setOrientation(float orientationX, float orientationY, float orientationZ) {
-    auto log = getLogger("Object");
-    this->orientation = glm::vec3(orientationX, orientationY, orientationZ);
-    log->trace("Setting orientation of Object {} to ({},{},{})", this->getId(), orientationX, orientationY, orientationZ);
+    this->setOrientation( glm::vec3( orientationX, orientationY, orientationZ ) );
 }
 
-void Object::setOrientation(glm::vec3 ori) {
+void Object::setOrientation( const glm::vec3 & ori ) {
+
     auto log = getLogger("Object");
-    this->orientation = glm::vec3(ori);
-    log->trace("Setting orientation of Object {} to ({},{},{})", this->getId(), orientation.x, orientation.y, orientation.z);
+    log->trace( "Setting orientation of Object {} to ({},{},{})", this->getId(), ori.x, ori.y, ori.z );
+    this->orientation = ori;
 
 }
 

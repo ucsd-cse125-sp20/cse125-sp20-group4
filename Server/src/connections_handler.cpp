@@ -35,6 +35,7 @@ bool ConnectionsHandler::sendGameStateToAll(GameState& gs) {
 			clients[i]->sendGameState(gs);
 		}
 	}
+	gs.setDirty(false);
 	return true;
 }
 
