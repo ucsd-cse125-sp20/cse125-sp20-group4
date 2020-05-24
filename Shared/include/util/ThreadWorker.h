@@ -22,6 +22,10 @@ class ThreadWorker {
      * @throws std::invalid_argument if act is empty.
      */
     ThreadWorker( const std::function<bool()> act );
+    /**
+     * Stops the worker. Will block until it is fully stopped.
+     */
+    ~ThreadWorker();
 
     /**
      * Starts execution.
@@ -71,6 +75,7 @@ class ThreadWorker {
     bool ready;
     std::mutex readyMutex;
     std::condition_variable readyCond;
+    std::mutex joinMutex;
 
     /**
      * Thread driver.

@@ -1,6 +1,9 @@
 #ifndef ASYNC_CONNECTION_H
 #define ASYNC_CONNECTION_H
 
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 #include <functional>
 #include <mutex>
 #include <stdexcept>
@@ -10,8 +13,6 @@
 #include "network/Connection.h"
 #include "util/BlockingQueue.hpp"
 #include "util/ThreadWorker.h"
-
-static const auto LOGGER = getLogger( "AsyncConnection" );
 
 /**
  * A connection interface that sends an receives objects through a socket.
@@ -86,6 +87,15 @@ class AsyncConnection {
         AsyncConnection( sock, std::make_shared<Queue>(), setup, nullptr ) {}
 
     /**
+     * Closes the connection.
+     */
+    ~AsyncConnection() {
+
+        close( true );
+
+    }
+
+    /**
      * Queues the given object for sending.
      *
      * @param e The object to send.
@@ -112,7 +122,7 @@ class AsyncConnection {
      */
     bool receive( Tptr & dest, const unsigned long timeout = 0 ) {
 
-        inQueue->pop( dest, timeout );
+        return inQueue->pop( dest, timeout );
 
     }
 
@@ -126,7 +136,7 @@ class AsyncConnection {
      */
     bool tryReceive( Tptr & dest ) {
 
-        inQueue->tryPop( dest );
+        return inQueue->tryPop( dest );
 
     }
 
@@ -134,6 +144,8 @@ class AsyncConnection {
      * Retrieves all currently available incoming objects.
      *
      * @param dest Where to place the objects into.
+     *             Elements are placed so that the oldest element is at
+     *             the front of the queue.
      */
     void receiveAll( std::deque<Tptr> & dest ) {
 
@@ -252,7 +264,7 @@ class AsyncConnection {
         }
 
         // Send
-        LOGGER->trace( "Sending encoded message {}", message );
+        LOGGER->trace( "Sending encoded message '{}'", message );
         conn->send( message );
 
         return true;
@@ -288,6 +300,8 @@ class AsyncConnection {
     std::mutex stop_mtx;
     std::mutex join_mtx;
     std::shared_ptr<std::thread> stopper;
+
+    inline static const auto LOGGER = getLogger( "AsyncConnection" );
 
 };
 

@@ -36,6 +36,8 @@ Connection::~Connection() {
 
 void Connection::send( const std::string & message ) const {
 
+    LOGGER->trace( "Sending message: '{}'", message );
+    
     std::string buf;
     insertMessage( message, buf );
     int sent = ::send( sock, buf.c_str(), ( int ) buf.size(), 0 );
@@ -55,11 +57,12 @@ std::string Connection::receive() {
     unsigned int errorCount = 0;
     do {
 
+        //LOGGER->trace( "Listening for more messages." );
         char inbuf[BUFLEN];
         int received = ::recv( sock, inbuf, BUFLEN, 0 );
         if ( received == SOCKET_ERROR ) { // Error
             int error = WSAGetLastError();
-            spdlog::error( "Failed to receive data: {}", error );
+            LOGGER->error( "Failed to receive data: {}", error );
             throw std::runtime_error( "Failed to receive data." );
         } else if ( received == 0 ) { // Connection closed
             throw ConnectionClosedException();
@@ -67,8 +70,10 @@ std::string Connection::receive() {
             std::string in_str( inbuf, received );
             inboundBuffer += in_str;
         }
+        //LOGGER->trace( "Buffer: {}", inboundBuffer );
 
     } while ( !extractMessage( inboundBuffer, message ) );
+    LOGGER->trace( "Received message: '{}'", message );
     return message;
 
 }
@@ -93,6 +98,9 @@ void  Connection::insertMessage( const std::string & message, std::string & buff
 
 }
 
+#define MESSAGE_START( pos ) ( ( pos ) + BEGIN_SEQ.size() )
+#define MESSAGE_END( pos ) ( ( pos ) + END_SEQ.size() )
+
 bool  Connection::extractMessage( std::string & buffer, std::string & message ) {
 
     size_t startPos = buffer.find( BEGIN_SEQ ); // Find message start
@@ -103,7 +111,7 @@ bool  Connection::extractMessage( std::string & buffer, std::string & message ) 
         }
     }
     if ( startPos != 0 ) {
-        LOGGER->warn( "Unstarted data received, ignoring: {}", buffer.substr( 0, startPos ) );
+        LOGGER->warn( "Unstarted data received, ignoring: '{}'", buffer.substr( 0, startPos ) );
     }
     if ( startPos == std::string::npos ) {
         message = "";
@@ -111,13 +119,13 @@ bool  Connection::extractMessage( std::string & buffer, std::string & message ) 
         return false;
     }
 
-    size_t endPos = buffer.find( END_SEQ, startPos );
+    size_t endPos = buffer.find( END_SEQ, MESSAGE_START( startPos ) );
 
-    size_t otherStart = buffer.find( BEGIN_SEQ, startPos );
+    size_t otherStart = buffer.find( BEGIN_SEQ, MESSAGE_START( startPos ) );
     while ( otherStart < endPos ) { // Check for multiple starts before an end
-        LOGGER->warn( "Unterminated data received, ignoring: {}", buffer.substr( startPos, otherStart - startPos ) );
+        LOGGER->warn( "Unterminated data received, ignoring: '{}'", buffer.substr( startPos, otherStart - startPos ) );
         startPos = otherStart;
-        otherStart = buffer.find( BEGIN_SEQ, startPos );
+        otherStart = buffer.find( BEGIN_SEQ, MESSAGE_START( startPos ) );
     }
 
     if ( endPos == std::string::npos ) { // Not a complete message
@@ -126,9 +134,9 @@ bool  Connection::extractMessage( std::string & buffer, std::string & message ) 
         return false;
     }
 
-    startPos += BEGIN_SEQ.size(); // Skip start marker
+    startPos = MESSAGE_START( startPos ); // Skip start marker
     message = restore( buffer.substr( startPos, endPos - startPos ) );
-    buffer = buffer.substr( endPos + END_SEQ.size() ); // Keep trailing content
+    buffer = buffer.substr( MESSAGE_END( endPos ) ); // Keep trailing content
     return true;
 
 }

@@ -15,6 +15,13 @@ ThreadWorker::ThreadWorker( const std::function<bool()> act, bool allowEmptyAct 
 
 }
 
+ThreadWorker::~ThreadWorker() {
+
+    stop();
+    waitDone();
+
+}
+
 void ThreadWorker::run() {
 
     // Wait for ready signal
@@ -41,7 +48,7 @@ bool ThreadWorker::action() {
 void ThreadWorker::start() {
 
     // Signal start
-    std::unique_lock<std::mutex> lck;
+    std::unique_lock<std::mutex> lck( readyMutex );
     ready = true;
     readyCond.notify_all();
 
@@ -57,14 +64,17 @@ void ThreadWorker::stop() {
 void ThreadWorker::waitReady() {
 
     // Wait until ready signal set
-    std::unique_lock<std::mutex> lck;
+    std::unique_lock<std::mutex> lck( readyMutex );
     while ( !ready ) readyCond.wait( lck );
 
 }
 
 void ThreadWorker::waitDone() {
 
-    worker.join();
+    std::lock_guard<std::mutex> lck( joinMutex );
+    if ( worker.joinable() ) {
+        worker.join();
+    }
 
 }
 

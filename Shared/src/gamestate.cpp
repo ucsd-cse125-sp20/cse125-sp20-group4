@@ -68,7 +68,7 @@ void GameState::updateState() {
         
         it++;
     }
-    log->info("Finished updating state");
+    log->debug("Finished updating state");
 }
 
 void GameState::applyEvent(std::shared_ptr<Event> event) {
@@ -160,4 +160,10 @@ void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> ob
         
     }
     log->trace("Finished checking collisions");
+}
+
+const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects() {
+
+    return gameObjects;
+
 }

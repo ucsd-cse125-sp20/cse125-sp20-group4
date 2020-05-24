@@ -5,8 +5,10 @@
 #include <memory>
 #include <glm/mat4x4.hpp>
 
+#include <EventClasses/UpdateEvent.h>
+#include <ObjectClasses/object.h>
+
 #include "state/Entity.h"
-#include "ObjectClasses/object.h"
 
 class World {
 
@@ -18,7 +20,7 @@ class World {
     Entity * getEntity( const std::string & name ) const;
     void addEntity( Entity * const entity );
     Entity * removeEntity( const std::string & name );
-    void handleUpdates( std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map );
+    void handleUpdates( const std::shared_ptr<UpdateEvent> & e );
 
     protected:
     std::unordered_map<std::string, Entity *> entities;

@@ -14,5 +14,6 @@
 #include <EventClasses/stopleftevent.h>
 
 #include <EventClasses/RotateEvent.h>
+#include <EventClasses/UpdateEvent.h>
 
 #endif
