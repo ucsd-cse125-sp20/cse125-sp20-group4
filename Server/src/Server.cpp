@@ -17,6 +17,8 @@
 
 #include "Clients.h"
 #include "statehandler.h"
+#include "wavehandler.h"
+#include "deserializer.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -42,6 +44,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     gameState.initialize();
+    WaveHandler waveHandler = WaveHandler(gameState); // TODO move this into gamestate
+    waveHandler.init();
     GameStateHandler gameStateHandler;
 
     while ( running ) {
