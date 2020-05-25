@@ -50,6 +50,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
         // ************** GAME LOGIC START **************
         log->trace( "Start of gameplay loop" );
+
+        gameState.resetDirty();
         
         std::deque<std::shared_ptr<Event>> events;
         clients->receiveAll( events );
@@ -63,7 +65,6 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         if (gameState.isDirty()) {
             std::shared_ptr<UpdateEvent> update = std::make_shared<UpdateEvent>( std::unordered_map<std::string, std::shared_ptr<Object>>( gameState.getGameObjects().cbegin(), gameState.getGameObjects().cend() ) );
             clients->broadcast( update );
-            gameState.setDirty( false );
         }
         
         // *************** GAME LOGIC END ***************

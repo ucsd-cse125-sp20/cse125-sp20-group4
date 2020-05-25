@@ -85,7 +85,7 @@ void World::handleUpdates( const std::shared_ptr<UpdateEvent> & e ) {
             entity->setPosition( it->second->getPosition() );
         } else {
             LOGGER->debug( "Couldn't find entity '{}'.", it->second->getId() );
-            addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getOrientation(), it->second->getPosition()));
+            addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
         }
     }
 }

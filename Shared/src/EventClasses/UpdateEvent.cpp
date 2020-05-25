@@ -29,14 +29,15 @@ static std::vector<Sanitizer::CharMapping> specialCharacters() {
 /* Used to sanitize messages */
 static const Sanitizer sanitizer( specialCharacters() );
 
-UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "" ), updates( updates ) {}
+UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::UEvent), updates( updates ) {}
 
 std::string UpdateEvent::serialize() const {
 
     std::string serial = HEADER;
     for ( auto it = updates.cbegin(); it != updates.cend(); it++ ) {
-
-        serial += sanitizer.sanitize( it->first ) + DATA_TAG + sanitizer.sanitize( it->second->serialize() ) + END_TAG;
+        if (it->second->dirty) {
+            serial += sanitizer.sanitize(it->first) + DATA_TAG + sanitizer.sanitize(it->second->serialize()) + END_TAG;
+        }
 
     }
     return serial;

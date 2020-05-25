@@ -18,6 +18,7 @@ void GameState::createObject(std::shared_ptr<Object> obj, std::string id) {
     auto log = getLogger("GameState");
     obj->setId(id);
     this->gameObjects.insert(std::pair<std::string, std::shared_ptr<Object>>(id, obj));
+    this->setDirty(true);
     log->trace("Created GameState object with id: {}", id);
 }
 
@@ -28,6 +29,7 @@ void GameState::deleteObject(std::string id) {
     it = this->gameObjects.find(id);
     if (it != this->gameObjects.end()) {
         this->gameObjects.erase(it);
+        this->setDirty(true);
         log->trace("Deleted GameState object with id: {}", id);
     }
     else {
@@ -152,12 +154,15 @@ bool GameState::isDirty() {
 }
 
 void GameState::setDirty(bool dty) {
+    this->dirty = dty;
+}
+void GameState::resetDirty() {
     auto it = this->gameObjects.begin();
     while (it != this->gameObjects.end()) {
         it->second->dirty = false;
         it++;
     }
-    this->dirty = dty;
+    this->dirty = false;
 }
 
 void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> object) {

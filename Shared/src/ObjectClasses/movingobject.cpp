@@ -77,6 +77,7 @@ void MovingObject::setOrientation( const glm::vec3 & newOrientation ) {
     if (!glm::all(epsilonEqual(relativeVelocity, glm::vec3(0, 0, 0), EPSILON))) {
         setVelocity(this->toWorld * glm::vec4(this->relativeVelocity, 1.0f));
     }
+    this->dirty = true;
 }
 
 void MovingObject::setRelativeVelocity( const glm::vec3 & newVelocity ) {
@@ -89,7 +90,7 @@ void MovingObject::setRelativeVelocity( const glm::vec3 & newVelocity ) {
         velocity = toWorld * glm::vec4(glm::normalize(newVelocity), 1.0f);
     }
     getLogger("MovingObject")->trace("Setting velocity of {} to ({},{},{})", this->getId(), velocity.x, velocity.y, velocity.z);
-
+    this->dirty = true;
 }
 
 const glm::vec3 & MovingObject::getRelativeVelocity() const {
