@@ -159,8 +159,10 @@ void Camera::update() {
 
 void Camera::updateV() {
 
+    static const glm::vec3 UP( 0.0f, 1.0f, 0.0f );
+
     glm::vec3 look_at = pos + dir;
-    glm::vec3 up = glm::cross( glm::cross( dir, glm::vec3( 0.0f, 1.0f, 0.0f ) ), dir );
+    glm::vec3 up = glm::normalize( glm::cross( glm::cross( dir, UP ), dir ) );
     V = glm::lookAt( pos, look_at, up );
     update();
 

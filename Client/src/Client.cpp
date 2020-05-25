@@ -7,17 +7,20 @@
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
 #else
-#include "GL/glew.h"
+#include <GL/glew.h>
 #endif
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <combaseapi.h>
 
-#include "spdlog/spdlog.h"
-#include "GLFW/glfw3.h"
+#include <fmod_studio.hpp>
+#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
+
 
 #include "logger.h"
-#include "server.h"
+#include "Server.h"
 #include "Window.h"
 #include "ObjectClasses/object.h"
 #include "deserializer.h"
@@ -28,6 +31,9 @@
 #define LOGLEVEL spdlog::level::trace //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
+
+// FMOD constants
+#define AUDIO_CHANNELS_MAX 100
 
 void setup_glew() {
 
@@ -109,6 +115,22 @@ void setup_callbacks( GLFWwindow * window ) {
 
 int main_inner( void ) {
 
+    spdlog::info( "Initializing COM." );
+    HRESULT hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+    if ( FAILED( hr ) ) {
+        spdlog::critical( "Failed to initialize COM, error code {}.", hr );
+        return 1;
+    }
+
+    spdlog::info( "Initializing FMOD." );
+    FMOD::Studio::System * audioSystem;
+    FMOD_RESULT res = FMOD::Studio::System::create( &audioSystem );
+    if ( res != FMOD_RESULT::FMOD_OK ) {
+        spdlog::critical( "Could not initialize FMOD ({}).", res );
+        throw std::runtime_error( "Failed to initialize audio." );
+    }
+    audioSystem->initialize( AUDIO_CHANNELS_MAX, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr );
+
     //initialize Winsock
     WSADATA wsaData;
     int status;
@@ -137,7 +159,7 @@ int main_inner( void ) {
     // Setup OpenGL settings, including lighting, materials, etc.
     setup_opengl_settings();
     // Initialize objects/pointers for rendering
-    Window::initialize( server );
+    Window::initialize( server, audioSystem );
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
 
@@ -145,6 +167,9 @@ int main_inner( void ) {
         Window::display_callback( window );
         // Idle callback. Updating objects, etc. can be done here.
         Window::idle_callback();
+
+        // Run audio commands
+        audioSystem->update();
 
     }
 
@@ -156,6 +181,13 @@ int main_inner( void ) {
 
     delete( server );
     WSACleanup();
+
+    spdlog::info( "Uninitializing FMOD." );
+    audioSystem->release();
+
+    spdlog::info( "Uninitializing COM." );
+    CoUninitialize();
+
     return EXIT_SUCCESS;
 
 }

@@ -10,6 +10,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#include <fmod_studio.hpp>
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 
@@ -38,7 +39,14 @@ class Window {
     static Server * server;
     static std::string playerName;
 
-    static void initialize(Server* server);
+    // Audio data
+    static FMOD::Studio::System * audioSystem;
+    static FMOD::Studio::Bank * bankMaster;
+    static FMOD::Studio::Bank * bankMasterStrings;
+
+    static void set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position, const glm::vec3 & velocity, const glm::vec3 & direction );
+
+    static void initialize( Server * server, FMOD::Studio::System * audioSystem );
     static void clean_up();
     static GLFWwindow * create_window( int width, int height );
     static void resize_callback( GLFWwindow * window, int width, int height );

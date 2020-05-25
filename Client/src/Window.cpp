@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <EventClasses/events.h>
+#include <logger.h>
 
 #include "Window.h"
 #include "drawing/Shaders.h"
@@ -22,7 +23,9 @@
 #define GLM_FORCE_RADIANS
 #endif
 
-const char * window_title = "CSE 125 Project";
+static const auto LOGGER = getLogger( "Window" );
+
+static const char * window_title = "CSE 125 Project";
 
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
@@ -54,6 +57,11 @@ Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
 
+// Audio data
+FMOD::Studio::System * Window::audioSystem;
+FMOD::Studio::Bank * Window::bankMaster;
+FMOD::Studio::Bank * Window::bankMasterStrings;
+
 std::string Window::playerName = "cube4"; 
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
@@ -69,14 +77,68 @@ void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
 }
 
+void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position, const glm::vec3 & velocity, const glm::vec3 & direction ) {
+
+    // Position
+    attr.position.x = position.x;
+    attr.position.y = position.y;
+    attr.position.z = position.z;
+
+    // Velocity
+    attr.velocity.x = velocity.x;
+    attr.velocity.y = velocity.y;
+    attr.velocity.z = velocity.z;
+
+    // Direction
+    attr.forward.x = direction.x;
+    attr.forward.y = direction.y;
+    attr.forward.z = direction.z;
+
+    // Up
+    static const glm::vec3 UP( 0.0f, 1.0f, 0.0f );
+    glm::vec3 up = glm::normalize( glm::cross( glm::cross( direction, UP ), direction ) );
+    attr.up.x = up.x;
+    attr.up.y = up.y;
+    attr.up.z = up.z;
+
+}
+
 GLFWwindow * Window::window = nullptr;
 
 int Window::width;
 int Window::height;
 
-void Window::initialize( Server * ser ) {
+void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
 
+    // Set up graphics
     Shaders::initializeShaders();
+
+    // Set up sound
+    Window::audioSystem = audio;
+
+    // Load audio banks
+    LOGGER->info( "Loading audio banks." );
+    
+    FMOD_RESULT res = audioSystem->loadBankFile( "Sounds/Master.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bankMaster );
+    if ( res != FMOD_OK ) {
+        LOGGER->critical( "Could not load master bank ({}).", res );
+        throw std::runtime_error( "Failed to initialize audio." );
+    } else {
+        LOGGER->info( "Loaded master bank." );
+    }
+
+    res = audioSystem->loadBankFile( "Sounds/Master.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bankMasterStrings );
+    if ( res != FMOD_OK ) {
+        LOGGER->critical( "Could not load master bank strings ({}).", res );
+        throw std::runtime_error( "Failed to initialize audio." );
+    } else {
+        LOGGER->info( "Loaded master bank strings." );
+    }
+
+    // Load audio samples
+    bankMaster->loadSampleData();
+
+    // Set up game state
     world = new World();
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
@@ -95,9 +157,16 @@ void Window::initialize( Server * ser ) {
 
 void Window::clean_up() {
 
+    // Clean up game state
     Camera::removeCamera( "spectator" );
 
     delete( world );
+
+    // Clean up audio
+    LOGGER->info( "Unloading audio banks." );
+    bankMaster->unload();
+
+    // Clean up graphics
     Shaders::deleteShaders();
 
 }
@@ -106,7 +175,7 @@ GLFWwindow * Window::create_window( int windowWidth, int windowHeight ) {
 
     // Initialize GLFW.
     if ( !glfwInit() ) {
-        fprintf( stderr, "Failed to initialize GLFW\n" );
+        LOGGER->critical( "Failed to initialize GLFW" );
         return NULL;
     }
 
@@ -133,7 +202,7 @@ GLFWwindow * Window::create_window( int windowWidth, int windowHeight ) {
 
     // Check if the window could not be created
     if ( !newWindow ) {
-        fprintf( stderr, "Failed to open GLFW window.\n" );
+        LOGGER->critical( "Failed to open GLFW window." );
         glfwTerminate();
         return NULL;
     }
@@ -178,7 +247,7 @@ void Window::idle_callback() {
     // Handle incoming events
     std::deque<std::shared_ptr<Event>> events;
     server->receiveAll( events );
-    spdlog::debug( "Number of events: {}", events.size() );
+    LOGGER->debug( "Number of events: {}", events.size() );
     while ( !events.empty() ) {
         
         handleEvent( events.front() );
@@ -206,6 +275,14 @@ void Window::idle_callback() {
         rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
+
+    // Update audio positioning
+    FMOD_3D_ATTRIBUTES attributes;
+    set3DParams( attributes, cam->getPos(), glm::vec3( 0.0f ), cam->getDir() );
+    FMOD_RESULT res = audioSystem->setListenerAttributes( 0, &attributes );
+    if ( res != FMOD_OK ) {
+        LOGGER->warn( "Error while updating listener position ({}).", res );
+    }
 
 }
 
