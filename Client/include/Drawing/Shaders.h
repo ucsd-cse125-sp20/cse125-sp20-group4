@@ -33,6 +33,7 @@ class Shaders {
     static const Shader & flat();
     static const Shader & phong();
     static const Shader & horizon();
+    static const Shader & particle();
 
 };
 

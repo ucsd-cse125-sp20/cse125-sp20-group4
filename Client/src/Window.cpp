@@ -19,6 +19,8 @@
 #include "drawing/model/LoadedModel.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
+#include "drawing/ParticleGenerator.h"
+#include "drawing/texture.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -30,7 +32,7 @@ const char * window_title = "CSE 125 Project";
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
 
-#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, 0.0f )
+#define DEFAULT_CAMERA_POS glm::vec3( 2.0f, 2.0f, 0.0f )
 #define DEFAULT_CAMERA_DIR glm::vec3( 0.0f, 0.0f, 1.0f )//-glm::normalize( DEFAULT_CAMERA_POS )
 
 #define POINT_SIZE_FACTOR 0.5f
@@ -56,6 +58,7 @@ const char * window_title = "CSE 125 Project";
 Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
+std::vector<ParticleGenerator*> pgens;
 
 std::string Window::playerName = "cube4"; 
 
@@ -86,17 +89,24 @@ void Window::initialize( Server * ser ) {
 
     cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world->addEntity( new CameraEntity( "cube4", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+    world->addEntity( new CameraEntity( "cube4", 0.0f, new EmptyModel(), DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+    world->addEntity(new Entity("cube5", new RectangularCuboid(glm::vec3(1.0f), 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
-    MapLoader* loader = new MapLoader("Maps/map1");
 
-    std::vector<Entity*> entities = loader->getEntities();
+    //MapLoader* loader = new MapLoader("Maps/map1");
 
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    //std::vector<Entity*> entities = loader->getEntities();
+
+    //for (auto it = entities.begin(); it != entities.end(); it++) {
     
-        world->addEntity(*it);
+    //    world->addEntity(*it);
     
-    }
+    //}
+
+    // add test particle generators
+    Texture* tex = new Texture();
+    tex->loadTextureFromFile("Textures/particle.png", true);
+    pgens.push_back(new ParticleGenerator(Shaders::particle(), tex, 2000));
 
     cam = Camera::getCamera( "cube4" );
 
@@ -208,6 +218,10 @@ void Window::idle_callback() {
     }
 #pragma warning( pop )
 
+    //update particles
+    for (ParticleGenerator* pgen : pgens)
+        pgen->Update(0.01f, world->getEntity("cube5"), 1);
+
 }
 
 void Window::display_callback( GLFWwindow * ) {
@@ -218,6 +232,9 @@ void Window::display_callback( GLFWwindow * ) {
 
     // Render scene.
     world->draw( cam->getToView() );
+    
+    for (ParticleGenerator* pgen : pgens)
+        pgen->Draw(cam->getP(), cam->getV());
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();

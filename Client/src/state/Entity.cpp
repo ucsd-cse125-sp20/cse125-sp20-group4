@@ -34,6 +34,12 @@ const glm::vec3 & Entity::getDirection() const {
 
 }
 
+const glm::vec3& Entity::getVelocity() const {
+
+    return velocity;
+
+}
+
 const float & Entity::getScale() const {
 
     return scale;
@@ -43,6 +49,8 @@ const float & Entity::getScale() const {
 /* Setters */
 
 void Entity::setPosition( const glm::vec3 & pos ) {
+
+    velocity = pos - position;
 
     auto log = getLogger("Entity");
     log->info("Setting position from ({}, {}, {}) to ({}, {}, {})", position.x, position.y, position.z, pos.x, pos.y, pos.z);
