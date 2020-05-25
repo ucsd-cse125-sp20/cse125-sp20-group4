@@ -127,6 +127,7 @@ int main_inner( void ) {
     FMOD_RESULT res = FMOD::Studio::System::create( &audioSystem );
     if ( res != FMOD_RESULT::FMOD_OK ) {
         spdlog::critical( "Could not initialize FMOD ({}).", res );
+        throw std::runtime_error( "Failed to initialize audio." );
     }
     audioSystem->initialize( AUDIO_CHANNELS_MAX, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr );
 
@@ -158,7 +159,7 @@ int main_inner( void ) {
     // Setup OpenGL settings, including lighting, materials, etc.
     setup_opengl_settings();
     // Initialize objects/pointers for rendering
-    Window::initialize( server );
+    Window::initialize( server, audioSystem );
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
 
@@ -166,6 +167,9 @@ int main_inner( void ) {
         Window::display_callback( window );
         // Idle callback. Updating objects, etc. can be done here.
         Window::idle_callback();
+
+        // Run audio commands
+        audioSystem->update();
 
     }
 
