@@ -1,6 +1,8 @@
 #include <stdexcept>
 
-#include "logger.h"
+#include <EventClasses/UpdateEvent.h>
+#include <logger.h>
+
 #include "state/World.h"
 
 static const auto LOGGER = getLogger( "World" );
@@ -68,9 +70,12 @@ Entity * World::removeEntity( const std::string & name ) {
 
 }
 
-void World::handleUpdates(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map) {
-    std::unordered_map<std::string, std::shared_ptr<Object>>::iterator it;
-    for (it = map->begin(); it != map->end(); it++) {
+void World::handleUpdates( const std::shared_ptr<UpdateEvent> & e ) {
+
+    const std::unordered_map<std::string, std::shared_ptr<Object>> & map = e->updates;
+    LOGGER->debug( "Number of updates: {}", map.size() );
+
+    for (auto it = map.begin(); it != map.end(); it++) {
         //auto entity = this->getEntity(it->second->getId());
         auto entity = this->getEntity(it->first);
 

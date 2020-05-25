@@ -7,11 +7,15 @@
 #include <GL/glew.h>
 #endif
 
-#include "server.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 
+#include <EventClasses/event.h>
+
+#include "Server.h"
 #include "state/Camera.h"
 #include "state/World.h"
 
@@ -21,6 +25,7 @@ class Window {
 
     static glm::vec3 trackBallMapping( float x, float y );
     static void rotateCamera( float angle, glm::vec3 axis );
+    static void handleEvent( const std::shared_ptr<Event> & e );
 
     public:
 
@@ -43,6 +48,7 @@ class Window {
     static void mouse_move_callback( GLFWwindow * window, double xpos, double ypos );
     static void mouse_button_callback( GLFWwindow * window, int button, int action, int mods );
     static void mouse_scroll_callback( GLFWwindow * window, double xoffset, double yoffset );
+
 };
 
 #endif

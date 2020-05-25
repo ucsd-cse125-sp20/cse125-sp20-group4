@@ -25,5 +25,6 @@ public:
     bool isDirty();
     void setDirty(bool dty);
     void checkCollisions(std::string id, std::shared_ptr<MovingObject> object);
+    const std::map<std::string, std::shared_ptr<Object>> & getGameObjects();
 
 };

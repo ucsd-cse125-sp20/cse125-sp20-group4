@@ -1,6 +1,7 @@
 #define NOMINMAX // Stop stupid library from defining max() as a macro
 
 #include <algorithm>
+#include <deque>
 #include <iostream>
 #include <vector>
 
@@ -62,7 +63,7 @@ void Window::rotateCamera( float angle, glm::vec3 axis ) {
         glm::vec3 newDir = ROTATE( cam->getDir(), angle, axis );
         cam->rotate( newDir );
         if ( isPlayer ) { // Send player movement to server
-            server->pushEvent( std::make_shared<RotateEvent>( playerName, newDir ) );
+            server->send( std::make_shared<RotateEvent>( playerName, newDir ) );
         }
     }
 
@@ -174,6 +175,17 @@ static glm::vec3 movement( 0.0f, 0.0f, 0.0f ); // Camera movement direction.
 
 void Window::idle_callback() {
 
+    // Handle incoming events
+    std::deque<std::shared_ptr<Event>> events;
+    server->receiveAll( events );
+    spdlog::debug( "Number of events: {}", events.size() );
+    while ( !events.empty() ) {
+        
+        handleEvent( events.front() );
+        events.pop_front();
+
+    }
+
     // Translate camera
     if ( ( movement.x != 0.0f ) || ( movement.y != 0.0f ) || ( movement.z != 0.0f ) ) {
         glm::vec4 move = glm::inverse( cam->getV() ) * glm::vec4( movement, 1.0f );
@@ -230,7 +242,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                    server->send( std::make_shared<MoveForwardEvent>( playerName ) );
                 }
                 break;
 
@@ -238,7 +250,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                    server->send( std::make_shared<MoveBackwardEvent>( playerName ) );
                 }
                 break;
 
@@ -246,7 +258,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                    server->send( std::make_shared<MoveLeftEvent>( playerName ) );
                 }
                 break;
 
@@ -254,7 +266,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                    server->send( std::make_shared<MoveRightEvent>( playerName ) );
                 }
                 break;
 
@@ -312,7 +324,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                    server->send( std::make_shared<MoveForwardEvent>( playerName ) );
                 }
                 break;
 
@@ -320,7 +332,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                    server->send( std::make_shared<MoveBackwardEvent>( playerName ) );
                 }
                 break;
 
@@ -328,7 +340,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                    server->send( std::make_shared<MoveLeftEvent>( playerName ) );
                 }
                 break;
 
@@ -336,7 +348,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                    server->send( std::make_shared<MoveRightEvent>( playerName ) );
                 }
                 break;
 
@@ -426,5 +438,11 @@ void Window::mouse_button_callback( GLFWwindow *, int button, int action, int /*
 void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /* yoffset */ ) {
 
     // Nothing
+
+}
+
+void Window::handleEvent( const std::shared_ptr<Event> & e ) {
+
+    world->handleUpdates( std::static_pointer_cast<UpdateEvent>( e ) );
 
 }
