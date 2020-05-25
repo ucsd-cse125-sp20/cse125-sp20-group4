@@ -39,6 +39,13 @@ class Client {
     const std::string & getID() const;
 
     /**
+     * Retrieves the underlying connection to the client.
+     *
+     * @return The connection.
+     */
+    EventConnection & connection();
+
+    /**
      * Queues the given event for sending.
      *
      * @param e The event to send.

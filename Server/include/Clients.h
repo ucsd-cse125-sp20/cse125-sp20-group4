@@ -35,6 +35,14 @@ class Clients {
     ~Clients();
 
     /**
+     * Retrieves a client.
+     *
+     * @param id The ID of the client.
+     * @return The client, or nullptr if there is no client with that ID.
+     */
+    std::shared_ptr<Client> getClient( const std::string & id ) const;
+
+    /**
      * Sends the given event to all clients.
      *
      * @param e The event to send.

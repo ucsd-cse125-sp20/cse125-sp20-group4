@@ -51,6 +51,12 @@ const std::string & Client::getID() const {
 
 }
 
+EventConnection & Client::connection() {
+
+    return conn;
+
+}
+
 void Client::send( const Eptr & e ) {
 
     conn.send( e );

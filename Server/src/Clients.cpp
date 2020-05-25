@@ -46,6 +46,13 @@ Clients::~Clients() {
 
 /* Public methods */
 
+std::shared_ptr<Client> Clients::getClient( const std::string & id ) const {
+
+    auto it = clients.find( id );
+    return it == clients.end() ? nullptr : it->second;
+
+}
+
 void Clients::broadcast( const Eptr & e ) {
 
     for ( auto it = clients.begin(); it != clients.end(); it++ ) {

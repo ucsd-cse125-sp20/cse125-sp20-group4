@@ -86,6 +86,12 @@ void Server::teardown( const std::shared_ptr<Connection> & /* conn */, const std
 
 /* Public methods */
 
+EventConnection & Server::connection() {
+
+    return conn;
+
+}
+
 void Server::send( const Eptr & e ) {
 
     conn.send( e );

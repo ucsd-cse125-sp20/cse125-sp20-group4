@@ -159,7 +159,7 @@ class AsyncConnection {
      *
      * @return The underlying Connection.
      */
-    const std::shared_ptr<Connection> & connection() {
+    const std::shared_ptr<Connection> & connection() const {
 
         return conn;
 

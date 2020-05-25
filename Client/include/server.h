@@ -13,6 +13,13 @@ class Server {
     Server( const std::string & address, const std::string & port );
 
     /**
+     * Retrieves the underlying connection to the server.
+     *
+     * @return The connection.
+     */
+    EventConnection & connection();
+
+    /**
      * Queues the given event for sending.
      *
      * @param e The event to send.

@@ -6,6 +6,8 @@
 /**
  * Provides an interface for sending and receiving strings
  * over a socket.
+ *
+ * Note that this class is NOT thread-safe.
  */
 class Connection {
 
