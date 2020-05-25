@@ -71,7 +71,7 @@ void GameState::updateState() {
         
         it++;
     }
-    log->info("Finished updating state");
+    log->debug("Finished updating state");
 }
 
 void GameState::applyEvent(std::shared_ptr<Event> event) {
@@ -185,4 +185,10 @@ std::shared_ptr<Object> GameState::getObject(std::string id) {
         return it->second;
     }
     return nullptr;
+}
+
+const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects() {
+
+    return gameObjects;
+
 }

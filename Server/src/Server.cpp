@@ -3,28 +3,20 @@
 
 #undef UNICODE
 
-#define WIN32_LEAN_AND_MEAN
-
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <processthreadsapi.h>
-#include <synchapi.h>
-#include <concurrent_queue.h>
-#include <stdlib.h>
-#include <stdio.h>
-
+#include <atomic>
+#include <chrono>
+#include <deque>
 #include <stdexcept>
-#include <vector>
+#include <thread>
+#include <unordered_map>
 
-#include "client.h"
-#include "connections_handler.h"
-#include "logger.h"
-#include "gamestate.h"
+#include <EventClasses/event.h>
+#include <EventClasses/UpdateEvent.h>
+#include <gamestate.h>
+#include <logger.h>
+
+#include "Clients.h"
 #include "statehandler.h"
-#include "EventClasses/event.h"
-#include "deserializer.h"
-#include "logger.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -37,209 +29,82 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
+static const std::chrono::duration TICK_PERIOD = std::chrono::milliseconds( SERVER_TICK );
+
+static std::atomic<bool> running = true;
+
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
-DWORD WINAPI handleGame(void* data) {
-    ConnectionsHandler* connectionHandler = (ConnectionsHandler*) data;
-    auto log = getLogger("Server");
+void handleGame( const std::shared_ptr<Clients> & clients ) {
+
+    auto log = getLogger( "Server" );
+
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     gameState.initialize();
     GameStateHandler gameStateHandler;
-    ConnectionsHandler* connHandler = (ConnectionsHandler*)data;
-    bool exit = false;
-    while (!exit) {
-        int signal;
+
+    while ( running ) {
+
+        std::chrono::time_point tickStart = std::chrono::steady_clock::now();
+
         // ************** GAME LOGIC START **************
-        log->trace("Start of gameplay loop");
-        if (!connectionHandler->getEventQueue()->empty()) {
-            fprintf(stderr, "%d Events in the event queue\n", (int)connectionHandler->getEventQueue()->unsafe_size());
-        }
+        log->trace( "Start of gameplay loop" );
+        
+        std::deque<std::shared_ptr<Event>> events;
+        clients->receiveAll( events );
+        log->trace( "{} events in the event queue.", events.size() );
+
         // process all events
-        gameStateHandler.getNextState(&gameState, connectionHandler->getEventQueue());
+        gameStateHandler.getNextState( &gameState, &events );
         // TODO: check if we have hit the tick yet
 
         // send out new gameState if gamestate has changed
         if (gameState.isDirty()) {
-            connectionHandler->sendGameStateToAll(gameState);
-            gameState.setDirty(false);
+            std::shared_ptr<UpdateEvent> update = std::make_shared<UpdateEvent>( std::unordered_map<std::string, std::shared_ptr<Object>>( gameState.getGameObjects().cbegin(), gameState.getGameObjects().cend() ) );
+            clients->broadcast( update );
+            gameState.setDirty( false );
         }
         
         // *************** GAME LOGIC END ***************
-        Sleep(SERVER_TICK);
-        if (connHandler->tryPopSignal(signal)) {
-            // maybe case if more signals
-            if (signal == 0) {
-                exit = true;
-            }
+        std::chrono::time_point tickEnd = std::chrono::steady_clock::now();
+        std::chrono::duration tickTime = std::chrono::duration_cast<std::chrono::milliseconds>( tickEnd - tickStart );
+        log->trace( "Tick time: {0:d} ms", tickTime.count() );
+        if ( tickTime < TICK_PERIOD ) {
+            std::this_thread::sleep_for( TICK_PERIOD - tickTime );
+        } else if ( tickTime > TICK_PERIOD ) {
+            log->warn( "Tick took {0:d} ms", tickTime.count() );
         }
+        tickStart = tickEnd;
+
     }
-    return 0;
+
 }
 
-// handles each client socket
-// data passed as pointer into array of pointers to Clients
-DWORD WINAPI handleConn(void* data) {
-    int status;
-    char buf[DEFAULT_BUFLEN] = { 0 };
-    Client* client = *(Client**) data;
-    Deserializer deserializer;
-    printf("Connected\n");
-    while ((status = client->recv(buf, DEFAULT_BUFLEN)) > 0) {
-        // TODO deserialize object from buffer and put on queue, no repsonse
-        printf("Received %d bytes\n", status);
-        std::shared_ptr<Event> event = deserializer.deserializeEvent(std::string(buf));
-        memset(buf, 0, sizeof(buf));
-        fprintf(stderr, "Event Recieved: %s\n", ((event->serialize()).c_str()));
-        client->pushEvent(event); //TODO changed function signatures
-        /*int sendStatus = client->send(buf, status);
-        // Echo the buffer back to the sender
-        if (sendStatus == SOCKET_ERROR) {
-            printf("send failed with error: %d\n", WSAGetLastError());
-            return 1;
-        }
-        printf("Echoed %d bytes\n", sendStatus);*/
-    }
-    if (status == 0) {
-        printf("Connection closed\n");
-        return 0;
-    } else {
-        printf("recv failed with error: %d\n", WSAGetLastError());
-        return 1;
-    } // todo destructor for client handler
-}
+int main_inner( void ) {
+  
+    //std::shared_ptr<Client> c = std::make_shared<Client>( 0, nullptr, nullptr, nullptr );
 
-int main_inner(void) {
     WSADATA wsaData;
-
     int status;
 
     // Initialize Winsock
-    if ((status = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
-        printf("WSAStartup failed with error: %d\n", status);
-        return 1;
+    if ( ( status = WSAStartup( MAKEWORD( 2, 2 ), &wsaData ) ) != 0 ) {
+        spdlog::critical( "WSAStartup failed with error: {0:d}", status );
+        return EXIT_FAILURE;
     }
 
-    struct addrinfo* result = NULL;
-    struct addrinfo hints;
+    // Start client handler
+    std::shared_ptr<Clients> clients = std::make_shared<Clients>( DEFAULT_PORT );
 
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-    hints.ai_flags = AI_PASSIVE;
+    // Create thread to handle game state loop
+    std::thread gameThread( [clients]() -> void { handleGame( clients ); } );
+    gameThread.join();
 
-    // resolve server address and port
-    if ((status = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result)) != 0) {
-        printf("getaddrinfo failed with error: %d\n", status);
-        WSACleanup();
-        return 1;
-    }
-
-    SOCKET listenSock = INVALID_SOCKET;
-
-    // create socket to listen for incoming connections
-    listenSock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-    if (listenSock == INVALID_SOCKET) {
-        printf("socket failed with error: %ld\n", WSAGetLastError());
-        freeaddrinfo(result);
-        WSACleanup();
-        return 1;
-    }
-
-    // bind connection listener socket
-    if (bind(listenSock, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
-        printf("bind failed with error: %d\n", WSAGetLastError());
-        freeaddrinfo(result);
-        closesocket(listenSock);
-        WSACleanup();
-        return 1;
-    }
-
-    freeaddrinfo(result);
-
-    // listen on socket
-    if (listen(listenSock, SOMAXCONN) == SOCKET_ERROR) {
-        printf("listen failed with error: %d\n", WSAGetLastError());
-        closesocket(listenSock);
-        WSACleanup();
-        return 1;
-    }
-
-    spdlog::info("Listening on port {}.", DEFAULT_PORT);
-
-    SOCKET clientSock = INVALID_SOCKET;
-    Client* clients[MAX_CLIENTS] = { NULL };
-    int count = 0; // TODO implement better client id assignment
-    concurrency::concurrent_queue<std::shared_ptr<Event>> eventQueue = concurrency::concurrent_queue<std::shared_ptr<Event>>(); // TODO use shared data class instead of int
-    concurrency::concurrent_queue<int> signalQueue = concurrency::concurrent_queue<int>();
-    ConnectionsHandler connHandler = ConnectionsHandler(clients, &eventQueue, &signalQueue);
-
-    // create thread to handle game state loop
-    HANDLE gameThread = CreateThread(NULL, 0, handleGame, &connHandler, 0, NULL);
-
-    // loop to accept connections
-    while (((clientSock = accept(listenSock, NULL, NULL)) != INVALID_SOCKET) && count < MAX_CLIENTS) {
-        // cleanup old client handlers
-        for (int i = 0; i < count; i++) {
-            DWORD exitCode;
-            if (clients[i] != NULL) {
-                // check if exited
-                HANDLE thread = clients[i]->getHandle();
-                if (GetExitCodeThread(thread, &exitCode)) {
-                    if (exitCode != STILL_ACTIVE) {
-                        printf("deleting client %d\n", i);
-                        delete clients[i];
-                        clients[i] = NULL;
-                    }
-                } else {
-                    printf("get exit code failed with error: %d\n", GetLastError());
-                }
-            }
-        }
-        // instantiate new client handler
-        HANDLE thread = CreateThread(NULL, 0, handleConn, clients + count, CREATE_SUSPENDED, NULL);
-        if (thread == NULL) {
-            printf("thread creation failed with error: %d\n", GetLastError());
-        }
-        else {
-            clients[count] = new Client(count, clientSock, thread, &eventQueue);
-        }
-        if (ResumeThread(thread) == -1) {
-            printf("thread resume failed with error: %d\n", GetLastError());
-            delete clients[count];
-            clients[count] = NULL;
-        } else {
-            count++;
-        }
-    }
-
-    printf("accept failed with error: %d (or max clients exceeded)\n", WSAGetLastError());
-    closesocket(listenSock);
-
-    // wait on outstanding threads
-    // first kill network connections
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (clients[i] != NULL) {
-            HANDLE thread = clients[i]->getHandle();
-            DWORD waitStatus = WaitForSingleObject(thread, INFINITE); // TODO actually kill instead of just waiting
-            if (waitStatus != WAIT_OBJECT_0) {
-                printf("bad\n"); // TODO look into whether this ever happens
-            }
-            delete clients[i];
-            clients[i] = NULL;
-        }
-    }
-    // kill game loop
-    signalQueue.push(0);
-    DWORD waitStatus = WaitForSingleObject(gameThread, INFINITE);
-    if (waitStatus != WAIT_OBJECT_0) {
-        printf("bad\n"); // TODO look into whether this ever happens
-    }
-    CloseHandle(gameThread);
-
+    // Release clients
+    clients = nullptr;
     WSACleanup();
-    return 1;
+    return EXIT_SUCCESS;
 }
 
 int main( void ) {
