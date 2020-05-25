@@ -75,16 +75,16 @@ void World::handleUpdates( const std::shared_ptr<UpdateEvent> & e ) {
     const std::unordered_map<std::string, std::shared_ptr<Object>> & map = e->updates;
     LOGGER->debug( "Number of updates: {}", map.size() );
 
-    for (auto it = map.begin(); it != map.end(); it++) {
+    for ( auto it = map.begin(); it != map.end(); it++ ) {
         //auto entity = this->getEntity(it->second->getId());
-        auto entity = this->getEntity(it->first);
+        auto entity = this->getEntity( it->first );
 
-        if (entity != nullptr) {
-            LOGGER->debug("Updating entity '{}'.", it->second->getId());
-            entity->setDirection(it->second->getOrientation());
-            entity->setPosition(it->second->getPosition());
+        if ( entity != nullptr ) {
+            LOGGER->debug( "Updating entity '{}'.", it->second->getId() );
+            entity->setDirection( it->second->getOrientation() );
+            entity->setPosition( it->second->getPosition() );
         } else {
-            LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
+            LOGGER->debug( "Couldn't find entity '{}'.", it->second->getId() );
         }
     }
 }

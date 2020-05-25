@@ -44,6 +44,8 @@ class Window {
     static FMOD::Studio::Bank * bankMaster;
     static FMOD::Studio::Bank * bankMasterStrings;
 
+    static void set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position, const glm::vec3 & velocity, const glm::vec3 & direction );
+
     static void initialize( Server * server, FMOD::Studio::System * audioSystem );
     static void clean_up();
     static GLFWwindow * create_window( int width, int height );

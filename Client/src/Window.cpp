@@ -77,6 +77,32 @@ void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
 }
 
+void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position, const glm::vec3 & velocity, const glm::vec3 & direction ) {
+
+    // Position
+    attr.position.x = position.x;
+    attr.position.y = position.y;
+    attr.position.z = position.z;
+
+    // Velocity
+    attr.velocity.x = velocity.x;
+    attr.velocity.y = velocity.y;
+    attr.velocity.z = velocity.z;
+
+    // Direction
+    attr.forward.x = direction.x;
+    attr.forward.y = direction.y;
+    attr.forward.z = direction.z;
+
+    // Up
+    static const glm::vec3 UP( 0.0f, 1.0f, 0.0f );
+    glm::vec3 up = glm::normalize( glm::cross( glm::cross( direction, UP ), direction ) );
+    attr.up.x = up.x;
+    attr.up.y = up.y;
+    attr.up.z = up.z;
+
+}
+
 GLFWwindow * Window::window = nullptr;
 
 int Window::width;
@@ -137,6 +163,7 @@ void Window::clean_up() {
     delete( world );
 
     // Clean up audio
+    LOGGER->info( "Unloading audio banks." );
     bankMaster->unload();
 
     // Clean up graphics
@@ -249,33 +276,13 @@ void Window::idle_callback() {
     }
 #pragma warning( pop )
 
-    /* Update audio positioning */
-
+    // Update audio positioning
     FMOD_3D_ATTRIBUTES attributes;
-    
-    // Position
-    attributes.position.x = cam->getPos().x;
-    attributes.position.y = cam->getPos().y;
-    attributes.position.z = cam->getPos().z;
-
-    // Velocity
-    attributes.velocity.x = 0.0f; // TODO
-    attributes.velocity.y = 0.0f;
-    attributes.velocity.z = 0.0f;
-
-    // Direction
-    attributes.forward.x = cam->getDir().x;
-    attributes.forward.y = cam->getDir().y;
-    attributes.forward.z = cam->getDir().z;
-
-    // Up
-    static const glm::vec3 UP( 0.0f, 1.0f, 0.0f );
-    glm::vec3 up = glm::normalize( glm::cross( glm::cross( cam->getDir(), UP ), cam->getDir() ) );
-    attributes.up.x = up.x;
-    attributes.up.y = up.y;
-    attributes.up.z = up.z;
-
+    set3DParams( attributes, cam->getPos(), glm::vec3( 0.0f ), cam->getDir() );
     FMOD_RESULT res = audioSystem->setListenerAttributes( 0, &attributes );
+    if ( res != FMOD_OK ) {
+        LOGGER->warn( "Error while updating listener position ({}).", res );
+    }
 
 }
 
