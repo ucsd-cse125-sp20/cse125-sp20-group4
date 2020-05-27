@@ -14,7 +14,7 @@ MovingObject::MovingObject(std::string id, float x, float y, float z, float orie
 
 MovingObject::MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length) : MovingObject(id, x, y, z, orientationX, orientationY, orientationZ, width, length, height, 0.0f, 0.0f, 0.0f) {}
 
-MovingObject::MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ) : Object(id, x, y, z, orientationX, orientationY, orientationZ, width, height, length) {
+MovingObject::MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ) : Object(id, x, y, z, orientationX, orientationY, orientationZ, width, height, length,true) {
     auto log = getLogger("MovingObject");
     this->fromWorld= glm::mat4(1.0);
     this->toWorld = glm::mat4(1.0);

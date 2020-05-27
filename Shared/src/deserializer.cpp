@@ -10,13 +10,15 @@
 #include "EventClasses/Factories/gamestateeventfactories.h"
 #include "EventClasses/Factories/UpdateEventFactory.h"
 #include "EventClasses/Factories/DeleteEventFactory.h"
+#include "ObjectClasses/Factories/barricadefactory.h"
 
 #include <cstddef>
 #include <stdexcept>
 
 
 Deserializer::Deserializer() {
-    this->gameMapping.insert(std::make_pair("Player", std::unique_ptr<PlayerFactory>(new PlayerFactory())));
+    this->gameMapping.insert(std::make_pair("Player", std::make_unique<PlayerFactory>()));
+    this->gameMapping.insert(std::make_pair("Barricade", std::make_unique<BarricadeFactory>()));
     this->eventMapping.insert(std::make_pair("MoveLeft", std::make_unique<MoveLeftEventFactory>()));
     this->eventMapping.insert(std::make_pair("MoveRight", std::make_unique<MoveRightEventFactory>()));
     this->eventMapping.insert(std::make_pair("MoveForward", std::make_unique<MoveForwardEventFactory>()));

@@ -5,11 +5,13 @@
 #include <EventClasses\Object\ObjectEvent.h>
 #include <EventClasses\GameState\gamestateevent.h>
 
+
 GameState::GameState() {
     this->nextId = 0;
     this->gameObjects = std::map<std::string, std::shared_ptr<Object>>();
     this->timers = std::map<std::string, std::shared_ptr<Timer>>();
     this->dirty = true;
+    this->deletes = false;
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
@@ -30,14 +32,25 @@ void GameState::deleteObject(std::string id) {
     std::map<std::string, std::shared_ptr<Object>>::iterator it;
     it = this->gameObjects.find(id);
     if (it != this->gameObjects.end()) {
+        this->addDeletions(it->second->getId());
         this->gameObjects.erase(it);
-        this->setDirty(true);
+        this->deletes = true;
         log->trace("Deleted GameState object with id: {}", id);
     }
     else {
         log->trace("Attempted to delete object with id: {} but did not find", id);
     }
 }
+
+
+std::vector<std::string> GameState::getDeletions() {
+    return this->deletedIds;
+}
+void GameState::addDeletions(std::string id) {
+    this->deletedIds.push_back(id);
+}
+
+
 
 void GameState::createTimer(std::string id, double duration, std::function<void()> callback) {
     time_t now = time(NULL);
@@ -150,7 +163,7 @@ void GameState::initialize(std::string file) {
         std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f));
         std::cout << "INITIALIZING DEFAULT" << std::endl;
         this->createObject(obj, obj->getId());
-        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Player("cube5", 3.0f, 0.0f, 3.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f));
+        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Barricade("cube5", 3.0f, 0.0f, 3.0f));
         std::cout << "INITIALIZING CUBE2" << std::endl;
         this->createObject(obj2, obj->getId());
         std::cout << this->serialize() << std::endl;
@@ -196,6 +209,8 @@ void GameState::resetDirty() {
         it++;
     }
     this->dirty = false;
+    this->deletes = false;
+    this->deletedIds.clear();
 }
 
 void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> object) {

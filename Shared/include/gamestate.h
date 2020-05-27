@@ -6,16 +6,18 @@
 #include <memory>
 #include "timer.h"
 #include "EventClasses/event.h"
-#include "ObjectClasses/player.h"
+#include "ObjectClasses/objects.h"
 class GameState
 {
 private:
     std::map<std::string, std::shared_ptr<Object>> gameObjects;
     std::map<std::string, std::shared_ptr<Timer>> timers;
+    std::vector<std::string> deletedIds;
     int nextId;
     bool dirty;
 
 public:
+    bool deletes;
     GameState();
     void createObject(std::shared_ptr<Object> obj);
     void createObject(std::shared_ptr<Object> obj, std::string id);
@@ -29,6 +31,8 @@ public:
     std::string serialize();
     void initialize(std::string file = "");
     std::string getUpdates();
+    std::vector<std::string> getDeletions();
+    void addDeletions(std::string id);
     bool isDirty();
     void setDirty(bool dty);
     void resetDirty();

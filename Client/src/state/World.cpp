@@ -1,6 +1,7 @@
 #include <stdexcept>
 
 #include <EventClasses/UpdateEvent.h>
+#include <EventClasses/Server/DeleteEvent.h>
 #include <logger.h>
 
 #include "state/World.h"
@@ -93,7 +94,10 @@ void World::handleUpdates( const std::shared_ptr<Event> & e ) {
         }
         break;
     case Event::EventType::UEvent:
-        this->removeEntity(e->getObjectId());
+        std::shared_ptr<DeleteEvent> de = std::dynamic_pointer_cast<DeleteEvent>(e);
+        for (auto it = de->ids.begin(); it != de->ids.end(); it++) {
+            this->removeEntity(*it);
+        }
         break;
     }
     

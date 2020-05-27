@@ -12,6 +12,8 @@
 
 #include <EventClasses/event.h>
 #include <EventClasses/UpdateEvent.h>
+#include <EventClasses/Server/DeleteEvent.h>
+
 #include <gamestate.h>
 #include <logger.h>
 
@@ -69,6 +71,9 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         if (gameState.isDirty()) {
             std::shared_ptr<UpdateEvent> update = std::make_shared<UpdateEvent>( std::unordered_map<std::string, std::shared_ptr<Object>>( gameState.getGameObjects().cbegin(), gameState.getGameObjects().cend() ) );
             clients->broadcast( update );
+        }
+        if (gameState.deletes) {
+            std::shared_ptr<DeleteEvent> deletes = std::make_shared<DeleteEvent>(gameState.getDeletions());
         }
         
         // *************** GAME LOGIC END ***************
