@@ -143,10 +143,10 @@ bool MovingObject::containsNext(const glm::vec3 pt) const {
     if (pt.x < this->getNextPositionX() + (this->getWidth() / 2) && pt.x > this->getNextPositionX() - (this->getWidth() / 2)) {
         return true;
     }
-    if (pt.x < this->getNextPositionY() + (this->getHeight() / 2) && pt.x > this->getNextPositionY() - (this->getHeight() / 2)) {
+    if (pt.y < this->getNextPositionY() + (this->getHeight() / 2) && pt.y > this->getNextPositionY() - (this->getHeight() / 2)) {
         return true;
     }
-    if (pt.x < this->getNextPositionZ() + (this->getLength() / 2) && pt.x > this->getNextPositionZ() - (this->getLength() / 2)) {
+    if (pt.z < this->getNextPositionZ() + (this->getLength() / 2) && pt.z > this->getNextPositionZ() - (this->getLength() / 2)) {
         return true;
     }
     return false;
@@ -168,11 +168,13 @@ bool MovingObject::collides(const MovingObject & obj) const {
 bool MovingObject::collidesNext(const Object & obj) const {
     auto log = getLogger("MovingObject");
 
-    if ((obj.getPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2)) && (obj.getPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2))) {
-        if (obj.getPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
-            if (obj.getPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
-                log->debug("Collision detected");
-                return true;
+    if (obj.canCollide()) {
+        if ((obj.getPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2)) && (obj.getPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2))) {
+            if (obj.getPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
+                if (obj.getPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
+                    log->info("Collision detected");
+                    return true;
+                }
             }
         }
     }
@@ -184,11 +186,13 @@ bool MovingObject::collidesNext(const Object & obj) const {
 
 bool MovingObject::collidesNext(const MovingObject & obj) const {
     auto log = getLogger("MovingObject");
-    if (obj.getNextPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2) && obj.getNextPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2)) {
-        if (obj.getNextPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getNextPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
-            if (obj.getNextPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getNextPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
-                log->debug("Collision detected");
-                return true;
+    if (obj.canCollide()) {
+        if (obj.getNextPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2) && obj.getNextPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2)) {
+            if (obj.getNextPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getNextPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
+                if (obj.getNextPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getNextPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
+                    log->info("Collision detected");
+                    return true;
+                }
             }
         }
     }

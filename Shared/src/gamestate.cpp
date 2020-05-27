@@ -142,6 +142,7 @@ std::string GameState::serialize() {
     log->trace("Serialized GameState with state: {}", res);
     return res;
 }
+
 void GameState::initialize(std::string file) {
     if (file.compare("") == 0) {
         // default
