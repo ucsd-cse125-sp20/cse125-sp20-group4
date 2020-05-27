@@ -20,7 +20,7 @@ class World {
     Entity * getEntity( const std::string & name ) const;
     void addEntity( Entity * const entity );
     Entity * removeEntity( const std::string & name );
-    void handleUpdates( const std::shared_ptr<UpdateEvent> & e );
+    void handleUpdates( const std::shared_ptr<Event> & e );
 
     protected:
     std::unordered_map<std::string, Entity *> entities;

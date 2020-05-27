@@ -12,6 +12,7 @@ void PlaceBarricadeEvent::apply(GameState* gamestate) const
     if (object != nullptr) {
         glm::vec3 pos = glm::vec3(object->getPosition());
         pos = pos + object->getOrientation();
+        // get item in player inventory
         // TODO replace player with correct class
         std::shared_ptr<Object> nObject = std::shared_ptr<Object>(new Player("ignore", pos.x, pos.y, pos.z));
         log->info("Trying to place {}", nObject->serialize());

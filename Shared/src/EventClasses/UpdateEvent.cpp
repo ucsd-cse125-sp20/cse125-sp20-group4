@@ -29,7 +29,7 @@ static std::vector<Sanitizer::CharMapping> specialCharacters() {
 /* Used to sanitize messages */
 static const Sanitizer sanitizer( specialCharacters() );
 
-UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::UEvent), updates( updates ) {}
+UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::GEvent), updates( updates ) {}
 
 std::string UpdateEvent::serialize() const {
 

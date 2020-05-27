@@ -71,21 +71,30 @@ Entity * World::removeEntity( const std::string & name ) {
 
 }
 
-void World::handleUpdates( const std::shared_ptr<UpdateEvent> & e ) {
+void World::handleUpdates( const std::shared_ptr<Event> & e ) {
 
-    const std::unordered_map<std::string, std::shared_ptr<Object>> & map = e->updates;
-    LOGGER->debug( "Number of updates: {}", map.size() );
+    const std::unordered_map<std::string, std::shared_ptr<Object>>& map = std::dynamic_pointer_cast<UpdateEvent>(e)->updates;
+    switch (e->getType())
+    {
+    case Event::EventType::GEvent:
+        LOGGER->debug("Number of updates: {}", map.size());
 
-    for ( auto it = map.begin(); it != map.end(); it++ ) {
-        //auto entity = this->getEntity(it->second->getId());
-        auto entity = this->getEntity( it->first );
-        if ( entity != nullptr ) {
-            LOGGER->debug( "Updating entity '{}'.", it->second->getId() );
-            entity->setDirection( it->second->getOrientation() );
-            entity->setPosition( it->second->getPosition() );
-        } else {
-            LOGGER->debug( "Couldn't find entity '{}'.", it->second->getId() );
-            addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
+        for (auto it = map.begin(); it != map.end(); it++) {
+            //auto entity = this->getEntity(it->second->getId());
+            auto entity = this->getEntity(it->first);
+            if (entity != nullptr) {
+                LOGGER->debug("Updating entity '{}'.", it->second->getId());
+                //entity->setDirection( it->second->getOrientation() );
+                entity->setPosition(it->second->getPosition());
+            } else {
+                LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
+                addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
+            }
         }
+        break;
+    case Event::EventType::UEvent:
+        this->removeEntity(e->getObjectId());
+        break;
     }
+    
 }

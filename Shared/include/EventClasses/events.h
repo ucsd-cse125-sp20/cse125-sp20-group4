@@ -13,6 +13,7 @@
 #include <EventClasses/Object/Movement/stoprightevent.h>
 #include <EventClasses/Object/Movement/stopleftevent.h>
 #include <EventClasses/UpdateEvent.h>
+#include <EventClasses/Server/DeleteEvent.h>
 
 #include <EventClasses/Object/RotateEvent.h>
 #include <EventClasses/GameState/place.h>
