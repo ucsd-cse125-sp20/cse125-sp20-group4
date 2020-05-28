@@ -4,6 +4,7 @@
 #include "logger.h"
 #include <EventClasses\Object\ObjectEvent.h>
 #include <EventClasses\GameState\gamestateevent.h>
+#include <ObjectClasses/Factories/barricadefactory.h>
 
 
 GameState::GameState() {
@@ -164,7 +165,7 @@ void GameState::initialize(std::string file) {
         // create a player
         std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f));
         this->createObject(obj, obj->getId());
-        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Barricade("cube5", 3.0f, 0.0f, 3.0f));
+        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Shelf("cube5", 3.0f, 0.0f, 3.0f, 1.0f, 1.0f, 1.0f, std::make_shared<BarricadeFactory>()));
         this->createObject(obj2, obj2->getId());
         log->info("Starting Game State: {}", this->serialize());
     } else {

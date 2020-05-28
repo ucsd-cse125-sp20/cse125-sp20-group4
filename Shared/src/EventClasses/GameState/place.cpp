@@ -16,7 +16,7 @@ void PlaceEvent::apply(GameState* gamestate) const
         glm::vec3 pos = glm::vec3(object->getPosition());
         pos = pos + object->getOrientation() * 2.0f;
         item->setPosition(pos.x,pos.y,pos.z);
-        gamestate->createObject(item,item->getId());
+        gamestate->createObject(item);
         object->setHeldItem(nullptr);
         
     }

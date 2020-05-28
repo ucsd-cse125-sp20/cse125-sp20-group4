@@ -1,6 +1,8 @@
 #include "ObjectClasses/barricade.h"
 #include "logger.h"
 
+Barricade::Barricade() : Object("ignore", 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1, 1, 1, true) {}
+
 Barricade::Barricade(std::string id, float xPos, float yPos, float zPos, float width, float height, float length, int durability, bool up) : Object(id, xPos, yPos, zPos, 1.0f, 0.0f, 0.0f, width, height, length, true) {
 	setUp(up);
 	setDurability(durability);
