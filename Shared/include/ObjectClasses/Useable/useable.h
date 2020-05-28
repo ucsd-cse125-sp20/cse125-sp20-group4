@@ -3,9 +3,7 @@
 class UseableObject : public Object
 {
 public:
-	UseableObject(std::string id, UseableObject::Type type);
+	enum class ItemType { RED, GREEN, BLUE };
+	UseableObject(std::string id, UseableObject::ItemType type);
 	~UseableObject();
-
-private:
-	enum class Type {RED, GREEN, BLUE};
 };

@@ -149,6 +149,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     //world->addEntity( new Entity( "cube4", new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f, 0.0f, 3.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );
     world->addEntity( new Entity( "cube5", new RectangularCuboid(glm::vec3(0.0f, 1.0f, 1.0f), 1.0f), glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
     cam = Camera::getCamera( playerName );
+    world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
     // Debugging entities
     world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );

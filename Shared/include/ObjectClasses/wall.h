@@ -1,3 +1,4 @@
+#pragma once
 #include "ObjectClasses/object.h"
 
 class Wall : public Object {
