@@ -127,7 +127,7 @@ if (Client_Maps)
 else()
     message(STATUS "No map targets found.")
 endif()
-endif()
+
 
 if (DEFINED FMOD_PATH)
     # Sound Banks
