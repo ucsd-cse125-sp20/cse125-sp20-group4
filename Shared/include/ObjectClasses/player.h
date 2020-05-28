@@ -17,6 +17,7 @@ public:
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ);
+    Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ, int startingMoney, int hp, std::shared_ptr<Object> held);
     //(de)serialize functions
     virtual std::string serialize() const override;
 

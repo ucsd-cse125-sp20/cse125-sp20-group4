@@ -1,4 +1,6 @@
 #include "ObjectClasses/Factories/playerfactory.h"
+#include "deserializer.h"
+
 std::shared_ptr<Object> PlayerFactory::create(std::string serial) { //TODO:Make more robust to serialization errors
     size_t pos = serial.find(":");
     size_t last = pos + 1;
@@ -53,8 +55,30 @@ std::shared_ptr<Object> PlayerFactory::create(std::string serial) { //TODO:Make 
 
     last = pos + 1;
     pos = serial.find(",", last);
-    float velz = std::stof(serial.substr(last));
+    float velz = std::stof(serial.substr(last, pos - last));
 
-    std::shared_ptr<Player> player = std::make_shared<Player>(id, posx, posy, posz, orx, ory, orz, width, height, length, velx, vely, velz);
+    last = pos + 1;
+    pos = serial.find(",", last);
+    int health = std::stoi(serial.substr(last, pos - last));
+
+    last = pos + 1;
+    pos = serial.find(",", last);
+    int money = std::stoi(serial.substr(last, pos - last));
+
+    last = pos + 1;
+
+    pos = serial.find("/", last);
+
+    //handle this differently
+    Deserializer deserializer;
+    std::string heldString = serial.substr(last, pos - last);
+    std::shared_ptr<Object> heldObj = nullptr;
+    if (heldString != "noItem") {
+        heldObj = deserializer.deserializeObject(heldString);
+    }
+
+  
+
+    std::shared_ptr<Player> player = std::make_shared<Player>(id, posx, posy, posz, orx, ory, orz, width, height, length, velx, vely, velz, health, money, heldObj);
     return player;
 }

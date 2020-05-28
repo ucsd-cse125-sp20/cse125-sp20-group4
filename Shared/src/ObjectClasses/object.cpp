@@ -166,7 +166,7 @@ bool Object::contains(const glm::vec3 pt) const {
     
 }
 
-bool Object::collides(const Object obj) const {
+bool Object::collides(const Object& obj) const {
     if (!obj.canCollide()) {
         return false;
     }

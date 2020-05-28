@@ -12,6 +12,16 @@ Player::Player(std::string id, float x, float y, float z, float orientationX, fl
     setCanCollide(true);
     setHealth(100);
     setMoney(0);
+    setHeldItem(nullptr);
+    log->trace("Creating Player with id {}, position ({}, {}, {}), width {}, height {}, length {}, orientation ({}, {}, {}), velocity ({}, {}, {})", id, x, y, z, width, height, length, orientationX, orientationY, orientationZ, velX, velY, velZ);
+}
+
+Player::Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ, int startingMoney, int hp, std::shared_ptr<Object> held) : MovingObject(id, x, y, z, orientationX, orientationY, orientationZ, width, height, length, velX, velY, velZ) {
+    auto log = getLogger("Player");
+    setCanCollide(true);
+    setHealth(hp);
+    setMoney(startingMoney);
+    setHeldItem(held);
     log->trace("Creating Player with id {}, position ({}, {}, {}), width {}, height {}, length {}, orientation ({}, {}, {}), velocity ({}, {}, {})", id, x, y, z, width, height, length, orientationX, orientationY, orientationZ, velX, velY, velZ);
 }
 
@@ -46,7 +56,7 @@ void Player::dropItem() {
 }
 
 void Player::setHealth(int newHealth) {
-    this->health = health;
+    this->health = newHealth;
 }
 
 int Player::getHealth() {
@@ -55,7 +65,16 @@ int Player::getHealth() {
 
 std::string Player::serialize() const {
     auto log = getLogger("Player");
-    std::string res = "Player:" + MovingObject::serialize();
+    std::string res = "Player:";
+    res += MovingObject::serialize() + ","
+    + std::to_string(this->health) + "," 
+    + std::to_string(this->money) + ",";
+    if (this->heldItem == nullptr) {
+        res += "noItem/";
+    }
+    else {
+        res += this->heldItem->serialize() + "/";
+    }
     log->trace("Serialized Player as {}", res);
     return res;
 }
