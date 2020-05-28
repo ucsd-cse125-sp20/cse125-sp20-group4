@@ -24,7 +24,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
-#define LOGLEVEL spdlog::level::warn //was debug
+#define LOGLEVEL spdlog::level::trace //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
 

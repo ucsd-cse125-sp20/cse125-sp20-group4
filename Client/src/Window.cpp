@@ -105,8 +105,8 @@ void Window::initialize( Server * ser ) {
 
     // add test particle generators
     Texture* tex = new Texture();
-    tex->loadTextureFromFile("Textures/particle.png", true);
-    pgens.push_back(new ParticleGenerator(Shaders::particle(), tex, 2000));
+    tex->loadTextureFromFile("Textures/smoke.png", true);
+    pgens.push_back(new ParticleGenerator(Shaders::particle(), tex, 1000, 1.0f));
 
     cam = Camera::getCamera( "cube4" );
 
@@ -220,7 +220,7 @@ void Window::idle_callback() {
 
     //update particles
     for (ParticleGenerator* pgen : pgens)
-        pgen->Update(0.01f, world->getEntity("cube5"), 1);
+        pgen->Update(0.01f, world->getEntity("cube5"), 10);
 
 }
 
@@ -234,7 +234,7 @@ void Window::display_callback( GLFWwindow * ) {
     world->draw( cam->getToView() );
     
     for (ParticleGenerator* pgen : pgens)
-        pgen->Draw(cam->getP(), cam->getV());
+        pgen->Draw(cam->getToView(), cam->getPos());
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
