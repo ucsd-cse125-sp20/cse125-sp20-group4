@@ -1,5 +1,7 @@
 #define NOMINMAX // Stop stupid library from defining max() as a macro
 
+#pragma warning(disable:4201)
+
 #include <algorithm>
 #include <deque>
 #include <iostream>
@@ -11,10 +13,12 @@
 #include <logger.h>
 
 #include "Window.h"
+#include "MapLoader.h"
 #include "drawing/Shaders.h"
 #include "drawing/model/Axis.h"
 #include "drawing/model/EmptyModel.h"
 #include "drawing/model/RectangularCuboid.h"
+#include "drawing/model/LoadedModel.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
 
@@ -143,7 +147,20 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world->addEntity( new CameraEntity( playerName, 0.0f, new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+    cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
+
+    world->addEntity( new CameraEntity( "cube4", 0.0f, new EmptyModel() , DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
+
+    MapLoader* loader = new MapLoader("Maps/map1");
+
+    std::vector<Entity*> entities = loader->getEntities();
+
+    for (auto it = entities.begin(); it != entities.end(); it++) {
+    
+        world->addEntity(*it);
+    
+    }
+
     //world->addEntity( "cube2", new Entity( new RectangularCuboid( glm::vec3( 0.0f, 1.0f, 0.0f ), 1.0f ), glm::vec3( 5.0f ), glm::vec3( 1.0f, 0.25f, 1.0f ) ) );
     //world->addEntity( "cube3", new Entity( new RectangularCuboid( glm::vec3( 1.0f, 0.0f, 1.0f ), 2.0f, 5.0f, 2.0f ), glm::vec3( 10.f, -5.0f, -2.0f ), glm::vec3( 0.70f, -1.0f, 1.0f ) ) );
     //world->addEntity( new Entity( "cube4", new RectangularCuboid( glm::vec3( 1.0f, 1.0f, 1.0f ), 1.0f ), glm::vec3( 0.0f, 0.0f, 3.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ) );

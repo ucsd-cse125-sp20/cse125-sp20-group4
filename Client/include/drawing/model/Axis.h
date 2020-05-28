@@ -14,7 +14,7 @@ class Axis : public Geometry {
     void setEnabled( bool enabled );
     void toggle();
 
-    void draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) const;
+    void draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const glm::vec3 & direction ) const;
 
     protected:
     mutable GLfloat normalPointSize;

@@ -3,7 +3,7 @@
 
 class EmptyModel : public Model {
 
-    void draw( const glm::mat4x4 &, const glm::vec3 & ) const {};
+    void draw( const glm::mat4x4 &, const glm::mat4x4 &, const glm::vec3 & ) const {};
 
 };
 

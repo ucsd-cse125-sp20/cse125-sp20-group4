@@ -94,15 +94,13 @@ void Entity::setScale( const float & s ) {
 
 /* Public functions */
 
-void Entity::draw( const glm::mat4x4 & toView ) const {
-
-    const glm::mat4x4 m = toView * modelMatrix;
+void Entity::draw( const glm::mat4x4 & view ) const {
 
     // Delegate to model
-    model->draw( m, direction );
+    model->draw( modelMatrix, view, direction );
 
     // Draw debugging axis
-    axis.draw( m, direction );
+    axis.draw( modelMatrix, view, direction );
 
 }
 

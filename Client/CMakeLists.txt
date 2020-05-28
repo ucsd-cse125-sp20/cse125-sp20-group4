@@ -38,6 +38,7 @@ find_package(spdlog REQUIRED)
 find_package(glfw3 CONFIG REQUIRED COMPONENTS GLFW)
 find_package(GLEW REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 # Link dependencies
 
@@ -48,6 +49,7 @@ target_link_libraries(Client PRIVATE Shared)
 target_link_libraries(Client PRIVATE glfw)
 target_link_libraries(Client PRIVATE GLEW::GLEW)
 target_link_libraries(Client PRIVATE glm)
+target_link_libraries(Client PRIVATE assimp::assimp)
 
 # Configure compiler
 target_compile_features(Client PRIVATE cxx_std_17)
@@ -80,6 +82,51 @@ if (Client_Shaders)
                        )
 else()
     message(STATUS "No shader targets found.")
+endif()
+
+# Models
+file(GLOB_RECURSE Client_Models RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Models/*)
+if (Client_Models)
+    message(STATUS "Including model targets.")
+    message(DEBUG "Models: ${Client_Models}")
+    list(TRANSFORM Client_Models PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Client_Models_SRC)
+    message(TRACE "Model sources: ${Client_Models_SRC}")
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Client>/Models
+                       COMMENT "Creating model output directory."
+                       )
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Client_Models_SRC} $<TARGET_FILE_DIR:Client>/Models
+                       BYPRODUCTS ${Client_Models}
+                       COMMENT "Copying models to output."
+                       )
+else()
+    message(STATUS "No model targets found.")
+endif()
+
+# Maps
+file(GLOB_RECURSE Client_Maps RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Maps/*)
+if (Client_Maps)
+    message(STATUS "Including map targets.")
+    message(DEBUG "Maps: ${Client_Maps}")
+    list(TRANSFORM Client_Maps PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Client_Maps_SRC)
+    message(TRACE "Map sources: ${Client_Maps_SRC}")
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Client>/Maps
+                       COMMENT "Creating map output directory."
+                       )
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Client_Maps_SRC} $<TARGET_FILE_DIR:Client>/Maps
+                       BYPRODUCTS ${Client_Maps}
+                       COMMENT "Copying maps to output."
+                       )
+else()
+    message(STATUS "No map targets found.")
+endif()
 endif()
 
 if (DEFINED FMOD_PATH)
