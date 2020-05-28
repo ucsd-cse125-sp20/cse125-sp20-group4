@@ -19,7 +19,7 @@ void PickUpEvent::apply(GameState* gamestate) const
             if (std::dynamic_pointer_cast<Barricade>(item) != nullptr) {
                 // check if player has enough dough
                 if (object->getMoney() > 5) {
-                    object->setMoney(object->getMoney() - 5);
+                    object->subtractMoney(5);
                     // put item into inventory
                     object->setHeldItem(itemObject->getItem());
                 }
@@ -27,6 +27,7 @@ void PickUpEvent::apply(GameState* gamestate) const
                 // put item into inventory
                 object->setHeldItem(itemObject->getItem());
             }
+            gamestate->setDirty(true);
             log->info("Just picked up an item from {}",itemObject->serialize());
         }
     } else {

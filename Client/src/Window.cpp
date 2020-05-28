@@ -17,6 +17,10 @@
 #include "drawing/model/RectangularCuboid.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+
+#include "imgui/imgui_impl_opengl3.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -287,20 +291,49 @@ void Window::idle_callback() {
 
 }
 
+void Window::drawGui() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    bool* p_open = new bool(true);
+    const float DISTANCE = 10.0f;
+    static int corner = 2;
+    ImGuiIO& io = ImGui::GetIO();
+    if (corner != -1)
+    {
+        ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+        ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    }
+    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    if (ImGui::Begin("Player Overlay", p_open, (corner != -1 ? ImGuiWindowFlags_NoMove : 0) | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("Round: 0");
+        ImGui::Text("Money: %d",world->money);
+    }
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 void Window::display_callback( GLFWwindow * ) {
 
     // Clear the color and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
+
     // Render scene.
     world->draw( cam->getToView() );
+
+    drawGui();
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
     // Swap buffers
     glfwSwapBuffers( window );
 }
+
 
 static float pointSize = 1.0f;
 

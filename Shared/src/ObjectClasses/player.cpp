@@ -11,7 +11,7 @@ Player::Player(std::string id, float x, float y, float z, float orientationX, fl
     auto log = getLogger("Player");
     setCanCollide(true);
     setHealth(100);
-    setMoney(0);
+    setMoney(10000000);
     setHeldItem(nullptr);
     log->trace("Creating Player with id {}, position ({}, {}, {}), width {}, height {}, length {}, orientation ({}, {}, {}), velocity ({}, {}, {})", id, x, y, z, width, height, length, orientationX, orientationY, orientationZ, velX, velY, velZ);
 }
@@ -32,14 +32,17 @@ int Player::getMoney() {
 
 void Player::setMoney(int newMoney) {
     this->money = newMoney;
+    this->dirty = true;
 }
 
 void Player::addMoney(int amount) {
     this->money += amount;
+    this->dirty = true;
 }
 
 void Player::subtractMoney(int amount) {
     this->money -= amount;
+    this->dirty = true;
 }
 
 
@@ -49,6 +52,7 @@ std::shared_ptr<Object> Player::getHeldItem() {
 
 void Player::setHeldItem(std::shared_ptr<Object> newObject) {
     this->heldItem = newObject;
+    this->dirty = true;
 }
 
 void Player::dropItem() {
@@ -57,6 +61,7 @@ void Player::dropItem() {
 
 void Player::setHealth(int newHealth) {
     this->health = newHealth;
+    this->dirty = true;
 }
 
 int Player::getHealth() {

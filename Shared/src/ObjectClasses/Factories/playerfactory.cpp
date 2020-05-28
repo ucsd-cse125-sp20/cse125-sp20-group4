@@ -79,7 +79,7 @@ std::shared_ptr<Object> PlayerFactory::create(std::string serial) { //TODO:Make 
 
   
 
-    std::shared_ptr<Player> player = std::make_shared<Player>(id, posx, posy, posz, orx, ory, orz, width, height, length, velx, vely, velz, health, money, heldObj);
+    std::shared_ptr<Player> player = std::make_shared<Player>(id, posx, posy, posz, orx, ory, orz, width, height, length, velx, vely, velz, money, health, heldObj);
     return player;
 }
 

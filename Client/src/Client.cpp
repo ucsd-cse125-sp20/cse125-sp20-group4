@@ -1,6 +1,10 @@
 ﻿// Cli+.cpp : Defines the entry point for the application.
 //
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+
+#include "imgui/imgui_impl_opengl3.h"
 #include <iostream>
 
 //#define GLFW_INCLUDE_GLEXT
@@ -24,6 +28,7 @@
 #include "Window.h"
 #include "ObjectClasses/object.h"
 #include "deserializer.h"
+
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -160,11 +165,23 @@ int main_inner( void ) {
     setup_opengl_settings();
     // Initialize objects/pointers for rendering
     Window::initialize( server, audioSystem );
+
+    // Imgui
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
 
+
         // Main render display callback. Rendering of objects is done here.
         Window::display_callback( window );
+
+       
         // Idle callback. Updating objects, etc. can be done here.
         Window::idle_callback();
 
@@ -172,6 +189,11 @@ int main_inner( void ) {
         audioSystem->update();
 
     }
+
+    //Imgui cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     Window::clean_up();
 

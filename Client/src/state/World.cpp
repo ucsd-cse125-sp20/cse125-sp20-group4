@@ -3,6 +3,7 @@
 #include <EventClasses/UpdateEvent.h>
 #include <EventClasses/Server/DeleteEvent.h>
 #include <logger.h>
+#include "ObjectClasses/objects.h"
 
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
@@ -11,7 +12,7 @@ static const auto LOGGER = getLogger( "World" );
 
 /* Constructor and destructor */
 
-World::World() : entities() {}
+World::World() : entities(), money(100){}
 
 World::~World() {
 
@@ -88,6 +89,12 @@ void World::handleUpdates( const std::shared_ptr<Event> & e ) {
                 LOGGER->debug("Updating entity '{}'.", it->second->getId());
                 entity->setDirection( it->second->getOrientation() );
                 entity->setPosition(it->second->getPosition());
+                // TODO update to use clients id
+                if (it->second->getId() == "cube4") {
+                    std::shared_ptr<Player> player = std::dynamic_pointer_cast<Player>(it->second);
+                    this->money = player->getMoney();
+                    LOGGER->info("Setting money to: {}", player->getMoney());
+                }
             } else {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
                 addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));

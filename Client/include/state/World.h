@@ -15,7 +15,7 @@ class World {
     public:
     World();
     ~World();
-
+    int money;
     void draw( const glm::mat4x4 & toView ) const;
     Entity * getEntity( const std::string & name ) const;
     void addEntity( Entity * const entity );
