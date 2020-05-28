@@ -22,6 +22,7 @@ void GameState::createObject(std::shared_ptr<Object> obj, std::string id) {
     auto log = getLogger("GameState");
     obj->setId(id);
     this->gameObjects.insert(std::pair<std::string, std::shared_ptr<Object>>(id, obj));
+    obj->dirty = true;
     this->setDirty(true);
     log->trace("Created GameState object with id: {}", id);
 }
@@ -157,19 +158,18 @@ std::string GameState::serialize() {
 }
 
 void GameState::initialize(std::string file) {
+    auto log = getLogger("GameState");
     if (file.compare("") == 0) {
         // default
         // create a player
         std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f));
-        std::cout << "INITIALIZING DEFAULT" << std::endl;
         this->createObject(obj, obj->getId());
         std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Barricade("cube5", 3.0f, 0.0f, 3.0f));
-        std::cout << "INITIALIZING CUBE2" << std::endl;
-        this->createObject(obj2, obj->getId());
-        std::cout << this->serialize() << std::endl;
+        this->createObject(obj2, obj2->getId());
+        log->info("Starting Game State: {}", this->serialize());
     } else {
         // TODO parse file
-        std::cout << "INITIALIZING FROM A FILE IS NOT IMPLEMENTED" << std::endl;
+        log->error("Game state initialization from file NOT IMPLEMENTED");
     }
  }
 

@@ -60,6 +60,7 @@ void World::addEntity( Entity * const entity ) {
 
 Entity * World::removeEntity( const std::string & name ) {
 
+    LOGGER->debug("Trying to Remove entity '{}' from world.", name);
     auto found = entities.find( name );
     if ( found == entities.end() ) {
         return nullptr;
@@ -95,6 +96,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e ) {
         break;
     case Event::EventType::UEvent:
         std::shared_ptr<DeleteEvent> de = std::dynamic_pointer_cast<DeleteEvent>(e);
+        LOGGER->debug("DELETE TIME: {}", de->ids.size());
         for (auto it = de->ids.begin(); it != de->ids.end(); it++) {
             this->removeEntity(*it);
         }

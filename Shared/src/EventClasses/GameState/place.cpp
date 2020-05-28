@@ -9,24 +9,16 @@ void PlaceEvent::apply(GameState* gamestate) const
     // get object
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
-    if (object != nullptr) {
-        glm::vec3 pos = glm::vec3(object->getPosition());
-        pos = pos + object->getOrientation()*2.0f;
+    if (object != nullptr && object->getHeldItem()!=nullptr) {
         // get item in player inventory
-        int itemId = object->inventory;
-        std::shared_ptr<Object> nObject = nullptr;
-        switch (itemId)
-        {
-            case 1:
-                nObject = std::shared_ptr<Object>(new Barricade("ignore", pos.x, pos.y, pos.z));
-                log->info("Trying to place {}", nObject->serialize());
-                object->inventory = -1;
-            break;
-        }
+        std::shared_ptr<Object> item = object->getHeldItem();
         // TODO replace player with correct class
-        if (nObject != nullptr) {
-            gamestate->createObject(nObject);
-        }
+        glm::vec3 pos = glm::vec3(object->getPosition());
+        pos = pos + object->getOrientation() * 2.0f;
+        item->setPosition(pos.x,pos.y,pos.z);
+        gamestate->createObject(item,item->getId());
+        object->setHeldItem(nullptr);
+        
     }
 }
 

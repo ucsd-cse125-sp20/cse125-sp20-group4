@@ -26,18 +26,15 @@ std::shared_ptr<DeleteEvent> DeleteEvent::deserialize(const std::string& seriali
         last = pos + 1;
         res.push_back(token);
     }
-    
+    auto log = getLogger("Delete");
+    log->info("Just created a delete event");
     return std::shared_ptr<DeleteEvent>(new DeleteEvent(res));
 }
 
 std::string DeleteEvent::serialize() const {
     std::string res = HEADER;
     for (auto it = ids.begin(); it != ids.end(); it++) {
-        if (res.compare(HEADER) == 0) {
-            res += *it;
-        } else {
-            res += DELIMITER + *it;
-        }
+        res += *it + DELIMITER;
     }
     res += END_TAG;
     

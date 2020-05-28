@@ -362,7 +362,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_E: // Start moving up.
                 if (cam->name == Window::playerName) {
                     // TODO: figure out target id
-                    server->send(std::make_shared<PickUpEvent>(playerName,"cube4"));
+                    server->send(std::make_shared<PickUpEvent>(playerName,"cube5"));
                 }else if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
                 }

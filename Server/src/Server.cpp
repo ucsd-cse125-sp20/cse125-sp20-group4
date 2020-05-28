@@ -26,7 +26,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::info
+#define LOGLEVEL spdlog::level::trace
 
 #define MAX_CLIENTS 5
 #define SERVER_TICK 20
@@ -74,6 +74,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         }
         if (gameState.deletes) {
             std::shared_ptr<DeleteEvent> deletes = std::make_shared<DeleteEvent>(gameState.getDeletions());
+            clients->broadcast(deletes);
         }
         
         // *************** GAME LOGIC END ***************
