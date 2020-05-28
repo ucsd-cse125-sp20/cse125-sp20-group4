@@ -364,7 +364,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 }
                 break;
 
-            case GLFW_KEY_SPACE: // Start moving forward.
+            case GLFW_KEY_SPACE: // Place an object
                 if (cam->name == Window::playerName) {
                     server->send(std::make_shared<PlaceEvent>(playerName));
                 }

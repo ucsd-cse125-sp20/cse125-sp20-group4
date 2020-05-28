@@ -162,7 +162,8 @@ void GameState::initialize(std::string file) {
     if (file.compare("") == 0) {
         // default
         // create a player
-        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f));
+        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f, 100, 100,
+           std::make_shared<Barricade>("barrier1", 1.0f, 1.0f, 1.0f)));
         this->createObject(obj, obj->getId());
         std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Barricade("cube5", 3.0f, 0.0f, 3.0f));
         this->createObject(obj2, obj2->getId());
