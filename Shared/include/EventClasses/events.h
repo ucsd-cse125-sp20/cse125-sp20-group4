@@ -17,4 +17,5 @@
 
 #include <EventClasses/Object/RotateEvent.h>
 #include <EventClasses/GameState/place.h>
+#include <EventClasses/GameState/pickup.h>
 #endif

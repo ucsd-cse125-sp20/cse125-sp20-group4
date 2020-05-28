@@ -30,7 +30,8 @@ Deserializer::Deserializer() {
     this->eventMapping.insert( std::make_pair( "RotateEvent", std::make_unique<RotateEventFactory>() ) );
     this->eventMapping.insert( std::make_pair( UpdateEvent::TAG, std::make_unique<UpdateEventFactory>() ) );
     this->eventMapping.insert(std::make_pair( DeleteEvent::TAG, std::make_unique<DeleteEventFactory>()));
-    this->eventMapping.insert(std::make_pair("PlaceBarricade", std::make_unique<PlaceEventFactory>()));
+    this->eventMapping.insert(std::make_pair("PlaceEvent", std::make_unique<PlaceEventFactory>()));
+    this->eventMapping.insert(std::make_pair("PickUpEvent", std::make_unique<PickUpEventFactory>()));
 }
 
 std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {

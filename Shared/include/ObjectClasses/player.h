@@ -2,10 +2,6 @@
 #include "movingobject.h"
 
 class Player : public MovingObject {
-private:
-    //inventory??
-    int disregard;
-
 public:
     Player(const Player& player);
     Player(std::string id);
@@ -17,4 +13,6 @@ public:
     virtual std::string serialize() const override;
 
     static Player& deserialize(std::string serial);
+    //inventory??
+    int inventory = -1;
 };

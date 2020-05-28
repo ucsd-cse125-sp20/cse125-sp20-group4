@@ -349,7 +349,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
 
             case GLFW_KEY_SPACE: // Start moving forward.
                 if (cam->name == Window::playerName) {
-                    server->send(std::make_shared<PlaceBarricadeEvent>(playerName));
+                    server->send(std::make_shared<PlaceEvent>(playerName));
                 }
                 break;
 
@@ -360,7 +360,10 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
             case GLFW_KEY_E: // Start moving up.
-                if ( cam->isFreeCamera() ) {
+                if (cam->name == Window::playerName) {
+                    // TODO: figure out target id
+                    server->send(std::make_shared<PickUpEvent>(playerName,"cube4"));
+                }else if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
                 }
                 break;
