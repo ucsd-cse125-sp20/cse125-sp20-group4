@@ -21,6 +21,7 @@
 #include "imgui/imgui_impl_glfw.h"
 
 #include "imgui/imgui_impl_opengl3.h"
+#include "imgui/fonts/IconsFontAwesome5.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -290,28 +291,84 @@ void Window::idle_callback() {
     }
 
 }
+void drawInfoGui(World* world) {   
+    bool* p_open = new bool(true);
+    const float DISTANCE = 10.0f;
+    static int corner = 2;
 
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+    if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("Round: 0");
+        ImGui::Text("Money: %d",world->money);
+        ImGui::End();
+    }
+
+}
+void drawReadyGui(World* world) {
+    bool* p_open = new bool(true);
+    const float DISTANCE = 10.0f;
+    static int corner = 1;
+    int money = world->money;
+    
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    if (ImGui::Begin("Ready Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        // TODO check if readied up
+        if (false) {
+            ImGui::Text(ICON_FA_BATH "%d of 5 Ready",2);
+        } else {
+            ImGui::Text("Press R to ready up");
+        }
+        ImGui::End();
+    }
+
+}
+void drawEndGui(World* world) {
+    bool* p_open = new bool(true);
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 window_pos = ImVec2( io.DisplaySize.x *0.5f, io.DisplaySize.y * 0.5f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
+    if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("Game Over");
+        ImGui::Text("Score: %d", world->money);
+        ImGui::End();
+    }
+
+}
 void Window::drawGui() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 2;
-    ImGuiIO& io = ImGui::GetIO();
-    if (corner != -1)
-    {
-        ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-        ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    LOGGER->info("About to draw gui");
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowBorderSize = 5;
+    style.FrameBorderSize = 0;
+    style.PopupBorderSize = 0;
+    switch (world->phase) {
+    case World::Phase::READY:
+        drawReadyGui(world);
+        break;
+    case World::Phase::ROUND:
+        drawInfoGui(world);
+        break;
+    case World::Phase::END:
+        drawEndGui(world);
+        drawInfoGui(world);
+        break;
     }
-    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-    if (ImGui::Begin("Player Overlay", p_open, (corner != -1 ? ImGuiWindowFlags_NoMove : 0) | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Round: 0");
-        ImGui::Text("Money: %d",world->money);
-    }
-    ImGui::End();
+    LOGGER->info("gui drawn");
+    
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

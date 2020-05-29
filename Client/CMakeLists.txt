@@ -59,7 +59,6 @@ else()
 endif()
 
 # Include resource files in artifacts
-
 # Shaders
 file(GLOB_RECURSE Client_Shaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
      CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/*)
