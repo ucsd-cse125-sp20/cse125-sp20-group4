@@ -1,6 +1,9 @@
 #include "EventClasses/GameState/place.h"
 #include "ObjectClasses/barricade.h"
 #include "logger.h"
+
+#include <glm/gtc/epsilon.hpp>
+#define EPSILON 0.0005f
 PlaceEvent::PlaceEvent(std::string id) : GameStateEvent(id) {}
 
 void PlaceEvent::apply(GameState* gamestate) const
@@ -12,9 +15,18 @@ void PlaceEvent::apply(GameState* gamestate) const
     if (object != nullptr && object->getHeldItem()!=nullptr) {
         // get item in player inventory
         std::shared_ptr<Object> item = object->getHeldItem();
-        // TODO replace player with correct class
         glm::vec3 pos = glm::vec3(object->getPosition());
-        pos = pos + object->getOrientation() * 2.0f;
+        glm::vec3 ori = object->getOrientation();
+        ori.y = 0;
+        if (glm::all(epsilonEqual(ori, glm::vec3(0, 0, 0), EPSILON))) {
+            ori = glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+        else{
+            ori = glm::normalize(ori);
+        }
+        pos = pos + ori * object->getWidth() * 3.0f;
+        //TODO check for collision
+        //TODO update map
         item->setPosition(pos.x,pos.y,pos.z);
         gamestate->createObject(item);
         object->setHeldItem(nullptr);

@@ -15,7 +15,6 @@ class World {
     public:
     World();
     ~World();
-    int money;
     enum class Phase {READY, END, ROUND};
     Phase phase;
     void draw( const glm::mat4x4 & toView ) const;

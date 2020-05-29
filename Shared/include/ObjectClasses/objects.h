@@ -5,3 +5,4 @@
 #include <ObjectClasses/player.h>
 #include <ObjectClasses/enemy.h>
 #include <ObjectClasses/shelf.h>
+#include <ObjectClasses/wall.h>

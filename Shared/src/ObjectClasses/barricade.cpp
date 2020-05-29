@@ -1,6 +1,7 @@
 #include "ObjectClasses/barricade.h"
 #include "logger.h"
 
+const std::string Barricade::TAG = "Barricade";
 Barricade::Barricade() : Object("ignore", 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1, 1, 1, true) {}
 
 Barricade::Barricade(std::string id, float xPos, float yPos, float zPos, float width, float height, float length, int durability, bool up) : Object(id, xPos, yPos, zPos, 1.0f, 0.0f, 0.0f, width, height, length, true) {
@@ -18,15 +19,16 @@ void Barricade::toggleUp() {
 }
 
 void Barricade::setUp(bool upValue) {
-	auto log = getLogger("Barricade");
+	auto log = getLogger(TAG);
 	this->up = upValue;
 	this->setCanCollide(upValue);
+	this->dirty = true;
 	log->trace("Set barricade with id {} to status {}", this->getId(), this->isUp());
 }
 
 std::string Barricade::serialize() const {
-	auto log = getLogger("Barricade");
-	std::string res = "Barricade:"
+	auto log = getLogger(TAG);
+	std::string res = TAG+":"
 		+ Object::serialize() + ","
 		+ std::to_string(this->isUp()) + ","
 		+ std::to_string(this->getDurability());
@@ -40,10 +42,11 @@ int Barricade::getDurability() const{
 
 void Barricade::degradeBarricade() {
 	this->setDurability(this->getDurability() - this->degradeFactor);
+	this->dirty = true;
 }
 
 void Barricade::setDurability(int newDurability) {
-	auto log = getLogger("Barricade");
+	auto log = getLogger(TAG);
 	this->durability = newDurability;
 	log->trace("Set durability of barricade with it {} to status {}", this->getId(), newDurability);
 	if (this->durability <= 0) {
@@ -52,4 +55,5 @@ void Barricade::setDurability(int newDurability) {
 	else {
 		this->setUp(true);
 	}
+	this->dirty = true;
 }

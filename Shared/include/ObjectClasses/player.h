@@ -9,6 +9,7 @@ private:
     int money;
 
 public:
+    static const std::string TAG;
     Player(const Player& player);
     Player(std::string id);
     Player(std::string id, float x, float y, float z);

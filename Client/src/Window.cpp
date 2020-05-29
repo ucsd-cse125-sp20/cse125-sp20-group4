@@ -69,6 +69,14 @@ FMOD::Studio::Bank * Window::bankMasterStrings;
 
 std::string Window::playerName = "cube4"; 
 
+
+GLFWwindow* Window::window = nullptr;
+
+int Window::width;
+int Window::height;
+int Window::money;
+bool Window::holding;
+
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
     bool isPlayer = cam->name == Window::playerName;
@@ -108,13 +116,10 @@ void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position,
 
 }
 
-GLFWwindow * Window::window = nullptr;
-
-int Window::width;
-int Window::height;
 
 void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
-
+    Window::money = 100;
+    Window::holding = false;
     // Set up graphics
     Shaders::initializeShaders();
 
@@ -291,7 +296,7 @@ void Window::idle_callback() {
     }
 
 }
-void drawInfoGui(World* world) {   
+void drawInfoGui() {   
     bool* p_open = new bool(true);
     const float DISTANCE = 10.0f;
     static int corner = 2;
@@ -304,16 +309,16 @@ void drawInfoGui(World* world) {
     if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         ImGui::Text("Round: 0");
-        ImGui::Text("Money: %d",world->money);
+        ImGui::Text("Money: %d", Window::money);
         ImGui::End();
     }
 
 }
-void drawReadyGui(World* world) {
+void drawReadyGui() {
     bool* p_open = new bool(true);
     const float DISTANCE = 10.0f;
     static int corner = 1;
-    int money = world->money;
+    int money = Window::money;
     
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
@@ -331,7 +336,7 @@ void drawReadyGui(World* world) {
     }
 
 }
-void drawEndGui(World* world) {
+void drawEndGui() {
     bool* p_open = new bool(true);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -341,7 +346,7 @@ void drawEndGui(World* world) {
     if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         ImGui::Text("Game Over");
-        ImGui::Text("Score: %d", world->money);
+        ImGui::Text("Score: %d", Window::money);
         ImGui::End();
     }
 
@@ -357,14 +362,14 @@ void Window::drawGui() {
     style.PopupBorderSize = 0;
     switch (world->phase) {
     case World::Phase::READY:
-        drawReadyGui(world);
+        drawReadyGui();
         break;
     case World::Phase::ROUND:
-        drawInfoGui(world);
+        drawInfoGui();
         break;
     case World::Phase::END:
-        drawEndGui(world);
-        drawInfoGui(world);
+        drawEndGui();
+        drawInfoGui();
         break;
     }
     LOGGER->info("gui drawn");
@@ -440,7 +445,12 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
 
             case GLFW_KEY_SPACE: // Start moving forward.
                 if (cam->name == Window::playerName) {
-                    server->send(std::make_shared<PlaceEvent>(playerName));
+                    if (Window::holding) {
+                        server->send(std::make_shared<PlaceEvent>(playerName));
+                    } else {
+                        // TODO update to select correct item
+                        server->send(std::make_shared<PickUpEvent>(playerName, "cube5"));
+                    }
                 }
                 break;
 
@@ -451,10 +461,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 break;
 
             case GLFW_KEY_E: // Start moving up.
-                if (cam->name == Window::playerName) {
-                    // TODO: figure out target id
-                    server->send(std::make_shared<PickUpEvent>(playerName,"cube5"));
-                }else if ( cam->isFreeCamera() ) {
+                if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
                 }
                 break;
@@ -619,7 +626,19 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 }
 
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
-
-    world->handleUpdates( std::static_pointer_cast<UpdateEvent>( e ) );
+    auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
+    // update my data
+    auto it = uEvent->updates.find(playerName);
+    if (it != uEvent->updates.end()) {
+        auto player = std::static_pointer_cast<Player>(it->second);
+        money = player->getMoney();
+        if (player->getHeldItem() != nullptr) {
+            holding = true;
+        } else
+        {
+            holding = false;
+        }
+    }
+    world->handleUpdates( uEvent );
 
 }

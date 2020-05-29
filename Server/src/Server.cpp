@@ -26,7 +26,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::trace
+#define LOGLEVEL spdlog::level::warn
 
 #define MAX_CLIENTS 5
 #define SERVER_TICK 20
@@ -45,7 +45,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     // ************** SETUP GAME STATE ****************
     GameState gameState;
-    gameState.initialize();
+    gameState.initialize("map.txt");
     WaveHandler waveHandler = WaveHandler(gameState); // TODO move this into gamestate
     waveHandler.init();
     GameStateHandler gameStateHandler;

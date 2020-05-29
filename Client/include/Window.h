@@ -39,6 +39,10 @@ class Window {
     static Server * server;
     static std::string playerName;
 
+
+    static int money;
+    static bool holding;
+
     // Audio data
     static FMOD::Studio::System * audioSystem;
     static FMOD::Studio::Bank * bankMaster;

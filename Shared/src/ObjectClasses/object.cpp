@@ -1,6 +1,5 @@
 #include "ObjectClasses/object.h"
 #include "logger.h"
-
 Object::Object(const Object& obj) : Object(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ()) {}
 
 Object::Object(std::string id) : Object(id, 0.0f, 0.0f, 0.0f) {}
