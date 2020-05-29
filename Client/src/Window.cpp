@@ -22,6 +22,8 @@
 
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/fonts/IconsFontAwesome5.h"
+#include "imgui/fonts/IconsMaterialDesign.h"
+#include "imgui/fonts/IconsForkAwesome.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -309,7 +311,8 @@ void drawInfoGui() {
     if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         ImGui::Text("Round: 0");
-        ImGui::Text("Money: %d", Window::money);
+        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
+        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
         ImGui::End();
     }
 

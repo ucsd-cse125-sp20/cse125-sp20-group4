@@ -6,6 +6,9 @@
 
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/fonts/IconsFontAwesome5.h"
+#include "imgui/fonts/IconsMaterialDesign.h"
+#include "imgui/fonts/IconsForkAwesome.h"
+
 #include <iostream>
 
 //#define GLFW_INCLUDE_GLEXT
@@ -177,10 +180,17 @@ int main_inner( void ) {
     //io.Fonts->AddFontDefault();
     ImFontConfig config;
     config.MergeMode = true;
-    config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
-    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    config.GlyphMinAdvanceX = 35.0f; // Use if you want to make the icon monospaced
     io.Fonts->AddFontFromFileTTF("fonts/Bangers-Regular.ttf", 30.0f);
-    io.Fonts->AddFontFromFileTTF("fonts/FA5-Regular-400.ttf" , 13.0f, &config, icon_ranges);
+
+    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    io.Fonts->AddFontFromFileTTF("fonts/fa-solid-900.ttf" , 30.0f, &config, icon_ranges);
+
+    //static const ImWchar icon_ranges[] = { ICON_MIN_MD, ICON_MAX_MD, 0 };
+    //io.Fonts->AddFontFromFileTTF("fonts/MaterialIcons-Regular.ttf", 30.0f, &config, icon_ranges);
+
+    //static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_FK, 0 };
+    //io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 30.0f, &config, icon_ranges);
     io.Fonts->Build();
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
