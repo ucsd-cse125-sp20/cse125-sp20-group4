@@ -31,6 +31,29 @@ find_package(glm CONFIG REQUIRED)
 target_link_libraries(Server PRIVATE Shared)
 target_link_libraries(Server PRIVATE glm)
 
+
+file(GLOB_RECURSE Server_Maps RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Maps/*)
+if (Server_Maps)
+    message(STATUS "Including maps targets.")
+    message(DEBUG "Maps: ${Server_Maps}")
+    list(TRANSFORM Server_Maps PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Server_Maps_SRC)
+    message(TRACE "Maps sources: ${Server_Maps_SRC}")
+    add_custom_command(TARGET Server POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Server>/Maps
+                       COMMENT "Creating map output directory."
+                       )
+    add_custom_command(TARGET Server POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Server_Maps_SRC} $<TARGET_FILE_DIR:Server>/Maps
+                       BYPRODUCTS ${Server_Maps}
+                       COMMENT "Copying maps to output."
+                       )
+else()
+    message(STATUS "No maps targets found.")
+endif()
+
+
 # Configure compiler
 target_compile_features(Server PRIVATE cxx_std_17)
 if (MSVC)

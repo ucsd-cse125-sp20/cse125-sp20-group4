@@ -45,7 +45,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     // ************** SETUP GAME STATE ****************
     GameState gameState;
-    gameState.initialize("map.txt");
+    gameState.initialize("Maps/base.txt");
     WaveHandler waveHandler = WaveHandler(gameState); // TODO move this into gamestate
     waveHandler.init();
     GameStateHandler gameStateHandler;

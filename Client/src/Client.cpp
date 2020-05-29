@@ -179,8 +179,8 @@ int main_inner( void ) {
     config.MergeMode = true;
     config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
     static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    io.Fonts->AddFontFromFileTTF("Bangers-Regular.ttf", 30.0f);
-    io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FAR, 13.0f, &config, icon_ranges);
+    io.Fonts->AddFontFromFileTTF("fonts/Bangers-Regular.ttf", 30.0f);
+    io.Fonts->AddFontFromFileTTF("fonts/FA5-Regular-400.ttf" , 13.0f, &config, icon_ranges);
     io.Fonts->Build();
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {

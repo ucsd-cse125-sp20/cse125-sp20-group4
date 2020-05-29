@@ -159,3 +159,24 @@ if (DEFINED FMOD_PATH AND NOT ${TARGET_PLATFORM} STREQUAL "unknown")
                        COMMENT "Copying FMOD studio DLLs to output."
                        )
 endif()
+
+file(GLOB_RECURSE Client_Fonts RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/imgui/fonts/*.ttf)
+if (Client_Fonts)
+    message(STATUS "Including model targets.")
+    message(DEBUG "Fonts: ${Client_Fonts}")
+    list(TRANSFORM Client_Fonts PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Client_Fonts_SRC)
+    message(TRACE "Fonts sources: ${Client_Fonts_SRC}")
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Client>/fonts
+                       COMMENT "Creating font output directory."
+                       )
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Client_Fonts_SRC} $<TARGET_FILE_DIR:Client>/fonts
+                       BYPRODUCTS ${Client_Fonts}
+                       COMMENT "Copying fonts to output."
+                       )
+else()
+    message(STATUS "No fonts targets found.")
+endif()
