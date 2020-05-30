@@ -1,6 +1,10 @@
-sssss    sssss
-
-sssss 02 sssss
-sssss 13 sssss
-
-sssss    sssss
+ssssssssssssssssssss
+s                  s
+s  sssss    sssss  s
+s                  s
+s  sssss 02 sssss  s
+s  sssss 13 sssss  s
+s                  s
+s  sssss    sssss  s
+s                  s
+ssssssssssssssssssss

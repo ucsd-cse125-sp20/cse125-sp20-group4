@@ -5,7 +5,6 @@
 #include <EventClasses\Object\ObjectEvent.h>
 #include <EventClasses\GameState\gamestateevent.h>
 #include <ObjectClasses/Factories/barricadefactory.h>
-#include "maploader.h"
 
 GameState::GameState() {
     this->nextId = 0;
@@ -158,21 +157,11 @@ std::string GameState::serialize() {
     return res;
 }
 
-void GameState::initialize(std::string file) {
+void GameState::initialize() {
     auto log = getLogger("GameState");
-    if (file.compare("") == 0) {
-        // default
-        // create a player
-        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f));
-        this->createObject(obj, obj->getId());
-        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Shelf("cube5", 3.0f, 0.0f, 3.0f, 1.0f, 1.0f, 1.0f, std::make_shared<BarricadeFactory>()));
-        this->createObject(obj2, obj2->getId());
-        log->info("Starting Game State: {}", this->serialize());
-    } else {
-        // TODO parse file
-        MapLoader::LoadMap(file, this);
-        log->info("Starting Game State: {}", this->serialize());
-    }
+    /* set the phase*/
+
+    log->info("Starting Game State: {}", this->serialize());
  }
 
 std::string GameState::getUpdates() {

@@ -29,7 +29,7 @@ public:
     void updateState();
     void applyEvent(std::shared_ptr<Event> event);
     std::string serialize();
-    void initialize(std::string file = "");
+    void initialize();
     std::string getUpdates();
     std::vector<std::string> getDeletions();
     void addDeletions(std::string id);
