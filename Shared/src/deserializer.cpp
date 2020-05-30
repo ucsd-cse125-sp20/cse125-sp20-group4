@@ -10,6 +10,7 @@
 #include "EventClasses/Factories/gamestateeventfactories.h"
 #include "EventClasses/Factories/UpdateEventFactory.h"
 #include "EventClasses/Factories/DeleteEventFactory.h"
+#include "EventClasses/Factories/NotifyEventFactory.h"
 #include "ObjectClasses/Factories/barricadefactory.h"
 #include "ObjectClasses/Factories/shelffactory.h"
 
@@ -33,8 +34,11 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair( "RotateEvent", std::make_unique<RotateEventFactory>() ) );
     this->eventMapping.insert(std::make_pair( UpdateEvent::TAG, std::make_unique<UpdateEventFactory>() ) );
     this->eventMapping.insert(std::make_pair( DeleteEvent::TAG, std::make_unique<DeleteEventFactory>()));
+    this->eventMapping.insert(std::make_pair(NotifyEvent::TAG, std::make_unique<NotifyEventFactory>()));
     this->eventMapping.insert(std::make_pair("PlaceEvent", std::make_unique<PlaceEventFactory>()));
     this->eventMapping.insert(std::make_pair("PickUpEvent", std::make_unique<PickUpEventFactory>()));
+    this->eventMapping.insert(std::make_pair(ReadyEvent::TAG, std::make_unique<ReadyEventFactory>()));
+    this->eventMapping.insert(std::make_pair(JoinEvent::TAG, std::make_unique<JoinEventFactory>()));
 }
 
 std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
@@ -77,7 +81,7 @@ std::shared_ptr<Event> Deserializer::deserializeEvent( std::string serial ) {
 
     auto factory = eventMapping.find( tag );
     if ( factory == eventMapping.end() ) {
-        throw std::invalid_argument( "Unrecognized event type." );
+        throw std::invalid_argument( "Unrecognized event type. " + tag );
     }
 
     getLogger( "Deserializer" )->trace( "Deserializing event {}", tag );

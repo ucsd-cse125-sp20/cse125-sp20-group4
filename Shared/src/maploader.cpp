@@ -28,6 +28,18 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
             case 'w':
                 //gs->createObject(std::make_shared<Wall>("ignore", position.x, position.y, position.z));
                 break;
+            case '0':
+                gs->createObject(std::make_shared<Player>("client-0", position.x, position.y, position.z), "client-0");
+                break;
+            case '1':
+                gs->createObject(std::make_shared<Player>("client-1", position.x, position.y, position.z), "client-1");
+                break;
+            case '2':
+                gs->createObject(std::make_shared<Player>("client-2", position.x, position.y, position.z), "client-2");
+                break;
+            case '3':
+                gs->createObject(std::make_shared<Player>("client-3", position.x, position.y, position.z), "client-3");
+                break;
             }
             i++;
         }

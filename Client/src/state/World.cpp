@@ -7,6 +7,7 @@
 
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
+#include "state/CameraEntity.h"
 
 static const auto LOGGER = getLogger( "World" );
 
@@ -73,8 +74,17 @@ Entity * World::removeEntity( const std::string & name ) {
     return e;
 
 }
+void World::createNewEntity(std::shared_ptr<Object> entity,std::string id) {
+    if (entity->getId().compare(id)==0) {
+        addEntity(new CameraEntity(id, 0.0f, new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), entity->getPosition(), entity->getOrientation(), 1.0f, false));
+        LOGGER->warn("Created Player camera entity");
+    } else {
+        addEntity(new Entity(entity->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), entity->getPosition(), entity->getOrientation()));
+    }
 
-void World::handleUpdates( const std::shared_ptr<Event> & e ) {
+}
+
+void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
 
     const std::unordered_map<std::string, std::shared_ptr<Object>>& map = std::dynamic_pointer_cast<UpdateEvent>(e)->updates;
     switch (e->getType())
@@ -91,7 +101,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e ) {
                 entity->setPosition(it->second->getPosition());
             } else {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
-                addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
+                createNewEntity(it->second,id);
             }
         }
         break;

@@ -171,12 +171,6 @@ void GameState::initialize(std::string file) {
     } else {
         // TODO parse file
         MapLoader::LoadMap(file, this);
-
-        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4", 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f));
-        this->createObject(obj, obj->getId());
-
-        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Shelf("cube5", 3.0f, 0.0f, 3.0f, 1.0f, 1.0f, 1.0f, std::make_shared<BarricadeFactory>()));
-        this->createObject(obj2, obj2->getId());
         log->info("Starting Game State: {}", this->serialize());
     }
  }
@@ -252,4 +246,10 @@ const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects
 
     return gameObjects;
 
+}
+void GameState::makeDirty() {
+    setDirty(true);
+    for (auto it = this->gameObjects.begin(); it != this->gameObjects.end();it++){
+        it->second->dirty = true;
+    }
 }
