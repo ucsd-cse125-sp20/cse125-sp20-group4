@@ -14,7 +14,7 @@ class Geometry : public Model {
     Geometry( const Shader & shaderProgram, const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<unsigned int> & indices, GLenum drawMode = GL_TRIANGLES );
     ~Geometry();
 
-    virtual void draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) const;
+    virtual void draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const glm::vec3 & direction ) const;
 
     protected:
     const Shader shaderProgram;

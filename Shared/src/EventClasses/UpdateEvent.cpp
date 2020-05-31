@@ -96,7 +96,7 @@ std::shared_ptr<UpdateEvent> UpdateEvent::deserialize( const std::string & seria
         
         std::string id;
         std::shared_ptr<Object> data = readEntry( serialized, start, end, id );
-
+        LOGGER->debug("Got object {}:", data->serialize());
         if ( data != nullptr ) {
             if ( updates.count( id ) > 0 ) {
                 LOGGER->warn( "Duplicate key: {}", id );
