@@ -6,6 +6,8 @@
 #include "glm/gtc/epsilon.hpp"
 #define EPSILON 0.0005f
 
+MovingObject::MovingObject(const MovingObject& obj) : MovingObject(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getVelocityX(), obj.getVelocityY(), obj.getVelocityZ()) {}
+
 MovingObject::MovingObject(std::string id) : MovingObject(id, 0.0f, 0.0f, 0.0f) {}
 
 MovingObject::MovingObject(std::string id, float x, float y, float z) : MovingObject(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
@@ -266,7 +268,9 @@ void MovingObject::handleZCollision(const MovingObject & obj) {
 
 }
 
-
+std::shared_ptr<Object> MovingObject::clone() const {
+    return std::make_shared<MovingObject>(*this);
+}
 
 //(de)serialize functions
 std::string MovingObject::serialize() const {

@@ -10,6 +10,7 @@ Enemy::Enemy(std::string id, float x, float y, float z, float orientationX, floa
 Enemy::Enemy(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ) : MovingObject(id, x, y, z, orientationX, orientationY, orientationZ, velX, velY, velZ) {
     auto log = getLogger("Enemy");
     log->trace("Creating Enemy with id {}, position ({}, {}, {}), orientation ({}, {}), velocity ({}, {}, {})", id, x, y, z, orientationX, orientationY, velX, velY, velZ);
+    setCanCollide(true);
 }
 
 // in game loop, if total displacement is less than some threshold,

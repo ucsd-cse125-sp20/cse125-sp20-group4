@@ -29,7 +29,18 @@ static std::vector<Sanitizer::CharMapping> specialCharacters() {
 /* Used to sanitize messages */
 static const Sanitizer sanitizer( specialCharacters() );
 
-UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::GEvent), updates( updates ) {}
+UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::GEvent){
+    //std::unordered_map<std::string, std::shared_ptr<Object>> newMap;
+    Deserializer deserializer;
+    auto iter = updates.begin();
+    while (iter != updates.end()) {
+        auto pair = std::pair<std::string, std::shared_ptr<Object>>(iter->first, iter->second->clone()); //needs to make underlying object
+        //LOGGER->trace("{}", pair.second->serialize());
+        this->updates.insert(pair);
+        iter++;
+    }
+    //this->updates = newMap;
+}
 
 std::string UpdateEvent::serialize() const {
 

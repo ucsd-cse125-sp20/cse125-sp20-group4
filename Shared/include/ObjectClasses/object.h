@@ -2,6 +2,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 class Object {
 private:
@@ -62,4 +63,6 @@ public:
 
     //(de)serialize functions
     virtual std::string serialize() const;
+
+    virtual std::shared_ptr<Object> clone() const;
 };
