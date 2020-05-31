@@ -20,6 +20,7 @@ Deserializer::Deserializer() {
     this->gameMapping.insert(std::make_pair(Player::TAG, std::make_unique<PlayerFactory>()));
     this->gameMapping.insert(std::make_pair(Shelf::TAG, std::make_unique<ShelfFactory>()));
     this->gameMapping.insert(std::make_pair(Barricade::TAG, std::make_unique<BarricadeFactory>()));
+    this->gameMapping.insert(std::make_pair("Enemy", std::make_unique<EnemyFactory>()));
 
     this->gameMapping.insert(std::make_pair("RedObject", std::make_unique<RedItemFactory>()));
     this->gameMapping.insert(std::make_pair("GreenObject", std::make_unique<GreenItemFactory>()));

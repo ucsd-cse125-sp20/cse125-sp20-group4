@@ -2,7 +2,7 @@
 #include "objectfactory.h"
 #include "ObjectClasses/enemy.h"
 
-class PlayerFactory : public IObjectFactory
+class EnemyFactory : public IObjectFactory
 {
 public:
 	std::shared_ptr<Object> create(std::string serial);

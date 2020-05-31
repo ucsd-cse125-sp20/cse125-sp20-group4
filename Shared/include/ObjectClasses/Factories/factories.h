@@ -4,3 +4,4 @@
 #include "playerfactory.h"
 #include "shelffactory.h"
 #include "useablefactory.h"
+#include "enemyfactory.h"

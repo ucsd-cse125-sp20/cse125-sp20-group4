@@ -629,11 +629,11 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
 
-    LOGGER->warn("Event type {}", e->getType());
+    LOGGER->warn("{} XXXX {}", Window::playerName, e->serialize());
     if (e->getType() == Event::EventType::JEvent) {
         Window::playerName = e->getObjectId();
         LOGGER->warn("Set my ID to {}", e->getObjectId());
-    } else {
+    } else if(e->getType() == Event::EventType::GEvent){
         auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
         world->handleUpdates(uEvent, Window::playerName);
         // update my data
@@ -652,5 +652,7 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
         } else {
             LOGGER->warn("Failed to find {}", playerName);
         }
+    } else {
+        world->handleUpdates(e, Window::playerName);
     }
 }

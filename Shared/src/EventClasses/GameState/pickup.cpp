@@ -7,7 +7,7 @@ PickUpEvent::PickUpEvent(std::string id, std::string targetId) : GameStateEvent(
 void PickUpEvent::apply(GameState* gamestate) const
 {
     auto log = getLogger("PickUpEvent");
-
+    log->warn("Pick up event: {}", serialize());
     // get object
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     std::shared_ptr<Shelf> itemObject = std::dynamic_pointer_cast<Shelf>(gamestate->getObject(this->targetId));

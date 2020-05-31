@@ -12,24 +12,29 @@ void UseEvent::apply(GameState* gamestate) const
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
     if (object != nullptr && object->getHeldItem() != nullptr && std::dynamic_pointer_cast<Barricade>(object->getHeldItem())==nullptr) {
+        log->warn("Using item");
         // get item in player inventory
         std::shared_ptr<UseableObject> item = std::dynamic_pointer_cast<UseableObject>(object->getHeldItem());
         // TODO: determine how to use event
         ItemType itype = item->itemType;
-        log->warn("Using an item");
         // loop over gamestate and remove all matching over add money for each removed
-        std::string id = "";
-        for (auto it = gamestate->getGameObjects().begin(); it != gamestate->getGameObjects().end();) {
-            if (id.compare("") != 0) {
-                gamestate->deleteObject(id);
-                id = "";
-            }
+        std::deque<std::string> deletes;
+        int count = 0;
+        for (auto it = gamestate->getGameObjects().begin(); it != gamestate->getGameObjects().end();it++) {
             auto enemy = std::dynamic_pointer_cast<Enemy>(it->second);
             if ( enemy != nullptr && glm::distance(object->getPosition(),enemy->getPosition())<5.0f && enemy->weakness == itype) {
-                id = it->second->getId();
+                deletes.push_back(enemy->getId());
+                count++;
                 object->addMoney(1);
             }
         }
+        while (!deletes.empty()) {
+            gamestate->deleteObject(deletes.front());
+            deletes.pop_front();
+        }
+        object->setHeldItem(nullptr);
+        gamestate->setDirty(true);
+        log->warn("Using an item and killed {}",count);
     }
 }
 

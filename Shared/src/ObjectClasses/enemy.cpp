@@ -24,7 +24,7 @@ void Enemy::setVelocityFromCmd() {
 
 std::string Enemy::serialize() const {
     auto log = getLogger("Enemy");
-    std::string res = "Enemy:" + MovingObject::serialize();
+    std::string res = "Enemy:" + MovingObject::serialize() + "," + std::to_string(static_cast<int>(weakness));
     log->trace("Serialized Enemy as {}", res);
     return res;
 }
