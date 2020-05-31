@@ -22,4 +22,5 @@
 #include <EventClasses/GameState/join.h>
 
 #include <EventClasses/GameState/ready.h>
+#include <EventClasses/GameState/use.h>
 #endif

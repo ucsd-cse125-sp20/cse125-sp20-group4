@@ -3,7 +3,7 @@
 #include "logger.h"
 #include "ObjectClasses/object.h"
 #include "EventClasses/events.h"
-#include "ObjectClasses/Factories/playerfactory.h"
+#include "ObjectClasses/Factories/factories.h"
 #include "EventClasses/Factories/eventmovementfactories.h"
 #include "EventClasses/Factories/eventstopfactories.h"
 #include "EventClasses/Factories/RotateEventFactory.h"
@@ -11,8 +11,6 @@
 #include "EventClasses/Factories/UpdateEventFactory.h"
 #include "EventClasses/Factories/DeleteEventFactory.h"
 #include "EventClasses/Factories/NotifyEventFactory.h"
-#include "ObjectClasses/Factories/barricadefactory.h"
-#include "ObjectClasses/Factories/shelffactory.h"
 
 #include <cstddef>
 #include <stdexcept>
@@ -22,6 +20,10 @@ Deserializer::Deserializer() {
     this->gameMapping.insert(std::make_pair(Player::TAG, std::make_unique<PlayerFactory>()));
     this->gameMapping.insert(std::make_pair(Shelf::TAG, std::make_unique<ShelfFactory>()));
     this->gameMapping.insert(std::make_pair(Barricade::TAG, std::make_unique<BarricadeFactory>()));
+
+    this->gameMapping.insert(std::make_pair("RedObject", std::make_unique<RedItemFactory>()));
+    this->gameMapping.insert(std::make_pair("GreenObject", std::make_unique<GreenItemFactory>()));
+    this->gameMapping.insert(std::make_pair("BlueObject", std::make_unique<BlueItemFactory>()));
     
     this->eventMapping.insert(std::make_pair("MoveLeft", std::make_unique<MoveLeftEventFactory>()));
     this->eventMapping.insert(std::make_pair("MoveRight", std::make_unique<MoveRightEventFactory>()));
@@ -34,11 +36,12 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair( "RotateEvent", std::make_unique<RotateEventFactory>() ) );
     this->eventMapping.insert(std::make_pair( UpdateEvent::TAG, std::make_unique<UpdateEventFactory>() ) );
     this->eventMapping.insert(std::make_pair( DeleteEvent::TAG, std::make_unique<DeleteEventFactory>()));
-    this->eventMapping.insert(std::make_pair(NotifyEvent::TAG, std::make_unique<NotifyEventFactory>()));
+    this->eventMapping.insert(std::make_pair("NotifyEvent", std::make_unique<NotifyEventFactory>()));
     this->eventMapping.insert(std::make_pair("PlaceEvent", std::make_unique<PlaceEventFactory>()));
     this->eventMapping.insert(std::make_pair("PickUpEvent", std::make_unique<PickUpEventFactory>()));
     this->eventMapping.insert(std::make_pair(ReadyEvent::TAG, std::make_unique<ReadyEventFactory>()));
     this->eventMapping.insert(std::make_pair(JoinEvent::TAG, std::make_unique<JoinEventFactory>()));
+    this->eventMapping.insert(std::make_pair(UseEvent::TAG, std::make_unique<UseEventFactory>()));
 }
 
 std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {
@@ -71,7 +74,8 @@ std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr
 }
 
 std::shared_ptr<Event> Deserializer::deserializeEvent( std::string serial ) {
-
+    auto log = getLogger("Deserializer");
+    
     size_t tagPos = serial.find( ":" );
     if ( tagPos == std::string::npos ) {
         throw std::invalid_argument( "Not a valid event serial." );
@@ -80,11 +84,11 @@ std::shared_ptr<Event> Deserializer::deserializeEvent( std::string serial ) {
     std::string input( serial );
 
     auto factory = eventMapping.find( tag );
-    if ( factory == eventMapping.end() ) {
-        throw std::invalid_argument( "Unrecognized event type. " + tag );
+    if (factory == eventMapping.end()) {
+        throw std::invalid_argument("Unrecognized event type. " + tag);
     }
 
-    getLogger( "Deserializer" )->trace( "Deserializing event {}", tag );
+    log->trace( "Deserializing event {}", tag );
     return factory->second->create( input );
 }
 std::shared_ptr <Object> Deserializer::deserializeObject( std::string serial ) {

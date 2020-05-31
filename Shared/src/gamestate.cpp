@@ -160,7 +160,6 @@ std::string GameState::serialize() {
 void GameState::initialize() {
     auto log = getLogger("GameState");
     /* set the phase*/
-
     log->info("Starting Game State: {}", this->serialize());
  }
 

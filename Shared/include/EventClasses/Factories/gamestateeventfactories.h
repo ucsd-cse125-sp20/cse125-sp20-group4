@@ -19,3 +19,8 @@ class JoinEventFactory : public IEventFactory {
 public:
     std::shared_ptr<Event> create(std::string serial);
 };
+
+class UseEventFactory : public IEventFactory {
+public:
+    std::shared_ptr<Event> create(std::string serial);
+};

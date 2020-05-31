@@ -1,9 +1,11 @@
 #pragma once
 #include "ObjectClasses/object.h"
+#include <memory>
+
+enum class ItemType { RED, GREEN, BLUE };
 class UseableObject : public Object
 {
 public:
-	enum class ItemType { RED, GREEN, BLUE };
-	UseableObject(std::string id, UseableObject::ItemType type);
-	~UseableObject();
+	UseableObject(ItemType type);
+	ItemType itemType;
 };

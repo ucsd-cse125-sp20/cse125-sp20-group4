@@ -1,5 +1,6 @@
 #include "maploader.h"
 #include "logger.h"
+#include "ObjectClasses/Factories/factories.h"
 void MapLoader::LoadMap(std::string file, GameState* gs)
 {
     auto log = getLogger("MapLoader");
@@ -21,9 +22,12 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
         {
             position = glm::vec3(x * 2, 0, z * 2);
             scale = 1.0f;
+            std::shared_ptr<Object> obj;
             switch (*it) {
             case 's':
-                gs->createObject(std::make_shared<Shelf>("ignore", position.x, position.y, position.z));
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z);
+                std::dynamic_pointer_cast<Shelf>(obj)->setItem(std::make_shared<RedItemFactory>());
+                gs->createObject(obj);
                 break;
             case 'w':
                 //gs->createObject(std::make_shared<Wall>("ignore", position.x, position.y, position.z));

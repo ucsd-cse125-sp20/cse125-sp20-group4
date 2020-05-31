@@ -7,4 +7,5 @@ public:
 
 	void apply(GameState* gamestate) const;
 	std::string serialize() const;
+	static const std::string TAG;
 };

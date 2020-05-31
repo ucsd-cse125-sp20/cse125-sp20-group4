@@ -1,7 +1,7 @@
 #pragma once
 #include "movingobject.h"
 #include "pathingmap.h"
-
+#include "ObjectClasses/Useable/useable.h"
 #include <stack>
 
 class Enemy : public MovingObject {
@@ -23,4 +23,5 @@ public:
     virtual std::string serialize() const override;
 
     static Enemy& deserialize(std::string serial);
+    ItemType weakness;
 };

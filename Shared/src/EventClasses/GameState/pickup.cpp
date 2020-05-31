@@ -28,10 +28,10 @@ void PickUpEvent::apply(GameState* gamestate) const
                 object->setHeldItem(itemObject->getItem());
             }
             gamestate->setDirty(true);
-            log->info("Just picked up an item from {}",itemObject->serialize());
+            log->warn("Just picked up an item from {}",itemObject->serialize());
         }
     } else {
-        log->info("Trying to picked up but no");
+        log->warn("Trying to picked up but no");
     }
 }
 

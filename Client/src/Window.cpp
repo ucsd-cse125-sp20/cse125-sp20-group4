@@ -307,6 +307,9 @@ void drawInfoGui() {
         ImGui::Text("Round: 0");
         ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
         ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
+        if (Window::holding) {
+            ImGui::Text("You are loaded Bish");
+        }
         ImGui::End();
     }
 
@@ -446,7 +449,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                         server->send(std::make_shared<PlaceEvent>(playerName));
                     } else {
                         // TODO update to select correct item
-                        server->send(std::make_shared<PickUpEvent>(playerName, "cube5"));
+                        server->send(std::make_shared<PickUpEvent>(playerName, "0"));
                     }
                 }
                 break;
@@ -460,8 +463,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_E: // Start moving up.
                 if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
-                } else if (cam->name == Window::playerName) {
-                    server->send(std::make_shared<ReadyEvent>(playerName));
+                } else if (cam->name == Window::playerName && Window::holding) {
+                    server->send(std::make_shared<UseEvent>(playerName));
                 }
                 break;
 
@@ -625,6 +628,8 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 }
 
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
+
+    LOGGER->warn("Event type {}", e->getType());
     if (e->getType() == Event::EventType::JEvent) {
         Window::playerName = e->getObjectId();
         LOGGER->warn("Set my ID to {}", e->getObjectId());
@@ -632,7 +637,7 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
         auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
         world->handleUpdates(uEvent, Window::playerName);
         // update my data
-        auto it = uEvent->updates.find(playerName);
+        auto it = uEvent->updates.find(Window::playerName);
         if (it != uEvent->updates.end()) {
             auto player = std::static_pointer_cast<Player>(it->second);
             money = player->getMoney();
@@ -643,6 +648,9 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
                 holding = false;
             }
             cam = Camera::getCamera(playerName);
+            LOGGER->warn("Updated player");
+        } else {
+            LOGGER->warn("Failed to find {}", playerName);
         }
     }
 }
