@@ -60,10 +60,6 @@ class AsyncConnection {
         if ( setup != nullptr ) {
             setup( conn, inQueue );
         }
-
-        // Start workers
-        sender.start(); 
-        receiver.start();
     
     }
 
@@ -92,6 +88,18 @@ class AsyncConnection {
     ~AsyncConnection() {
 
         close( true );
+
+    }
+
+    /**
+     * Starts the connection, allowing the internal worker threads to start sending and
+     * receiving messages.
+     */
+    void start() {
+
+        // Start workers
+        sender.start();
+        receiver.start();
 
     }
 

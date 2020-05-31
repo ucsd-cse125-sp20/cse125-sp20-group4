@@ -19,7 +19,11 @@ Client::Client( SOCKET sock, const Qptr & inQueue,
     conn( sock, inQueue,
           [this, idAssigner]( const Cptr & c, const Qptr & q ) -> void { this->setup( c, q, idAssigner ); },
           [this]( const Cptr & c, const Qptr & q ) -> void { this->teardown( c, q ); } ), 
-    closeCallback( closeCallback ) {}
+    closeCallback( closeCallback ) {
+
+    conn.start();
+
+}
 
 /* Protected methods */
 
