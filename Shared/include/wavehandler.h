@@ -1,21 +1,35 @@
 #pragma once
+
+#include <chrono>
 #include <string>
+#include <vector>
+
 #include "gamestate.h"
 
-//#define DEFAULT_READY_TIME 30000.0
-#define DEFAULT_READY_TIME 10000.0
-#define DEFAULT_WAVE_TIME 120000.0
-#define ID_READY_TIMER std::string("ready_timer")
-#define ID_WAVE_TIMER std::string("wave_timer")
-
 class WaveHandler {
-private:
-    int waveNum;
-    bool waveActive;
-    std::function<void()> startWave;
-    std::function<void()> endWave;
 
-public:
-    WaveHandler(GameState&);
-    void init();
+    public:
+    using Clock = std::chrono::system_clock;
+    enum class State { NO_CHANGE, PRE_WAVE, WAVE, NOT_RUNNING };
+    typedef struct {
+
+        unsigned int count;
+
+    } EnemyData;
+
+    WaveHandler();
+
+    void loadWaveData();
+    void start();
+
+    State update( const GameState & gs );
+    State getWaveInfo( unsigned int & waveNum, Clock::time_point & startTime, std::vector<EnemyData> & waveEnemies );
+
+    private:
+    bool running;
+    unsigned int waveNum;
+    bool waveActive;
+    Clock::time_point startTime;
+    std::vector<std::vector<EnemyData>> waveEnemies;
+
 };

@@ -1,27 +1,96 @@
 #include <string>
-#include <functional>
-#include "wavehandler.h"
+#include <time.h>
+
 #include "logger.h"
 #include "objectclasses/enemy.h"
+#include "wavehandler.h"
 
-WaveHandler::WaveHandler(GameState& state) : waveNum(0), waveActive(false) {
-    startWave = [this, &state]() {
-        state.createTimer(ID_WAVE_TIMER, DEFAULT_WAVE_TIME, this->endWave);
-        auto log = getLogger("WaveHandler");
-        this->waveNum++;
-        this->waveActive = true;
-        std::shared_ptr<Object> enemy = std::shared_ptr<Object>(new Player("enemy", 0.0, 0.0, 5.0)); // TODO set type to enemy when can be rendered on client
-        state.createObject(enemy, enemy->getId());
-        // TODO register handler that checks when all enemis are dead
-        log->info("Wave {} started", this->waveNum);
-    };
-    endWave = [this, &state]() {
-        state.createTimer(ID_READY_TIMER, DEFAULT_READY_TIME, this->startWave);
-        this->waveActive = false;
-        // TODO clean up remaining existing enemies
-    };
+#define DEFAULT_READY_TIME 10 // In seconds
+
+#define START_TIME( delay ) ( WaveHandler::Clock::now() + std::chrono::seconds( delay ) )
+
+static const auto LOGGER = getLogger( "WaveHandler" );
+
+WaveHandler::WaveHandler() : running( false ), waveNum( 0 ), waveActive( false ) {}
+
+void WaveHandler::loadWaveData() {
+
+    running = false;
+
+    waveEnemies.clear();
+    // TODO: set up waves
+
+    waveNum = 0;
+    waveActive = false;
+
 }
 
-void WaveHandler::init() {
-    endWave();
+static std::string timeToStr( const WaveHandler::Clock::time_point & t ) {
+
+    std::time_t time = WaveHandler::Clock::to_time_t( t );
+    char buf[BUFSIZ];
+    ctime_s( buf, BUFSIZ, &time );
+    buf[BUFSIZ - 1] = '\0'; // Juuuuust in case
+    return std::string( buf );
+
+}
+
+void WaveHandler::start() {
+
+    LOGGER->info( "Starting waves." );
+    waveNum = 1;
+    waveActive = false;
+    startTime = START_TIME( DEFAULT_READY_TIME );
+    running = true;
+    LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+
+}
+
+WaveHandler::State WaveHandler::update( const GameState & gs ) {
+
+    if ( !running ) {
+        return State::NOT_RUNNING;
+    }
+
+    if ( waveActive ) {
+        unsigned int remain = 0;
+        for ( auto it = gs.getGameObjects().begin(); it != gs.getGameObjects().end(); it++ ) {
+            if ( it->second->isEnemy() ) {
+                remain++;
+            }
+        }
+        LOGGER->trace( "Wave {} has {} enemies remaining.", waveNum, remain );
+        if ( remain == 0 ) {
+            // Wave over, start waiting for next wave
+            LOGGER->info( "Wave {} completed, waiting for next wave.", waveNum );
+            waveNum++;
+            waveActive = false;
+            startTime = START_TIME( DEFAULT_READY_TIME );
+            LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+            return State::PRE_WAVE;
+        }
+    } else {
+        if ( Clock::now() > startTime ) {
+            // Start wave
+            LOGGER->info( "Wave {} starting." );
+            waveActive = true;
+            return State::WAVE;
+        }
+    }
+
+    return State::NO_CHANGE;
+
+}
+
+WaveHandler::State WaveHandler::getWaveInfo( unsigned int & wave, Clock::time_point & start, std::vector<EnemyData> & enemies ) {
+
+    if ( !running ) {
+        return State::NOT_RUNNING;
+    }
+
+    wave = waveNum;
+    start = startTime;
+    enemies = waveEnemies[waveNum];
+    return waveActive ? State::WAVE : State::PRE_WAVE;
+
 }

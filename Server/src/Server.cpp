@@ -46,8 +46,10 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     gameState.initialize();
-    WaveHandler waveHandler = WaveHandler(gameState); // TODO move this into gamestate
-    waveHandler.init();
+
+    WaveHandler waveHandler = WaveHandler();
+    waveHandler.loadWaveData();
+
     GameStateHandler gameStateHandler;
 
     while ( running ) {
@@ -75,6 +77,30 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         if (gameState.deletes) {
             std::shared_ptr<DeleteEvent> deletes = std::make_shared<DeleteEvent>(gameState.getDeletions());
             clients->broadcast(deletes);
+        }
+
+        WaveHandler::State waveState = waveHandler.update( gameState );
+
+        unsigned int waveNum;
+        std::chrono::system_clock::time_point startTime;
+        std::vector<WaveHandler::EnemyData> waveEnemies;
+        waveHandler.getWaveInfo( waveNum, startTime, waveEnemies );
+
+        switch ( waveState ) {
+
+            case WaveHandler::State::PRE_WAVE:
+                // Send time to clients
+                break;
+
+            case WaveHandler::State::WAVE:
+                for ( auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++ ) {
+                    for ( unsigned int i = 0; i < it->count; i++ ) {
+                        // Spawn enemy
+                    }
+                }
+                // Notify clients?
+                break;
+
         }
         
         // *************** GAME LOGIC END ***************

@@ -183,6 +183,11 @@ bool Object::collides(const Object & obj) const {
 
 }
 
+bool Object::isEnemy() const {
+
+    return false;
+
+}
 
 
 std::string Object::serialize() const {

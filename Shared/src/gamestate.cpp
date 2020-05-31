@@ -241,7 +241,7 @@ std::shared_ptr<Object> GameState::getObject(std::string id) {
     return nullptr;
 }
 
-const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects() {
+const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects() const {
 
     return gameObjects;
 

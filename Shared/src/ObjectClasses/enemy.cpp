@@ -22,6 +22,12 @@ void Enemy::setVelocityFromCmd() {
     setVelocityY(baseSpeed * dispY / dispTotal);
 }
 
+bool Enemy::isEnemy() const {
+
+    return true;
+
+}
+
 std::string Enemy::serialize() const {
     auto log = getLogger("Enemy");
     std::string res = "Enemy:" + MovingObject::serialize();
