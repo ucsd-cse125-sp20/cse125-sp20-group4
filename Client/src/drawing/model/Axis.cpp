@@ -135,10 +135,10 @@ void Axis::toggle() {
 
 }
 
-void Axis::draw( const glm::mat4x4 & toView, const glm::vec3 & direction ) const {
+void Axis::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const glm::vec3 & direction ) const {
 
     if ( enabledAll && enabled ) { // Only draw if axes are enabled
-        Geometry::draw( toView, direction );
+        Geometry::draw( model, view, direction );
     }
 
 }

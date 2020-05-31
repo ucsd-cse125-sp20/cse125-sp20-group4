@@ -104,6 +104,8 @@ in float shadowClipZ;
 
 out vec4 color;
 
+uniform vec3 uColor;
+
 uniform vec3 viewPos;
 uniform float ambientCoefficient;
 uniform DirLight dirLight;
@@ -181,35 +183,34 @@ void main() {
     // this fragment's final color.
     // == ======================================
     // Phase 1: Directional lighting
-    //if ( directionalOn ) {
+    if ( directionalOn ) {
 		result += CalcDirLight( dirLight, norm, viewDir );
-	//}
+	}
     // Phase 2: Point light
 	//if ( pointOn ) {
-		result += CalcPointLight( pointLight, norm, FragPos, viewDir );    
+	//	result += CalcPointLight( pointLight, norm, FragPos, viewDir );    
 	//}
     // Phase 3: Spot light
 	//if ( spotOn ) {
-		result += CalcSpotLight( spotLight, norm, FragPos, viewDir );   
+	//	result += CalcSpotLight( spotLight, norm, FragPos, viewDir );   
 	//}
 
 	vec3 ambient = material.ambient * ambientCoefficient;
 
 	float shadowCoefficient = 1.0;
-	if ( shadowsOn ) { // Render shadows if turned on.
-		int shadowMap = getShadowMap( shadowClipZ );
-		if ( shadowMap != -1 ) { // In a shadow map.
-			shadowCoefficient = calculateShadow( shadowMap, ShadowCoord[shadowMap] );
-		}
-	}
+	//if ( shadowsOn ) { // Render shadows if turned on.
+	//	int shadowMap = getShadowMap( shadowClipZ );
+	//	if ( shadowMap != -1 ) { // In a shadow map.
+	//		shadowCoefficient = calculateShadow( shadowMap, ShadowCoord[shadowMap] );
+	//	}
+	//}
 	result = result * shadowCoefficient + ambient;
 
 	result.x = min( result.x, 1.0 );
 	result.y = min( result.y, 1.0 );
 	result.z = min( result.z, 1.0 );
 
-	color = vec4( result, material.opacity );
-
+	color = vec4( result * uColor, material.opacity );
 }
 
 // Calculates the diffuse component of the reflected light.

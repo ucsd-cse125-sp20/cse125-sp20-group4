@@ -1,5 +1,7 @@
 #define NOMINMAX // Stop stupid library from defining max() as a macro
 
+#pragma warning(disable:4201)
+
 #include <algorithm>
 #include <deque>
 #include <iostream>
@@ -11,10 +13,12 @@
 #include <logger.h>
 
 #include "Window.h"
+#include "MapLoader.h"
 #include "drawing/Shaders.h"
 #include "drawing/model/Axis.h"
 #include "drawing/model/EmptyModel.h"
 #include "drawing/model/RectangularCuboid.h"
+#include "drawing/model/LoadedModel.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
 #include "imgui/imgui.h"
@@ -443,7 +447,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 }
                 break;
 
-            case GLFW_KEY_SPACE: // Start moving forward.
+            case GLFW_KEY_SPACE: // Place an object
                 if (cam->name == Window::playerName) {
                     if (Window::holding) {
                         server->send(std::make_shared<PlaceEvent>(playerName));

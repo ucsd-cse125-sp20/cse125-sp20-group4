@@ -6,6 +6,8 @@ class Wall : public Object {
 
 		Wall(std::string& id, float xPos, float yPos, float zPos);
 
+		std::shared_ptr<Object> clone() const;
+
 		//(de)serialize functions
 		virtual std::string serialize() const;
 		

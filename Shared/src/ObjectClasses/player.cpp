@@ -2,7 +2,7 @@
 #include "logger.h"
 const std::string Player::TAG = "Player";
 
-Player::Player(const Player& player) : Player(player.getId(), player.getPositionX(), player.getPositionY(), player.getPositionZ(), player.getOrientationX(), player.getOrientationY(), player.getOrientationZ(), player.getVelocityX(), player.getVelocityY(), player.getVelocityZ()) {}
+Player::Player(const Player& player) : Player(player.getId(), player.getPositionX(), player.getPositionY(), player.getPositionZ(), player.getOrientationX(), player.getOrientationY(), player.getOrientationZ(), player.getWidth(), player.getHeight(), player.getLength(), player.getVelocityX(), player.getVelocityY(), player.getVelocityZ(), player.getMoney(), player.getHealth(), player.getHeldItem() == nullptr ? nullptr : player.getHeldItem()->clone()) {}
 Player::Player(std::string id) : Player(id, 0, 0, 0) {}
 Player::Player(std::string id, float x, float y, float z) : Player(id, x, y, z, 1.0f, 0.0f, 0.0f) {}
 Player::Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ) : Player(id, x, y, z, orientationX, orientationY, orientationZ, 0.0f, 0.0f, 0.0f) {}
@@ -27,7 +27,7 @@ Player::Player(std::string id, float x, float y, float z, float orientationX, fl
 }
 
 
-int Player::getMoney() {
+int Player::getMoney() const {
     return money;
 }
 
@@ -47,7 +47,7 @@ void Player::subtractMoney(int amount) {
 }
 
 
-std::shared_ptr<Object> Player::getHeldItem() {
+std::shared_ptr<Object> Player::getHeldItem() const {
     return this->heldItem;
 }
 
@@ -66,8 +66,12 @@ void Player::setHealth(int newHealth) {
     this->dirty = true;
 }
 
-int Player::getHealth() {
+int Player::getHealth() const {
     return this->health;
+}
+
+std::shared_ptr<Object> Player::clone() const {
+    return std::make_shared<Player>(*this);
 }
 
 std::string Player::serialize() const {

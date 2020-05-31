@@ -9,7 +9,7 @@ class UpdateEvent : public Event {
 
     public:
     UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates );
-    const std::unordered_map<std::string, std::shared_ptr<Object>> updates;
+    std::unordered_map<std::string, std::shared_ptr<Object>> updates;
 
     void apply( std::shared_ptr<Object> object ) const;
     std::string serialize() const;

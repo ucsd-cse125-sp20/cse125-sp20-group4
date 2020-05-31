@@ -1,3 +1,5 @@
+#pragma warning(disable:4201)
+
 #include <stdexcept>
 
 #include <EventClasses/UpdateEvent.h>
@@ -8,6 +10,7 @@
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
 #include "state/CameraEntity.h"
+
 
 static const auto LOGGER = getLogger( "World" );
 
@@ -101,7 +104,28 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 entity->setPosition(it->second->getPosition());
             } else {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
-                createNewEntity(it->second,id);
+                LOGGER->debug("Yeeting this {}, {}", map.at(it->second->getId())->serialize(), std::dynamic_pointer_cast<std::shared_ptr<Barricade>>(map.at(it->second->getId())) != nullptr);
+
+
+
+                if (map.at(it->second->getId())->serialize().find("Barricade") != std::string::npos) {
+                    LOGGER->debug("Making a barricade");
+                    auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
+                    model->setColor(glm::vec3(1.0f, 0.0f, 0));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation()));
+                }
+                else if (map.at(it->second->getId())->serialize().find("Shelf") != std::string::npos) {
+                    LOGGER->debug("Making a shelf");
+
+                    auto model = new LoadedModel("Models/barricade.dae", Shaders::phong());
+                    model->setColor(glm::vec3(1.0f, 1.0f, 0));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation()));
+                }
+                else {
+                    LOGGER->debug("Making a cube");
+
+                    addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
+                }
             }
         }
         break;

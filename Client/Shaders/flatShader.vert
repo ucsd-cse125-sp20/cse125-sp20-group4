@@ -6,13 +6,14 @@ layout (location = 2) in vec3 normal;
 
 // Uniform variables.
 uniform mat4 model;
+uniform mat4 pv;
 
 // Output color of fragment.
 out vec4 vertexColor;
 
 void main() {
 
-    gl_Position = model * vec4( position.x, position.y, position.z, 1.0 );
+    gl_Position = pv * model * vec4( position.x, position.y, position.z, 1.0 );
     vertexColor = vec4( color, 1.0f );
 
 }

@@ -13,6 +13,7 @@ private:
     bool isCollidedZ = false;
 
 public:
+    MovingObject(const MovingObject& obj);
     MovingObject(std::string id);
     MovingObject(std::string id, float x, float y, float z);
     MovingObject(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);
@@ -56,6 +57,8 @@ public:
     void handleYCollision(const MovingObject & obj);
     void handleZCollision(const Object & obj);
     void handleZCollision(const MovingObject & obj);
+
+    virtual std::shared_ptr<Object> clone() const override;
 
     //(de)serialize functions
     virtual std::string serialize() const override;
