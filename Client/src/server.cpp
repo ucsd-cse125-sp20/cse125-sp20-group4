@@ -68,7 +68,11 @@ static SOCKET connect( const std::string & address, const std::string & port ) {
 
 /* Constructor */
 
-Server::Server( const std::string & address, const std::string & port ) : conn( connect( address, port ), setup, teardown ) {}
+Server::Server( const std::string & address, const std::string & port ) : conn( connect( address, port ), setup, teardown ) {
+
+    conn.start();
+
+}
 
 /* Protected methods */
 
