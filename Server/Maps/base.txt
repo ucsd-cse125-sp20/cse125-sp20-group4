@@ -1,1 +1,9 @@
-s  0123
+ssssssssssssssssssssssssssssssssssssssssss
+s                                        s
+s   ssssssssssssssss  ssssssssssssssss   s
+s                   01                   s
+s   ssssssssssssss      ssssssssssssss   s
+s                   23                   s
+s   ssssssssssssssss  ssssssssssssssss   s
+s                                        s
+ssssssssssssssssssssssssssssssssssssssssss

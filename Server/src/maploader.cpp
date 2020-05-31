@@ -9,19 +9,14 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
     log->info("Starting Loading map");
     glm::vec3 position;
     //glm::vec3 direction;
-    float scale;
-
-    int i = 0;
 
     int z = 0;
     for (std::string line; getline(input, line); z++)
     {
-
         int x = 0;
         for (auto it = line.begin(); it < line.end(); it++, x++)
         {
-            position = glm::vec3(x * 2, 0, z * 2);
-            scale = 1.0f;
+            position = glm::vec3(x, 0.0, z);
             std::shared_ptr<Object> obj;
             switch (*it) {
             case 's':
@@ -45,7 +40,6 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 gs->createObject(std::make_shared<Player>("client-3", position.x, position.y, position.z), "client-3");
                 break;
             }
-            i++;
         }
     }
     log->info("Done Loading map");

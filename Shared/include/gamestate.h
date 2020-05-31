@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "EventClasses/event.h"
 #include "ObjectClasses/objects.h"
+#include "MapRep.h"
 class GameState
 {
 private:
@@ -18,6 +19,7 @@ private:
 
 public:
     bool deletes;
+    MapRep map;
     GameState();
     void createObject(std::shared_ptr<Object> obj);
     void createObject(std::shared_ptr<Object> obj, std::string id);
