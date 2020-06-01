@@ -53,6 +53,12 @@ std::shared_ptr<Client> Clients::getClient( const std::string & id ) const {
 
 }
 
+unsigned int Clients::getClientCount() const {
+
+    return ( unsigned int ) clients.size();
+
+}
+
 void Clients::broadcast( const Eptr & e ) {
 
     for ( auto it = clients.begin(); it != clients.end(); it++ ) {

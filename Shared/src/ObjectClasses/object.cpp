@@ -191,6 +191,12 @@ std::shared_ptr<Object> Object::clone() const {
     return std::make_shared<Object>(*this);
 }
 
+bool Object::isEnemy() const {
+
+    return false;
+
+}
+
 std::string Object::serialize() const {
     auto log = getLogger("Object");
     // id, x, y, z, directionX, directionY, directionZ

@@ -22,6 +22,8 @@ public:
     // sets the velocity from top command of cmdStack
     void setVelocityFromCmd();
 
+    bool isEnemy() const;
+
     //(de)serialize functions
     virtual std::string serialize() const override;
 
