@@ -6,11 +6,14 @@
 #include <atomic>
 #include <chrono>
 #include <deque>
+#include <random>
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
+
+#include <glm/vec3.hpp>
 
 #include <EventClasses/event.h>
 #include <EventClasses/UpdateEvent.h>
@@ -38,6 +41,9 @@
 #define DEFAULT_PORT "8080"
 #define DEFAULT_CONFIG_FILE "Config/config.ini"
 
+#define SPAWNS_PER_TICK 1
+#define SPAWN_DELAY 30
+
 static const std::chrono::duration TICK_PERIOD = std::chrono::milliseconds( SERVER_TICK );
 
 static std::atomic<bool> running = true;
@@ -51,13 +57,19 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     auto log = getLogger( "Server" );
 
+    std::default_random_engine rng;
+
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     MapLoader::LoadMap("Maps/base.txt", &gameState);
     gameState.initialize();
-    WaveHandler waveHandler = WaveHandler(gameState); // TODO move this into gamestate
-    waveHandler.init();
+
+    WaveHandler waveHandler = WaveHandler();
+    waveHandler.loadWaveData();
+
     GameStateHandler gameStateHandler;
+    std::deque<std::shared_ptr<Enemy>> pendingSpawns;
+    unsigned int spawnCooldown = 0;
 
     while ( running ) {
 
@@ -84,6 +96,71 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         if (gameState.deletes) {
             std::shared_ptr<DeleteEvent> deletes = std::make_shared<DeleteEvent>(gameState.getDeletions());
             clients->broadcast(deletes);
+        }
+
+        WaveHandler::State waveState = waveHandler.update( gameState );
+
+        unsigned int waveNum;
+        std::chrono::system_clock::time_point startTime;
+        std::vector<WaveHandler::EnemyData> waveEnemies;
+        waveHandler.getWaveInfo( waveNum, startTime, waveEnemies );
+
+        switch ( waveState ) {
+
+            case WaveHandler::State::PRE_WAVE:
+                // Send time to clients
+                break;
+
+            case WaveHandler::State::WAVE:
+            {
+                std::vector<glm::vec3> spawns; // TODO: obtain spawns
+                spawns.push_back( glm::vec3( 1.0f, 0.0f, 1.0f ) );
+                spawns.push_back( glm::vec3( 5.0f, 5.0f, 5.0f ) );
+                spawns.push_back( glm::vec3( 3.0f, 0.0f, 5.0f ) );
+                if ( spawns.size() == 0 ) {
+                    log->error( "No locations to spawn enemies were defined." );
+                    break;
+                }
+
+                std::uniform_int_distribution<unsigned int> spawnIndices( 0, ( unsigned int ) spawns.size() - 1 );
+                for ( auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++ ) {
+                    log->debug( "Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum );
+                    for ( unsigned int i = 0; i < it->count; i++ ) {
+                        const glm::vec3 & spawn = spawns[spawnIndices( rng )];
+                        const std::string id = "wave" + std::to_string( waveNum ) + "-enemy-" + it->type + "-" + std::to_string( i );
+                        std::shared_ptr<Enemy> e = std::make_shared<Enemy>( id, spawn.x, spawn.y, spawn.z );
+                        pendingSpawns.push_back( e );
+                    }
+                }
+                spawnCooldown = 0;
+
+                // Notify clients?
+                break;
+            }
+
+            case WaveHandler::State::DONE:
+                // Notify client that game is won
+                break;
+
+        }
+
+        if ( spawnCooldown == 0 ) {
+            for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
+
+                std::shared_ptr<Enemy> e = pendingSpawns.front();
+                pendingSpawns.pop_front();
+                log->trace( "Spawning enemy '{}'.", e->getId() );
+                gameState.createObject( e, e->getId() );
+
+            }
+            spawnCooldown = SPAWN_DELAY;
+        } else {
+            spawnCooldown--;
+        }
+
+        // TODO: client voting system?
+        if ( clients->getClientCount() > 0 ) {
+            waveHandler.start();
         }
         
         // *************** GAME LOGIC END ***************

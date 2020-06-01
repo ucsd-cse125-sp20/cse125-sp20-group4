@@ -60,6 +60,7 @@ public:
     //utility
     virtual bool contains(const glm::vec3 pt) const;
     virtual bool collides(const Object & obj) const;
+    virtual bool isEnemy() const;
 
     //(de)serialize functions
     virtual std::string serialize() const;
