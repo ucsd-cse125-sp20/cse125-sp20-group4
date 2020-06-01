@@ -16,12 +16,16 @@ private:
     // mesh
 public:
     bool dirty;
+    
     //constructor
     Object(const Object& obj);
     Object(std::string id);
     Object(std::string id, float x, float y, float z);
     Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ);
     Object(std::string id, float x, float y, float z, float dirX, float dirY, float dirZ, float width, float height, float length, bool isCollidable = false);
+    
+    const std::string TAG = "Object";
+    virtual const std::string& getTag();
 
     //setters
     void setId(std::string inputId);
@@ -60,6 +64,7 @@ public:
     //utility
     virtual bool contains(const glm::vec3 pt) const;
     virtual bool collides(const Object & obj) const;
+    virtual bool isEnemy() const;
 
     //(de)serialize functions
     virtual std::string serialize() const;

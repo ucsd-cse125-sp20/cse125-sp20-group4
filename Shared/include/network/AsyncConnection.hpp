@@ -254,6 +254,8 @@ class AsyncConnection {
      */
     bool senderLoop() {
 
+        LOGGER->trace( "Outbound queue has {} items.", outQueue->size() );
+        
         // Obtain next object to send
         Tptr src;
         outQueue->pop( src );
@@ -271,6 +273,10 @@ class AsyncConnection {
             return true; // Discard
         }
 
+        // Attach counter
+        static unsigned int counter = 0;
+        message = std::to_string( counter++ ) + ":" + message;
+
         // Send
         LOGGER->trace( "Sending encoded message '{}'", message );
         conn->send( message );
@@ -286,6 +292,8 @@ class AsyncConnection {
      */
     bool receiverLoop() {
 
+        LOGGER->trace( "Inbound queue has {} items.", inQueue->size() );
+
         // Obtain next message
         std::string message = conn->receive();
         if ( message.empty() ) { // Received sentinel
@@ -293,13 +301,26 @@ class AsyncConnection {
             close( false ); // Signal stopping
             return false; // Stop
         }
+        LOGGER->trace( "Received encoded message '{}'", message );
+
+        // Remove counter
+        size_t pos = message.find( ":" );
+        if ( pos != std::string::npos ) {
+            message = message.substr( pos + 1 );
+        } else {
+            LOGGER->error( "Message missing counter: '{}'", message );
+        }
 
         // Decode object
         Tptr dest;
         decode( message, dest );
 
-        // Queue received object
-        inQueue->push( dest );
+        if ( dest == nullptr ) {
+            LOGGER->error( "Message could not get decoded: '{}'", message );
+        } else {
+            // Queue received object
+            inQueue->push( dest );
+        }
         return true;
 
     }

@@ -1,5 +1,10 @@
 #include "ObjectClasses/object.h"
 #include "logger.h"
+
+const std::string& Object::getTag() {
+    return TAG;
+}
+
 Object::Object(const Object& obj) : Object(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.canCollide()) {}
 
 Object::Object(std::string id) : Object(id, 0.0f, 0.0f, 0.0f) {}
@@ -184,6 +189,12 @@ bool Object::collides(const Object & obj) const {
 
 std::shared_ptr<Object> Object::clone() const {
     return std::make_shared<Object>(*this);
+}
+
+bool Object::isEnemy() const {
+
+    return false;
+
 }
 
 std::string Object::serialize() const {

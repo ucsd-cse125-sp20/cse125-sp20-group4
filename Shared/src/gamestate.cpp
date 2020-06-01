@@ -83,7 +83,7 @@ std::map<std::string, std::function<void()>> GameState::updateTimers() {
             timers.erase(it);
         }
     }
-    log->info("Finished updating timers");
+    log->trace("Finished updating timers");
     log->trace("{} timers expired of {}", callbacks.size(), timers.size());
     return callbacks;
 }
@@ -97,7 +97,6 @@ void GameState::updateState() {
     float z;
     while (it != this->gameObjects.end()) {
         // check for collisions
-        
         if (std::dynamic_pointer_cast<MovingObject>(it->second) != NULL) {           
             std::shared_ptr<MovingObject> temp = std::dynamic_pointer_cast<MovingObject>(it->second);
             checkCollisions(it->first, temp);
@@ -235,7 +234,7 @@ std::shared_ptr<Object> GameState::getObject(std::string id) {
     return nullptr;
 }
 
-const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects() {
+const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects() const {
 
     return gameObjects;
 

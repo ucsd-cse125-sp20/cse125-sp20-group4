@@ -16,3 +16,7 @@ std::string Wall::serialize() const {
     return res;
 
 }
+
+const std::string& Wall::getTag() {
+    return TAG;
+}

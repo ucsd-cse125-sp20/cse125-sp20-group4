@@ -5,6 +5,7 @@
 
 #include "glm/gtc/epsilon.hpp"
 #define EPSILON 0.0005f
+#define MOVEMENT_DIV 20
 
 MovingObject::MovingObject(const MovingObject& obj) : MovingObject(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getVelocityX(), obj.getVelocityY(), obj.getVelocityZ()) {}
 
@@ -102,14 +103,14 @@ const glm::vec3 & MovingObject::getRelativeVelocity() const {
 }
 
 float MovingObject::getNextPositionX() const {
-    return getPositionX() + getVelocityX()/50;
+    return getPositionX() + getVelocityX()/ MOVEMENT_DIV;
 }
 
 float MovingObject::getNextPositionY() const {
-    return getPositionY() + getVelocityY() / 50;
+    return getPositionY() + getVelocityY() / MOVEMENT_DIV;
 }
 float MovingObject::getNextPositionZ() const {
-    return getPositionZ() + getVelocityZ() / 50;
+    return getPositionZ() + getVelocityZ() / MOVEMENT_DIV;
 }
 
 float MovingObject::getNextPositionCollisionX(){
@@ -117,7 +118,7 @@ float MovingObject::getNextPositionCollisionX(){
         isCollidedX = false; 
         return getPositionX(); 
 	}
-    return getPositionX() + getVelocityX()/50;
+    return getPositionX() + getVelocityX()/ MOVEMENT_DIV;
 }
 
 float MovingObject::getNextPositionCollisionY(){
@@ -125,14 +126,14 @@ float MovingObject::getNextPositionCollisionY(){
         isCollidedY = false; 
         return getPositionY(); 
 	}
-    return getPositionY() + getVelocityY() / 50;
+    return getPositionY() + getVelocityY() / MOVEMENT_DIV;
 }
 float MovingObject::getNextPositionCollisionZ(){
     if(isCollidedZ){
         isCollidedZ = false; 
         return getPositionZ(); 
 	}
-    return getPositionZ() + getVelocityZ() / 50;
+    return getPositionZ() + getVelocityZ() / MOVEMENT_DIV;
 }
 
 
@@ -174,7 +175,7 @@ bool MovingObject::collidesNext(const Object & obj) const {
         if ((obj.getPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2)) && (obj.getPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2))) {
             if (obj.getPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
                 if (obj.getPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
-                    log->info("Collision detected");
+                    log->info( "Collision detected: '{}' and '{}'", this->getId(), obj.getId() );
                     return true;
                 }
             }
@@ -192,7 +193,7 @@ bool MovingObject::collidesNext(const MovingObject & obj) const {
         if (obj.getNextPositionX() - (obj.getWidth() / 2) < this->getNextPositionX() + (this->getWidth() / 2) && obj.getNextPositionX() + (obj.getWidth() / 2) > this->getNextPositionX() - (this->getWidth() / 2)) {
             if (obj.getNextPositionY() - (obj.getHeight() / 2) < this->getNextPositionY() + (this->getHeight() / 2) && obj.getNextPositionY() + (obj.getHeight() / 2) > this->getNextPositionY() - (this->getHeight() / 2)) {
                 if (obj.getNextPositionZ() - (obj.getLength() / 2) < this->getNextPositionZ() + (this->getLength() / 2) && obj.getNextPositionZ() + (obj.getLength() / 2) > this->getNextPositionZ() - (this->getLength() / 2)) {
-                    log->info("Collision detected");
+                    log->info( "Collision detected: '{}' and '{}'", this->getId(), obj.getId() );
                     return true;
                 }
             }

@@ -30,8 +30,9 @@ target_link_libraries(Shared PUBLIC glm)
 # Configure compiler
 target_compile_features(Shared PUBLIC cxx_std_17)
 if (MSVC)
-    target_compile_options(Shared PRIVATE /W4 /WX /wd4275)
+    target_compile_options(Shared PRIVATE /W4 /WX- /wd4275)
     target_link_options(Shared PRIVATE)
+
 else()
     target_compile_options(Shared PRIVATE -Wall -Wextra -Werror)
 endif()

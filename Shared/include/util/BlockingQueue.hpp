@@ -132,7 +132,7 @@ class BlockingQueue {
 
     protected:
     /* Mutex that synchronizes the queue */
-    std::timed_mutex mtx;
+    mutable std::timed_mutex mtx;
     /* Condition Variable popping threads wait on */
     std::condition_variable_any cv;
     /* Internal storage queue */

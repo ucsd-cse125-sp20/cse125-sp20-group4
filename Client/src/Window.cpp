@@ -126,6 +126,7 @@ void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position,
 
 
 void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
+    
     Window::money = 100;
     Window::holding = false;
     Window::lX = 0;
@@ -368,7 +369,7 @@ void Window::drawGui() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    LOGGER->info("About to draw gui");
+    LOGGER->trace("About to draw gui");
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowBorderSize = 5;
     style.FrameBorderSize = 0;
@@ -385,7 +386,7 @@ void Window::drawGui() {
         drawInfoGui();
         break;
     }
-    LOGGER->info("gui drawn");
+    LOGGER->trace("gui drawn");
     
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -413,7 +414,7 @@ void Window::display_callback( GLFWwindow * ) {
 static float pointSize = 1.0f;
 
 void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, int mods ) {
-    
+
     // Check for a key press
     if ( action == GLFW_PRESS ) {
         // Check if escape was pressed
@@ -642,16 +643,16 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
 
-    LOGGER->warn("{} XXXX {}", Window::playerName, e->serialize());
+    LOGGER->trace( "{} XXXX {}", Window::playerName, e->serialize() );
     if (e->getType() == Event::EventType::JEvent) {
         Window::playerName = e->getObjectId();
-        LOGGER->warn("Set my ID to {}", e->getObjectId());
+        LOGGER->info("Set my ID to {}", e->getObjectId());
     } else if(e->getType() == Event::EventType::GEvent){
         auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
         world->handleUpdates(uEvent, Window::playerName);
         // update my data
-        auto it = uEvent->updates.find(Window::playerName);
-        if (it != uEvent->updates.end()) {
+        auto it = uEvent->updates.find( Window::playerName );
+        if ( it != uEvent->updates.end() ) {
             auto player = std::static_pointer_cast<Player>(it->second);
             money = player->getMoney();
             if (player->getHeldItem() != nullptr) {
@@ -661,11 +662,11 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
                 holding = false;
             }
             cam = Camera::getCamera(playerName);
-            LOGGER->warn("Updated player");
+            LOGGER->trace( "Updated player ");
         } else {
-            LOGGER->warn("Failed to find {}", playerName);
+            LOGGER->trace( "Failed to find {}", playerName );
         }
     } else {
-        world->handleUpdates(e, Window::playerName);
+        world->handleUpdates( e, Window::playerName );
     }
 }
