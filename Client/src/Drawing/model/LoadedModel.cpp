@@ -9,11 +9,10 @@ LoadedModel::LoadedModel(const std::string file, const Shader& shaderProgram) : 
     const aiScene* scene = import.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        return;
+        throw("WHAT IN THE FUCK");
     }
 
     processNode(scene->mRootNode, scene);
-
 }
 
 void LoadedModel::processNode(aiNode *node, const aiScene *scene) {

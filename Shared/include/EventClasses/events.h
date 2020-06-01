@@ -14,8 +14,13 @@
 #include <EventClasses/Object/Movement/stopleftevent.h>
 #include <EventClasses/UpdateEvent.h>
 #include <EventClasses/Server/DeleteEvent.h>
+#include <EventClasses/Server/NotifyEvent.h>
 
 #include <EventClasses/Object/RotateEvent.h>
 #include <EventClasses/GameState/place.h>
 #include <EventClasses/GameState/pickup.h>
+#include <EventClasses/GameState/join.h>
+
+#include <EventClasses/GameState/ready.h>
+#include <EventClasses/GameState/use.h>
 #endif

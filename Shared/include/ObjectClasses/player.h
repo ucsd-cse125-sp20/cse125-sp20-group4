@@ -9,6 +9,7 @@ private:
     int money;
 
 public:
+    static const std::string TAG;
     Player(const Player& player);
     Player(std::string id);
     Player(std::string id, float x, float y, float z);
@@ -19,17 +20,17 @@ public:
     //(de)serialize functions
     virtual std::string serialize() const override;
 
-    int getMoney();
+    int getMoney() const;
     void setMoney(int newMoney);
     void addMoney(int amount);
     void subtractMoney(int amount);
     
-    std::shared_ptr<Object> getHeldItem();
+    std::shared_ptr<Object> getHeldItem() const;
     void setHeldItem(std::shared_ptr<Object> newObject);
     void dropItem();
 
     void setHealth(int newHealth);
-    int getHealth();
-
+    int getHealth() const;
+    virtual std::shared_ptr<Object> clone() const override;
     static Player& deserialize(std::string serial);
 };

@@ -6,6 +6,8 @@
 #include "glm/gtc/epsilon.hpp"
 #define EPSILON 0.0005f
 
+MovingObject::MovingObject(const MovingObject& obj) : MovingObject(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getVelocityX(), obj.getVelocityY(), obj.getVelocityZ()) {}
+
 MovingObject::MovingObject(std::string id) : MovingObject(id, 0.0f, 0.0f, 0.0f) {}
 
 MovingObject::MovingObject(std::string id, float x, float y, float z) : MovingObject(id, x, y, z, 0.0f, 0.0f, 0.0f) {}
@@ -100,14 +102,14 @@ const glm::vec3 & MovingObject::getRelativeVelocity() const {
 }
 
 float MovingObject::getNextPositionX() const {
-    return getPositionX() + getVelocityX()/10;
+    return getPositionX() + getVelocityX()/50;
 }
 
 float MovingObject::getNextPositionY() const {
-    return getPositionY() + getVelocityY() / 10;
+    return getPositionY() + getVelocityY() / 50;
 }
 float MovingObject::getNextPositionZ() const {
-    return getPositionZ() + getVelocityZ() / 10;
+    return getPositionZ() + getVelocityZ() / 50;
 }
 
 float MovingObject::getNextPositionCollisionX(){
@@ -115,7 +117,7 @@ float MovingObject::getNextPositionCollisionX(){
         isCollidedX = false; 
         return getPositionX(); 
 	}
-    return getPositionX() + getVelocityX()/10;
+    return getPositionX() + getVelocityX()/50;
 }
 
 float MovingObject::getNextPositionCollisionY(){
@@ -123,14 +125,14 @@ float MovingObject::getNextPositionCollisionY(){
         isCollidedY = false; 
         return getPositionY(); 
 	}
-    return getPositionY() + getVelocityY() / 10;
+    return getPositionY() + getVelocityY() / 50;
 }
 float MovingObject::getNextPositionCollisionZ(){
     if(isCollidedZ){
         isCollidedZ = false; 
         return getPositionZ(); 
 	}
-    return getPositionZ() + getVelocityZ() / 10;
+    return getPositionZ() + getVelocityZ() / 50;
 }
 
 
@@ -266,7 +268,9 @@ void MovingObject::handleZCollision(const MovingObject & obj) {
 
 }
 
-
+std::shared_ptr<Object> MovingObject::clone() const {
+    return std::make_shared<MovingObject>(*this);
+}
 
 //(de)serialize functions
 std::string MovingObject::serialize() const {

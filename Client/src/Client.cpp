@@ -1,6 +1,14 @@
 ﻿// Cli+.cpp : Defines the entry point for the application.
 //
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/fonts/IconsFontAwesome5.h"
+#include "imgui/fonts/IconsMaterialDesign.h"
+#include "imgui/fonts/IconsForkAwesome.h"
+
 #include <iostream>
 
 //#define GLFW_INCLUDE_GLEXT
@@ -24,14 +32,17 @@
 #include "Window.h"
 #include "ObjectClasses/object.h"
 #include "deserializer.h"
+#include "inih/INIReader.h"
+
 
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
-#define LOGLEVEL spdlog::level::trace //was debug
+#define LOGLEVEL spdlog::level::warn //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
-
+#define DEFAULT_CONFIG_FILE "Config/config.ini"
+#define DEFAULT_IP "127.0.0.1"
 // FMOD constants
 #define AUDIO_CHANNELS_MAX 100
 
@@ -114,6 +125,7 @@ void setup_callbacks( GLFWwindow * window ) {
 }
 
 int main_inner( void ) {
+    INIReader client_config(DEFAULT_CONFIG_FILE);
 
     spdlog::info( "Initializing COM." );
     HRESULT hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
@@ -139,7 +151,25 @@ int main_inner( void ) {
         return EXIT_FAILURE;
     }
 
-    Server * server = new Server( "127.0.0.1", DEFAULT_PORT );
+    //get port from congif file
+    std::string port = DEFAULT_PORT;
+    std::string set_port = client_config.Get("client", "port", "");
+    if (set_port == "") {
+        spdlog::warn("Port not found in config file, using default");
+    }
+    else {
+        port = set_port;
+    }
+
+    std::string ip = DEFAULT_IP;
+    std::string set_ip = client_config.Get("client", "ip", "");
+    if (set_ip == "") {
+        spdlog::warn("IP not found in config file, using default");
+    }
+    else {
+        ip = set_ip;
+    }
+    Server * server = new Server( ip, port );
 
     // Create the GLFW window
     spdlog::info( "Creating window..." );
@@ -160,11 +190,37 @@ int main_inner( void ) {
     setup_opengl_settings();
     // Initialize objects/pointers for rendering
     Window::initialize( server, audioSystem );
+
+    // Imgui
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    ImGuiIO& io = ImGui::GetIO();
+    //io.Fonts->AddFontDefault();
+    ImFontConfig config;
+    config.MergeMode = true;
+    config.GlyphMinAdvanceX = 35.0f; // Use if you want to make the icon monospaced
+    io.Fonts->AddFontFromFileTTF("fonts/Bangers-Regular.ttf", 30.0f);
+
+    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    io.Fonts->AddFontFromFileTTF("fonts/fa-solid-900.ttf" , 30.0f, &config, icon_ranges);
+
+    //static const ImWchar icon_ranges[] = { ICON_MIN_MD, ICON_MAX_MD, 0 };
+    //io.Fonts->AddFontFromFileTTF("fonts/MaterialIcons-Regular.ttf", 30.0f, &config, icon_ranges);
+
+    //static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_FK, 0 };
+    //io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 30.0f, &config, icon_ranges);
+    io.Fonts->Build();
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
 
+
         // Main render display callback. Rendering of objects is done here.
         Window::display_callback( window );
+
+       
         // Idle callback. Updating objects, etc. can be done here.
         Window::idle_callback();
 
@@ -172,6 +228,11 @@ int main_inner( void ) {
         audioSystem->update();
 
     }
+
+    //Imgui cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     Window::clean_up();
 

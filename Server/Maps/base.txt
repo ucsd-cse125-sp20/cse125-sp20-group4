@@ -1,0 +1,9 @@
+ssssssssssssssssssssssssssssss
+s                            s
+s   sssssssssss  sssssssss   s
+s             0 1            s
+s   sssssssss     ssssssss   s
+s             2 3            s
+s   sssss  ssssssssss  sssssss
+s                            s
+ssssssssssssssssssssssssssssss

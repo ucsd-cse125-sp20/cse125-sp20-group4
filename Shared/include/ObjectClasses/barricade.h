@@ -8,6 +8,9 @@ protected:
 	int durability;
 	const int degradeFactor = 10;
 public:
+	static const std::string TAG;
+	Barricade();
+	Barricade(const Barricade& obj);
 	Barricade(std::string id, float xPos, float yPos, float zPos, float width = 1.0f, float height = 1.0f, float length = 1.0f, int durability = 100, bool up = true);
 
 	bool isUp() const;
@@ -16,6 +19,8 @@ public:
 	int getDurability() const;
 	void setDurability(int newDurability);
 	void degradeBarricade();
+	virtual std::shared_ptr<Object> clone() const override;
+
 	//(de)serialize functions
 	virtual std::string serialize() const;
 

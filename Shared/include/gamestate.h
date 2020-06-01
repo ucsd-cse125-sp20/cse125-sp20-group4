@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "EventClasses/event.h"
 #include "ObjectClasses/objects.h"
+#include "MapRep.h"
 class GameState
 {
 private:
@@ -18,6 +19,7 @@ private:
 
 public:
     bool deletes;
+    MapRep map;
     GameState();
     void createObject(std::shared_ptr<Object> obj);
     void createObject(std::shared_ptr<Object> obj, std::string id);
@@ -29,12 +31,13 @@ public:
     void updateState();
     void applyEvent(std::shared_ptr<Event> event);
     std::string serialize();
-    void initialize(std::string file = "");
+    void initialize();
     std::string getUpdates();
     std::vector<std::string> getDeletions();
     void addDeletions(std::string id);
     bool isDirty();
     void setDirty(bool dty);
+    void makeDirty();
     void resetDirty();
     void checkCollisions(std::string id, std::shared_ptr<MovingObject> object);
     const std::map<std::string, std::shared_ptr<Object>> & getGameObjects() const;

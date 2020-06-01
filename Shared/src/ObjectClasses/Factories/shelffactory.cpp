@@ -49,7 +49,7 @@ std::shared_ptr<Object> ShelfFactory::create(std::string serial) { //TODO:Make m
     last = pos + 1;
 
     pos = serial.find("/", last);
-
+    /*
     //handle this differently
     Deserializer deserializer;
     std::string heldString = serial.substr(last, pos - last);
@@ -57,8 +57,12 @@ std::shared_ptr<Object> ShelfFactory::create(std::string serial) { //TODO:Make m
     if (heldString != "noItem") {
         heldObj = deserializer.deserializeObject(heldString);
     }
-
-    std::shared_ptr<Shelf> shelf = std::make_shared<Shelf>(id, posx, posy, posz, length, width, height, heldObj);
+    */
+    std::shared_ptr<Shelf> shelf = std::make_shared<Shelf>(id, posx, posy, posz, length, width, height, nullptr);
     return shelf;
 
+}
+
+std::shared_ptr<Object> ShelfFactory::create() {
+    return std::make_shared<Shelf>();
 }

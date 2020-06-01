@@ -6,7 +6,7 @@
 
 class Event {
 public:
-    enum class EventType { GEvent, OEvent, UEvent };
+    enum class EventType { GEvent, OEvent, UEvent, JEvent };
     Event( const std::string & objectId, const EventType type );
     const Event::EventType getType() const;
     const std::string & getObjectId() const;

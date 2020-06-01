@@ -29,7 +29,20 @@ static std::vector<Sanitizer::CharMapping> specialCharacters() {
 /* Used to sanitize messages */
 static const Sanitizer sanitizer( specialCharacters() );
 
-UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::GEvent), updates( updates ) {}
+UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<Object>> & updates ) : Event( "ignore", Event::EventType::GEvent){
+    //std::unordered_map<std::string, std::shared_ptr<Object>> newMap;
+    Deserializer deserializer;
+    auto iter = updates.begin();
+    while (iter != updates.end()) {
+        if (iter->second->dirty == true) {
+            auto pair = std::pair<std::string, std::shared_ptr<Object>>(iter->first, iter->second->clone()); //needs to make underlying object
+            //LOGGER->trace("{}", pair.second->serialize());
+            this->updates.insert(pair);
+        }
+        iter++;
+    }
+    //this->updates = newMap;
+}
 
 std::string UpdateEvent::serialize() const {
 
@@ -85,7 +98,7 @@ std::shared_ptr<UpdateEvent> UpdateEvent::deserialize( const std::string & seria
         
         std::string id;
         std::shared_ptr<Object> data = readEntry( serialized, start, end, id );
-        LOGGER->debug("Got object {}:", data->serialize());
+        //LOGGER->debug("Got object {}:", data->serialize());
         if ( data != nullptr ) {
             if ( updates.count( id ) > 0 ) {
                 LOGGER->warn( "Duplicate key: {}", id );

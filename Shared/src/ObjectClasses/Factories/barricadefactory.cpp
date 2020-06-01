@@ -55,3 +55,7 @@ std::shared_ptr<Object> BarricadeFactory::create(std::string serial) { //TODO:Ma
     return barricade;
 
 }
+
+std::shared_ptr<Object> BarricadeFactory::create() {
+    return std::make_shared<Barricade>();
+}

@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
+#include <iostream>
+#include <fstream>
 
 #include <glm/vec3.hpp>
 
@@ -24,17 +26,20 @@
 #include "statehandler.h"
 #include "wavehandler.h"
 #include "deserializer.h"
+#include "maploader.h"
+#include "inih/INIReader.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::trace
+#define LOGLEVEL spdlog::level::warn
 
 #define MAX_CLIENTS 5
 #define SERVER_TICK 20
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
+#define DEFAULT_CONFIG_FILE "Config/config.ini"
 
 #define SPAWNS_PER_TICK 1
 #define SPAWN_DELAY 30
@@ -42,6 +47,9 @@
 static const std::chrono::duration TICK_PERIOD = std::chrono::milliseconds( SERVER_TICK );
 
 static std::atomic<bool> running = true;
+
+std::unordered_map<std::string, std::string> config_map;
+
 
 // handles each client socket
 // data passed as pointer to GameThreadQueues struct
@@ -53,6 +61,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     // ************** SETUP GAME STATE ****************
     GameState gameState;
+    MapLoader::LoadMap("Maps/base.txt", &gameState);
     gameState.initialize();
 
     WaveHandler waveHandler = WaveHandler();
@@ -172,9 +181,25 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 int main_inner( void ) {
   
     //std::shared_ptr<Client> c = std::make_shared<Client>( 0, nullptr, nullptr, nullptr );
-
+    
+    //read config file
+    INIReader config(DEFAULT_CONFIG_FILE);
+    if (config.ParseError() < 0) {
+        spdlog::critical("Error reading config file");
+        return EXIT_FAILURE;
+    }
     WSADATA wsaData;
     int status;
+    std::string port = DEFAULT_PORT;
+    std::string set_port = config.Get("server", "port", "");
+    if (set_port == "") {
+        spdlog::warn("Port not found in config file, using default");
+    }
+    else {
+        port = set_port;
+    }
+    spdlog::warn("Starting server on port: {}", port);
+
 
     // Initialize Winsock
     if ( ( status = WSAStartup( MAKEWORD( 2, 2 ), &wsaData ) ) != 0 ) {
@@ -183,7 +208,7 @@ int main_inner( void ) {
     }
 
     // Start client handler
-    std::shared_ptr<Clients> clients = std::make_shared<Clients>( DEFAULT_PORT );
+    std::shared_ptr<Clients> clients = std::make_shared<Clients>( port );
 
     // Create thread to handle game state loop
     std::thread gameThread( [clients]() -> void { handleGame( clients ); } );
@@ -194,6 +219,7 @@ int main_inner( void ) {
     WSACleanup();
     return EXIT_SUCCESS;
 }
+
 
 int main( void ) {
 

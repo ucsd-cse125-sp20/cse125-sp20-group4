@@ -4,7 +4,7 @@
 #include "logger.h"
 #include <EventClasses\Object\ObjectEvent.h>
 #include <EventClasses\GameState\gamestateevent.h>
-
+#include <ObjectClasses/Factories/barricadefactory.h>
 
 GameState::GameState() {
     this->nextId = 0;
@@ -12,6 +12,7 @@ GameState::GameState() {
     this->timers = std::map<std::string, std::shared_ptr<Timer>>();
     this->dirty = true;
     this->deletes = false;
+    this->map = MapRep(100, 100);
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
@@ -24,6 +25,8 @@ void GameState::createObject(std::shared_ptr<Object> obj, std::string id) {
     this->gameObjects.insert(std::pair<std::string, std::shared_ptr<Object>>(id, obj));
     obj->dirty = true;
     this->setDirty(true);
+    // update map
+    this->map.addObject(obj, obj->getPosition());
     log->trace("Created GameState object with id: {}", id);
 }
 
@@ -33,6 +36,8 @@ void GameState::deleteObject(std::string id) {
     std::map<std::string, std::shared_ptr<Object>>::iterator it;
     it = this->gameObjects.find(id);
     if (it != this->gameObjects.end()) {
+        // update map
+        this->map.removeObject(it->second->getPosition());
         this->addDeletions(it->second->getId());
         this->gameObjects.erase(it);
         this->deletes = true;
@@ -157,21 +162,10 @@ std::string GameState::serialize() {
     return res;
 }
 
-void GameState::initialize(std::string file) {
+void GameState::initialize() {
     auto log = getLogger("GameState");
-    if (file.compare("") == 0) {
-        // default
-        // create a player
-        std::shared_ptr<Object> obj = std::shared_ptr<Object>(new Player("cube4",0.0f,0.0f,3.0f,0.0f,0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.0f,0.0f,0.0f, 100, 100,
-           std::make_shared<Barricade>("barrier1", 1.0f, 1.0f, 1.0f)));
-        this->createObject(obj, obj->getId());
-        std::shared_ptr<Object> obj2 = std::shared_ptr<Object>(new Barricade("cube5", 3.0f, 0.0f, 3.0f));
-        this->createObject(obj2, obj2->getId());
-        log->info("Starting Game State: {}", this->serialize());
-    } else {
-        // TODO parse file
-        log->error("Game state initialization from file NOT IMPLEMENTED");
-    }
+    /* set the phase*/
+    log->info("Starting Game State: {}", this->serialize());
  }
 
 std::string GameState::getUpdates() {
@@ -245,4 +239,10 @@ const std::map<std::string, std::shared_ptr<Object>> & GameState::getGameObjects
 
     return gameObjects;
 
+}
+void GameState::makeDirty() {
+    setDirty(true);
+    for (auto it = this->gameObjects.begin(); it != this->gameObjects.end();it++){
+        it->second->dirty = true;
+    }
 }

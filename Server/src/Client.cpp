@@ -6,6 +6,8 @@
 #include <logger.h>
 
 #include "Client.h"
+#include "EventClasses/GameState/join.h"
+#include "EventClasses/Server/NotifyEvent.h"
 
 const auto LOGGER = getLogger( "Client" );
 
@@ -17,20 +19,25 @@ Client::Client( SOCKET sock, const Qptr & inQueue,
     conn( sock, inQueue,
           [this, idAssigner]( const Cptr & c, const Qptr & q ) -> void { this->setup( c, q, idAssigner ); },
           [this]( const Cptr & c, const Qptr & q ) -> void { this->teardown( c, q ); } ), 
-    closeCallback( closeCallback ) {}
+    closeCallback( closeCallback ) {
+
+    conn.start();
+
+}
 
 /* Protected methods */
 
-void Client::setup( const Cptr & /* conn */, const Qptr & /* inQueue */, 
+void Client::setup( const Cptr & /* conn */, const Qptr &  inQueue , 
                     std::function<std::string( const std::string & )> idAssigner ) {
 
     // Do nothing
-    std::string requestedName = "cube4"; // Try to use this name if possible
+    std::string requestedName = ""; // Try to use this name if possible
 
     // Store client ID
     clientID = idAssigner( requestedName );
     LOGGER->info( "Established connection with client '{}'.", clientID );
-
+    inQueue->push(std::make_shared<JoinEvent>(clientID));
+    send(std::make_shared<NotifyEvent>(clientID));
 }
 
 void Client::teardown( const Cptr & /* conn */, const Qptr & /* inQueue */ ) {
@@ -38,7 +45,8 @@ void Client::teardown( const Cptr & /* conn */, const Qptr & /* inQueue */ ) {
     // Do nothing
 
     LOGGER->info( "Closed connection with client '{}'.", clientID );
-    
+
+    //inQueue->push(std::make_shared<LeaveEvent>(clientID));
     closeCallback( clientID );
 
 }
