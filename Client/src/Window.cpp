@@ -67,6 +67,7 @@ static const char * window_title = "CSE 125 Project";
 Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
+ParticleManager* Window::pmanager;
 
 // Audio data
 FMOD::Studio::System * Window::audioSystem;
@@ -160,6 +161,8 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+
+    pmanager = new ParticleManager();
 
     // Debugging entities
     //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
@@ -294,6 +297,9 @@ void Window::idle_callback() {
     if ( res != FMOD_OK ) {
         LOGGER->warn( "Error while updating listener position ({}).", res );
     }
+
+    //update particles
+    pmanager->update();
 
 }
 void drawInfoGui() {   

@@ -1,3 +1,5 @@
+#pragma warning(disable:4201)
+
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <logger.h>
@@ -81,8 +83,6 @@ void Entity::setPosition( const glm::vec3 & pos ) {
 
     velocity = pos - position;
 
-    auto log = getLogger("Entity");
-    log->info("Setting position from ({}, {}, {}) to ({}, {}, {})", position.x, position.y, position.z, pos.x, pos.y, pos.z);
     position = pos;
     updateModelMatrix();
 

@@ -19,6 +19,7 @@
 #include "Server.h"
 #include "state/Camera.h"
 #include "state/World.h"
+#include "state/ParticleManager.h"
 
 class Window {
 
@@ -37,6 +38,7 @@ class Window {
     static World * world;
     static Camera * cam;
     static Server * server;
+    static ParticleManager* pmanager;
     static std::string playerName;
 
 

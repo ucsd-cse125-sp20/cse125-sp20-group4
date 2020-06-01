@@ -1,6 +1,8 @@
 ﻿// Cli+.cpp : Defines the entry point for the application.
 //
 
+#pragma warning(disable:4201)
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 

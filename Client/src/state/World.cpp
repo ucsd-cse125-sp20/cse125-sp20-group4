@@ -7,6 +7,7 @@
 #include <logger.h>
 #include "ObjectClasses/objects.h"
 
+#include "window.h"
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
 #include "state/CameraEntity.h"
@@ -33,13 +34,18 @@ World::~World() {
 
 void World::draw( const glm::mat4x4 & toView ) const {
 
-    LOGGER->trace( "Starting world draw." );
+    LOGGER->trace( "Starting entity draw." );
     for ( auto it = entities.begin(); it != entities.end(); it++ ) {
         it->second->draw( toView );
 
     }
-    LOGGER->trace( "World draw done." );
+    LOGGER->trace( "Entity draw done." );
 
+
+    LOGGER->trace("Starting particle draw.");
+    Window::pmanager->draw( toView, Window::cam->getPos());
+
+    LOGGER->trace("Particle draw done.");
 }
 
 Entity * World::getEntity( const std::string & name ) const {
@@ -74,9 +80,14 @@ Entity * World::removeEntity( const std::string & name ) {
     LOGGER->debug( "Removing entity '{}' to world.", name );
     Entity * e = found->second;
     entities.erase( name );
+
+    //create particle when the entity is deleted
+    Window::pmanager->addExplosion(e);
+
     return e;
 
 }
+
 void World::createNewEntity(std::shared_ptr<Object> entity,std::string id) {
     if (entity->getId().compare(id)==0) {
         addEntity(new CameraEntity(id, 0.0f, new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), entity->getPosition(), entity->getOrientation(), 1.0f, false));
@@ -112,7 +123,9 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     LOGGER->debug("Making a player");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 0.0f, 0));
-                    addEntity(new CameraEntity(it->second->getId(),0.2f, (model), it->second->getPosition(), it->second->getOrientation(),0.05f));
+                    entity = new CameraEntity(it->second->getId(), 0.2f, (model), it->second->getPosition(), it->second->getOrientation(), 0.05f);
+                    addEntity(entity);
+                    Window::pmanager->addTrail(entity);
                 } else if (map.at(it->second->getId())->serialize().find("Barricade") != std::string::npos) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());

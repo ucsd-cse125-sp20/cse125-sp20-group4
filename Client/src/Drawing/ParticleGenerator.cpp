@@ -36,6 +36,8 @@ void ParticleGenerator::Update(float dt, Entity* entity, unsigned int newParticl
             colors[i] = p.Color;
         }
     }
+
+    life += dt;
 }
 
 void ParticleGenerator::Draw(const glm::mat4x4& view, const glm::vec3& cameraPos) {
@@ -73,6 +75,20 @@ void ParticleGenerator::Draw(const glm::mat4x4& view, const glm::vec3& cameraPos
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+void ParticleGenerator::Clear() {
+    for (unsigned int i = 0; i < amount; i++) {
+        particles[i] = Particle();
+        positions[i] = particles[i].Position;
+        colors[i] = particles[i].Color;
+    }
+
+    life = 0.0f;
+}
+
+float ParticleGenerator::getLife() {
+    return life;
+}
+
 void ParticleGenerator::init() {
 
     for (unsigned int i = 0; i < amount; ++i) {
@@ -80,6 +96,8 @@ void ParticleGenerator::init() {
         positions.push_back(particles[i].Position);
         colors.push_back(particles[i].Color);
     }
+
+    life = 0.0f;
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(2, VBO);

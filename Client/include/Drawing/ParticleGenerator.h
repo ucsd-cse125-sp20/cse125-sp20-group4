@@ -25,6 +25,9 @@ public:
 
     void Update(float dt, Entity* entity, unsigned int newParticles, glm::vec3 offset = glm::vec3(0.0f));
     void Draw(const glm::mat4x4& view, const glm::vec3& cameraPos);
+    void Clear();
+
+    float getLife();
 private:
     std::vector<Particle> particles;
     std::vector<glm::vec3> positions;
@@ -33,6 +36,7 @@ private:
     Texture* texture;
     unsigned int amount;
     float scale;
+    float life;
     unsigned int VAO;
     unsigned int VBO[2];
 
