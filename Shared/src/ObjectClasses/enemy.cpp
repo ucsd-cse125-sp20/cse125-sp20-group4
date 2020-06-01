@@ -2,7 +2,9 @@
 #include "logger.h"
 
 #include <cmath>
-
+const std::string& Enemy::getTag() {
+    return TAG;
+}
 Enemy::Enemy(const Enemy& enemy) : Enemy(enemy.getId(), enemy.getPositionX(), enemy.getPositionY(), enemy.getPositionZ(), enemy.getOrientationX(), enemy.getOrientationY(), enemy.getOrientationZ(), enemy.getVelocityX(), enemy.getVelocityY(), enemy.getVelocityZ()) {}
 Enemy::Enemy(std::string id) : Enemy(id, 0, 0, 0) {}
 Enemy::Enemy(std::string id, float x, float y, float z) : Enemy(id, x, y, z, 1.0f, 0.0f, 0.0f) {}
@@ -25,7 +27,7 @@ void Enemy::setVelocityFromCmd() {
 
 std::string Enemy::serialize() const {
     auto log = getLogger("Enemy");
-    std::string res = "Enemy:" + MovingObject::serialize() + "," + std::to_string(static_cast<int>(weakness));
+    std::string res = TAG+":" + MovingObject::serialize() + "," + std::to_string(static_cast<int>(weakness));
     log->trace("Serialized Enemy as {}", res);
     return res;
 }

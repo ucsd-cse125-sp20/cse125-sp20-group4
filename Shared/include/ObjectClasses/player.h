@@ -9,7 +9,6 @@ private:
     int money;
 
 public:
-    static const std::string TAG;
     Player(const Player& player);
     Player(std::string id);
     Player(std::string id, float x, float y, float z);
@@ -17,6 +16,10 @@ public:
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ, int startingMoney, int hp, std::shared_ptr<Object> held);
+    
+    const std::string TAG = "Player";
+    const std::string& getTag();
+
     //(de)serialize functions
     virtual std::string serialize() const override;
 

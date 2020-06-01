@@ -1,7 +1,9 @@
 #include "ObjectClasses/barricade.h"
 #include "logger.h"
 
-const std::string Barricade::TAG = "Barricade";
+const std::string& Barricade::getTag() {
+	return TAG;
+}
 Barricade::Barricade(const Barricade& obj): Barricade(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getDurability(), obj.isUp()) {}
 
 Barricade::Barricade() : Object("ignore", 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1, 1, 1, true) {}

@@ -17,9 +17,9 @@
 
 
 Deserializer::Deserializer() {
-    this->gameMapping.insert(std::make_pair(Player::TAG, std::make_unique<PlayerFactory>()));
-    this->gameMapping.insert(std::make_pair(Shelf::TAG, std::make_unique<ShelfFactory>()));
-    this->gameMapping.insert(std::make_pair(Barricade::TAG, std::make_unique<BarricadeFactory>()));
+    this->gameMapping.insert(std::make_pair("Player", std::make_unique<PlayerFactory>()));
+    this->gameMapping.insert(std::make_pair("Shelf", std::make_unique<ShelfFactory>()));
+    this->gameMapping.insert(std::make_pair("Barricade", std::make_unique<BarricadeFactory>()));
     this->gameMapping.insert(std::make_pair("Enemy", std::make_unique<EnemyFactory>()));
 
     this->gameMapping.insert(std::make_pair("RedObject", std::make_unique<RedItemFactory>()));
@@ -34,9 +34,9 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair("StopRight", std::make_unique<StopRightEventFactory>()));
     this->eventMapping.insert(std::make_pair("StopForward", std::make_unique<StopForwardEventFactory>()));
     this->eventMapping.insert(std::make_pair("StopBackward", std::make_unique<StopBackwardEventFactory>()));
-    this->eventMapping.insert(std::make_pair( "RotateEvent", std::make_unique<RotateEventFactory>() ) );
-    this->eventMapping.insert(std::make_pair( UpdateEvent::TAG, std::make_unique<UpdateEventFactory>() ) );
-    this->eventMapping.insert(std::make_pair( DeleteEvent::TAG, std::make_unique<DeleteEventFactory>()));
+    this->eventMapping.insert(std::make_pair("RotateEvent", std::make_unique<RotateEventFactory>() ) );
+    this->eventMapping.insert(std::make_pair(UpdateEvent::TAG, std::make_unique<UpdateEventFactory>() ) );
+    this->eventMapping.insert(std::make_pair(DeleteEvent::TAG, std::make_unique<DeleteEventFactory>()));
     this->eventMapping.insert(std::make_pair("NotifyEvent", std::make_unique<NotifyEventFactory>()));
     this->eventMapping.insert(std::make_pair("PlaceEvent", std::make_unique<PlaceEventFactory>()));
     this->eventMapping.insert(std::make_pair("PickUpEvent", std::make_unique<PickUpEventFactory>()));

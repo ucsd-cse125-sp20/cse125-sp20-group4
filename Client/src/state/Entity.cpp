@@ -5,6 +5,9 @@
 #include "state/Entity.h"
 #include "Window.h"
 
+#include <glm/gtc/epsilon.hpp>
+#define EPSILON 0.0005f
+
 static const auto LOGGER = getLogger( "Entity" );
 
 /* Constructor */

@@ -16,7 +16,7 @@ void PickUpEvent::apply(GameState* gamestate) const
     if (object != nullptr && itemObject != nullptr && object->getHeldItem()==nullptr) {
         if (glm::distance(object->getPosition(), itemObject->getPosition()) < 2.0f) {
             std::shared_ptr<Object> item = itemObject->getItem();
-            if (std::dynamic_pointer_cast<Barricade>(item) != nullptr) {
+            if (item->getTag().compare("Barricade")==0) {
                 // check if player has enough dough
                 if (object->getMoney() > 5) {
                     object->subtractMoney(5);

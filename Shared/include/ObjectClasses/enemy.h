@@ -16,6 +16,9 @@ public:
     Enemy(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ);
     Enemy(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float velX, float velY, float velZ);
 
+    const std::string TAG = "Enemy";
+    const std::string& getTag();
+
     // sets the velocity from top command of cmdStack
     void setVelocityFromCmd();
 

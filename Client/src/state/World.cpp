@@ -104,27 +104,59 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 }
                 entity->setPosition(it->second->getPosition());
             } else {
-                LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
-                LOGGER->debug("Yeeting this {}, {}", map.at(it->second->getId())->serialize(), std::dynamic_pointer_cast<std::shared_ptr<Barricade>>(map.at(it->second->getId())) != nullptr);
-
+                LOGGER->debug("Couldn't find entity '{}'.", it->second->getTag());
 
                 if (it->first.compare(id)==0) {
                     LOGGER->debug("Making a player");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                    addEntity(new CameraEntity(it->second->getId(),0.8f, (model), it->second->getPosition(), it->second->getOrientation(),0.13f));
+                } else if (it->second->getTag().compare("Player") == 0) {
+                    LOGGER->debug("Making a Player");
+                    auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.13f));
+                } else if (it->second->getTag().compare("Enemy") == 0) {
+                    LOGGER->debug("Making a Enemy");
+                    auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 0.0f, 0));
-                    addEntity(new CameraEntity(it->second->getId(),0.2f, (model), it->second->getPosition(), it->second->getOrientation(),0.05f));
-                } else if (map.at(it->second->getId())->serialize().find("Barricade") != std::string::npos) {
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.13f));
+                } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 0.0f, 0));
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
-                }
-                else if (map.at(it->second->getId())->serialize().find("Shelf") != std::string::npos) {
-                    LOGGER->debug("Making a shelf");
+                } else if (it->second->getTag().compare("Shelf") == 0) {
 
-                    auto model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
-                    model->setColor(glm::vec3(1.0f, 1.0f, 0));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
+                    auto shelf = std::dynamic_pointer_cast<Shelf>(it->second);
+                    glm::vec3 color = glm::vec3(0.5f,0.5f,0.5f);
+                    if (shelf->getFactory() != nullptr) {
+                        if (shelf->getItem()->getTag().compare("Barricade") == 0) {
+                            color = glm::vec3(0.6f, 0.3f, 0.0f);
+                        } else if (shelf->getItem()->getTag().compare("Red") == 0) {
+                            color = glm::vec3(1.0f, 0.0f, 0.0f);
+                        } else if (shelf->getItem()->getTag().compare("Green") == 0) {
+                            color = glm::vec3(0.0f, 1.0f, 0.0f);
+                        } else if (shelf->getItem()->getTag().compare("Blue") == 0) {
+                            color = glm::vec3(0.0f, 0.0f, 1.0f);
+                        }
+                    }
+                    
+                    LoadedModel* model;
+                    if (shelf->isCorner == 0) {
+                        LOGGER->debug("Making a shelf");
+                        // its a shelf
+                        model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
+                    } else {
+
+                        LOGGER->debug("Making a corner shelf");
+                        // its a corner
+                        model = new LoadedModel("Models/corner_shelf.dae", Shaders::phong());
+                    }
+
+                    model->setColor(color);
+
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else {
                     LOGGER->debug("Making a cube");
 

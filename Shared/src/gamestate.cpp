@@ -97,7 +97,6 @@ void GameState::updateState() {
     float z;
     while (it != this->gameObjects.end()) {
         // check for collisions
-        
         if (std::dynamic_pointer_cast<MovingObject>(it->second) != NULL) {           
             std::shared_ptr<MovingObject> temp = std::dynamic_pointer_cast<MovingObject>(it->second);
             checkCollisions(it->first, temp);
