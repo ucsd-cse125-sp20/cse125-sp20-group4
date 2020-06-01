@@ -60,6 +60,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     GameStateHandler gameStateHandler;
     std::deque<std::shared_ptr<Enemy>> pendingSpawns;
+    unsigned int spawnCooldown = 0;
 
     while ( running ) {
 
@@ -122,6 +123,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                         pendingSpawns.push_back( e );
                     }
                 }
+                spawnCooldown = 0;
+
                 // Notify clients?
                 break;
             }
@@ -132,13 +135,18 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
         }
 
-        for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
+        if ( spawnCooldown == 0 ) {
+            for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
 
-            std::shared_ptr<Enemy> e = pendingSpawns.front();
-            pendingSpawns.pop_front();
-            log->trace( "Spawning enemy '{}'.", e->getId() );
-            gameState.createObject( e, e->getId() );
+                std::shared_ptr<Enemy> e = pendingSpawns.front();
+                pendingSpawns.pop_front();
+                log->trace( "Spawning enemy '{}'.", e->getId() );
+                gameState.createObject( e, e->getId() );
 
+            }
+            spawnCooldown = SPAWN_DELAY;
+        } else {
+            spawnCooldown--;
         }
 
         // TODO: client voting system?

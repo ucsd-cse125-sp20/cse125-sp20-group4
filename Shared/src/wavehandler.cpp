@@ -47,7 +47,9 @@ static std::string timeToStr( const WaveHandler::Clock::time_point & t ) {
     char buf[BUFSIZ];
     ctime_s( buf, BUFSIZ, &time );
     buf[BUFSIZ - 1] = '\0'; // Juuuuust in case
-    return std::string( buf );
+    std::string s( buf );
+    s.pop_back(); // Remove trailing newline
+    return s;
 
 }
 
