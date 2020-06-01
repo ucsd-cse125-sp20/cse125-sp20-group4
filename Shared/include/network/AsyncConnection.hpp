@@ -302,16 +302,18 @@ class AsyncConnection {
             return false; // Stop
         }
 
-        // Decode object
-        LOGGER->trace( "Received encoded message '{}'", message );
-        Tptr dest;
-        decode( message, dest );
-
         // Remove counter
         size_t pos = message.find( ":" );
         if ( pos != std::string::npos ) {
             message = message.substr( pos + 1 );
+        } else {
+            LOGGER->error( "Message missing counter: '{}'", message );
         }
+
+        // Decode object
+        LOGGER->trace( "Received encoded message '{}'", message );
+        Tptr dest;
+        decode( message, dest );
 
         if ( dest == nullptr ) {
             LOGGER->error( "Message could not get decoded: '{}'", message );
