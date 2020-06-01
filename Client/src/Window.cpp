@@ -124,6 +124,7 @@ void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position,
 
 
 void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
+    
     Window::money = 100;
     Window::holding = false;
     // Set up graphics

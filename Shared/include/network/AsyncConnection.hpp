@@ -254,6 +254,8 @@ class AsyncConnection {
      */
     bool senderLoop() {
 
+        LOGGER->trace( "Outbound queue has {} items.", outQueue->size() );
+        
         // Obtain next object to send
         Tptr src;
         outQueue->pop( src );
@@ -285,6 +287,8 @@ class AsyncConnection {
      * @return False if the worker should stop, true otherwise.
      */
     bool receiverLoop() {
+
+        LOGGER->trace( "Inbound queue has {} items.", inQueue->size() );
 
         // Obtain next message
         std::string message = conn->receive();
