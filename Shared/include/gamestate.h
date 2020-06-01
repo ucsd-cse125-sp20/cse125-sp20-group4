@@ -19,7 +19,7 @@ private:
 
 public:
     bool deletes;
-    MapRep map;
+    MapRep* map;
     GameState();
     void createObject(std::shared_ptr<Object> obj);
     void createObject(std::shared_ptr<Object> obj, std::string id);
@@ -40,6 +40,6 @@ public:
     void makeDirty();
     void resetDirty();
     void checkCollisions(std::string id, std::shared_ptr<MovingObject> object);
-    const std::map<std::string, std::shared_ptr<Object>> & getGameObjects();
+    const std::map<std::string, std::shared_ptr<Object>> & getGameObjects() const;
 
 };

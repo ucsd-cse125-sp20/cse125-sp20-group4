@@ -54,8 +54,9 @@ target_link_libraries(Client PRIVATE assimp::assimp)
 # Configure compiler
 target_compile_features(Client PRIVATE cxx_std_17)
 if (MSVC)
-    target_compile_options(Client PRIVATE /W4 /WX /wd4275 /wd4127)
+    target_compile_options(Client PRIVATE /W4 /WX- /wd4275 /wd4127)
     target_link_options(Client PRIVATE)
+
 else()
     target_compile_options(Client PRIVATE -Wall -Wextra -Werror)
 endif()
@@ -226,4 +227,26 @@ if (Client_Fonts)
                        )
 else()
     message(STATUS "No fonts targets found.")
+endif()
+
+# config
+file(GLOB_RECURSE Client_Config RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Config/*)
+if (Client_Config)
+    message(STATUS "Including map targets.")
+    message(DEBUG "Config: ${Client_Config}")
+    list(TRANSFORM Client_Config PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Client_Config_SRC)
+    message(TRACE "Config sources: ${Client_Config_SRC}")
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Client>/Config
+                       COMMENT "Creating config output directory."
+                       )
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Client_Config_SRC} $<TARGET_FILE_DIR:Client>/Config
+                       BYPRODUCTS ${Client_Maps}
+                       COMMENT "Copying config to output."
+                       )
+else()
+    message(STATUS "No config targets found.")
 endif()

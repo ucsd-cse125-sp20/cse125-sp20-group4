@@ -10,5 +10,7 @@ class Wall : public Object {
 
 		//(de)serialize functions
 		virtual std::string serialize() const;
-		
+
+		const std::string TAG = "Wall";
+		const std::string& getTag();
 };

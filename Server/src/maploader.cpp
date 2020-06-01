@@ -18,14 +18,147 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
         {
             position = glm::vec3(x, 0.0, z);
             std::shared_ptr<Object> obj;
+            std::shared_ptr<IObjectFactory> fac = nullptr;
             switch (*it) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+                // shelf facing up
+                log->info("Made an upward shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
+                switch (*it)
+                {
+                case 'b':
+                    fac = std::make_shared<RedItemFactory>();
+                    break;
+                case 'c':
+                    fac = std::make_shared<GreenItemFactory>();
+                    break;
+                case 'd':
+                    fac = std::make_shared<BlueItemFactory>();
+                    break;
+                case 'e':
+                    fac = std::make_shared<BarricadeFactory>();
+                    break;
+                }
+                if (fac != nullptr) {
+                    std::dynamic_pointer_cast<Shelf>(obj)->setItem(fac);
+                }
+                gs->createObject(obj);
+                break;
+            case 'f':
+            case 'g':
+            case 'h':
+            case 'i':
+            case 'j':
+                // shelf facing down
+                log->info("Made a down shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, -1.0f, 0.0f, 0.0f);
+                switch (*it)
+                {
+                case 'g':
+                    fac = std::make_shared<RedItemFactory>();
+                    break;
+                case 'h':
+                    fac = std::make_shared<GreenItemFactory>();
+                    break;
+                case 'i':
+                    fac = std::make_shared<BlueItemFactory>();
+                    break;
+                case 'j':
+                    fac = std::make_shared<BarricadeFactory>();
+                    break;
+                }
+                if (fac != nullptr) {
+                    std::dynamic_pointer_cast<Shelf>(obj)->setItem(fac);
+                }
+                gs->createObject(obj);
+                break;
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+                // shelf facing right
+                log->info("Made a right shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                switch (*it)
+                {
+                case 'l':
+                    fac = std::make_shared<RedItemFactory>();
+                    break;
+                case 'm':
+                    fac = std::make_shared<GreenItemFactory>();
+                    break;
+                case 'n':
+                    fac = std::make_shared<BlueItemFactory>();
+                    break;
+                case 'o':
+                    fac = std::make_shared<BarricadeFactory>();
+                    break;
+                }
+                if (fac != nullptr) {
+                    std::dynamic_pointer_cast<Shelf>(obj)->setItem(fac);
+                }
+                gs->createObject(obj);
+                break;
+            case 'p':
+            case 'q':
+            case 'r':
             case 's':
-                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z);
-                std::dynamic_pointer_cast<Shelf>(obj)->setItem(std::make_shared<RedItemFactory>());
+            case 't':
+                // shelf facing left
+                log->info("Made a left shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
+                switch (*it)
+                {
+                case 'q':
+                    fac = std::make_shared<RedItemFactory>();
+                    break;
+                case 'r':
+                    fac = std::make_shared<GreenItemFactory>();
+                    break;
+                case 's':
+                    fac = std::make_shared<BlueItemFactory>();
+                    break;
+                case 't':
+                    fac = std::make_shared<BarricadeFactory>();
+                    break;
+                }
+                if (fac != nullptr) {
+                    std::dynamic_pointer_cast<Shelf>(obj)->setItem(fac);
+                }
+                gs->createObject(obj);
+                break;
+            case 'u':
+                // top left corner shelf
+                log->info("Made a tlc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, -1.0f, 0.0f, 0.0f);
+                std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
+                gs->createObject(obj);
+                break;
+            case 'v':
+                // top right corner shelf
+                log->info("Made a trc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
+                std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
             case 'w':
-                //gs->createObject(std::make_shared<Wall>("ignore", position.x, position.y, position.z));
+                // bottom left corner shelf
+                log->info("Made a blc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
+                gs->createObject(obj);
+                break;
+            case 'x':
+                // bottom right corner shelf
+                log->info("Made a brc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
+                std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
+                gs->createObject(obj);
                 break;
             case '0':
                 gs->createObject(std::make_shared<Player>("client-0", position.x, position.y, position.z), "client-0");

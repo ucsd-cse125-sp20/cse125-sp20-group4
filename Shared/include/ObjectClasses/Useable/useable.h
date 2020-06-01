@@ -8,4 +8,5 @@ class UseableObject : public Object
 public:
 	UseableObject(ItemType type);
 	ItemType itemType;
+	virtual std::string serialize() const = 0;
 };

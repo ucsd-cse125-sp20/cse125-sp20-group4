@@ -1,6 +1,9 @@
 #include "ObjectClasses/player.h"
 #include "logger.h"
-const std::string Player::TAG = "Player";
+
+const std::string& Player::getTag() {
+    return TAG;
+}
 
 Player::Player(const Player& player) : Player(player.getId(), player.getPositionX(), player.getPositionY(), player.getPositionZ(), player.getOrientationX(), player.getOrientationY(), player.getOrientationZ(), player.getWidth(), player.getHeight(), player.getLength(), player.getVelocityX(), player.getVelocityY(), player.getVelocityZ(), player.getMoney(), player.getHealth(), player.getHeldItem() == nullptr ? nullptr : player.getHeldItem()->clone()) {}
 Player::Player(std::string id) : Player(id, 0, 0, 0) {}

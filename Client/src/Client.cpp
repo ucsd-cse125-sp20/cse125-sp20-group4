@@ -34,15 +34,17 @@
 #include "Window.h"
 #include "ObjectClasses/object.h"
 #include "deserializer.h"
+#include "inih/INIReader.h"
 
 
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/client.log"
-#define LOGLEVEL spdlog::level::warn //was debug
+#define LOGLEVEL spdlog::level::info //was debug
 #define DEFAULT_PORT "8080"
 #define DEFAULT_BUFLEN 512
-
+#define DEFAULT_CONFIG_FILE "Config/config.ini"
+#define DEFAULT_IP "127.0.0.1"
 // FMOD constants
 #define AUDIO_CHANNELS_MAX 100
 
@@ -125,6 +127,7 @@ void setup_callbacks( GLFWwindow * window ) {
 }
 
 int main_inner( void ) {
+    INIReader client_config(DEFAULT_CONFIG_FILE);
 
     spdlog::info( "Initializing COM." );
     HRESULT hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
@@ -150,7 +153,25 @@ int main_inner( void ) {
         return EXIT_FAILURE;
     }
 
-    Server * server = new Server( "127.0.0.1", DEFAULT_PORT );
+    //get port from congif file
+    std::string port = DEFAULT_PORT;
+    std::string set_port = client_config.Get("client", "port", "");
+    if (set_port == "") {
+        spdlog::warn("Port not found in config file, using default");
+    }
+    else {
+        port = set_port;
+    }
+
+    std::string ip = DEFAULT_IP;
+    std::string set_ip = client_config.Get("client", "ip", "");
+    if (set_ip == "") {
+        spdlog::warn("IP not found in config file, using default");
+    }
+    else {
+        ip = set_ip;
+    }
+    Server * server = new Server( ip, port );
 
     // Create the GLFW window
     spdlog::info( "Creating window..." );

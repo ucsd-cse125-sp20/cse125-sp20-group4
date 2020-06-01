@@ -82,7 +82,7 @@ GLFWwindow* Window::window = nullptr;
 int Window::width;
 int Window::height;
 int Window::money;
-bool Window::holding;
+int Window::holding;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -125,8 +125,9 @@ void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position,
 
 
 void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
+    
     Window::money = 100;
-    Window::holding = false;
+    Window::holding = 0;
     // Set up graphics
     Shaders::initializeShaders();
 
@@ -317,9 +318,23 @@ void drawInfoGui() {
         ImGui::Text("Round: 0");
         ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
         ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
-        if (Window::holding) {
-            ImGui::Text("You are loaded Bish");
-        }
+        switch (Window::holding) {
+            case 0:
+                ImGui::Text("Pick Up an Item");
+            break;
+            case 1:
+                ImGui::Text("You are holding a RED Item");
+                break;
+            case 2:
+                ImGui::Text("You are holding a GREEN Item");
+                break;
+            case 3:
+                ImGui::Text("You are holding a BLUE Item");
+                break;
+            case 4:
+                ImGui::Text("You are holding a BARRICADE");
+                break;
+        }\
         ImGui::End();
     }
 
@@ -365,7 +380,7 @@ void Window::drawGui() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    LOGGER->info("About to draw gui");
+    LOGGER->trace("About to draw gui");
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowBorderSize = 5;
     style.FrameBorderSize = 0;
@@ -382,7 +397,7 @@ void Window::drawGui() {
         drawInfoGui();
         break;
     }
-    LOGGER->info("gui drawn");
+    LOGGER->trace("gui drawn");
     
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -410,7 +425,7 @@ void Window::display_callback( GLFWwindow * ) {
 static float pointSize = 1.0f;
 
 void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, int mods ) {
-    
+
     // Check for a key press
     if ( action == GLFW_PRESS ) {
         // Check if escape was pressed
@@ -455,9 +470,9 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
 
             case GLFW_KEY_SPACE: // Place an object
                 if (cam->name == Window::playerName) {
-                    if (Window::holding) {
+                    if (Window::holding ==  4) {
                         server->send(std::make_shared<PlaceEvent>(playerName));
-                    } else {
+                    } else if (holding == 0){
                         // TODO update to select correct item
                         server->send(std::make_shared<PickUpEvent>(playerName, "0"));
                     }
@@ -473,7 +488,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_E: // Start moving up.
                 if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
-                } else if (cam->name == Window::playerName && Window::holding) {
+                } else if (cam->name == Window::playerName && Window::holding > 0 && Window::holding < 4) {
                     server->send(std::make_shared<UseEvent>(playerName));
                 }
                 break;
@@ -639,30 +654,37 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
 
-    LOGGER->warn("{} XXXX {}", Window::playerName, e->serialize());
+    LOGGER->trace( "{} XXXX {}", Window::playerName, e->serialize() );
     if (e->getType() == Event::EventType::JEvent) {
         Window::playerName = e->getObjectId();
-        LOGGER->warn("Set my ID to {}", e->getObjectId());
+        LOGGER->info("Set my ID to {}", e->getObjectId());
     } else if(e->getType() == Event::EventType::GEvent){
         auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
         world->handleUpdates(uEvent, Window::playerName);
         // update my data
-        auto it = uEvent->updates.find(Window::playerName);
-        if (it != uEvent->updates.end()) {
+        auto it = uEvent->updates.find( Window::playerName );
+        if ( it != uEvent->updates.end() ) {
             auto player = std::static_pointer_cast<Player>(it->second);
             money = player->getMoney();
             if (player->getHeldItem() != nullptr) {
-                holding = true;
-            } else
-            {
-                holding = false;
+                if (player->getHeldItem()->getTag().compare("Red")==0) {
+                    holding = 1;
+                } else if (player->getHeldItem()->getTag().compare("Green") == 0) {
+                    holding = 2;
+                } else if (player->getHeldItem()->getTag().compare("Blue") == 0) {
+                    holding = 3;
+                } else if (player->getHeldItem()->getTag().compare("Barricade") == 0) {
+                    holding = 4;
+                } 
+            } else {
+                holding = 0;
             }
             cam = Camera::getCamera(playerName);
-            LOGGER->warn("Updated player");
+            LOGGER->trace( "Updated player ");
         } else {
-            LOGGER->warn("Failed to find {}", playerName);
+            LOGGER->trace( "Failed to find {}", playerName );
         }
     } else {
-        world->handleUpdates(e, Window::playerName);
+        world->handleUpdates( e, Window::playerName );
     }
 }

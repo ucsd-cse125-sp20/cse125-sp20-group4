@@ -43,7 +43,7 @@ class Window {
 
 
     static int money;
-    static bool holding;
+    static int holding;
 
     // Audio data
     static FMOD::Studio::System * audioSystem;
