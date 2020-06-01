@@ -63,7 +63,7 @@ static std::shared_ptr<Object> readEntry( const std::string & str, const size_t 
 
     size_t data = str.find( DATA_TAG, start );
     if ( data == std::string::npos || data > end ) {
-        LOGGER->error( "Dropping entry with no data: {}", str.substr( start, end ) );
+        LOGGER->error( "Dropping entry with no data: '{}'", str.substr( start, end ) );
         return nullptr;
     }
     id = sanitizer.restore( str.substr( start, data - start ) );
@@ -73,7 +73,7 @@ static std::shared_ptr<Object> readEntry( const std::string & str, const size_t 
     try {
         return decoder.deserializeObject( dat );
     } catch ( std::invalid_argument & e ) {
-        LOGGER->error( "Dropping entry with invalid data ({}): {} = {}", e.what(), id, dat );
+        LOGGER->error( "Dropping entry with invalid data ({}): '{}' = '{}'", e.what(), id, dat );
         return nullptr;
     }
 
@@ -92,7 +92,7 @@ std::shared_ptr<UpdateEvent> UpdateEvent::deserialize( const std::string & seria
 
         size_t end = serialized.find( END_TAG, start );
         if ( end == std::string::npos ) {
-            LOGGER->error( "Dropping unterminated entry: {}", serialized.substr( start ) );
+            LOGGER->error( "Dropping unterminated entry: '{}'", serialized.substr( start ) );
             break;
         }
         
@@ -101,7 +101,7 @@ std::shared_ptr<UpdateEvent> UpdateEvent::deserialize( const std::string & seria
         //LOGGER->debug("Got object {}:", data->serialize());
         if ( data != nullptr ) {
             if ( updates.count( id ) > 0 ) {
-                LOGGER->warn( "Duplicate key: {}", id );
+                LOGGER->warn( "Duplicate key: '{}'", id );
             }
             updates[id] = data;
         }

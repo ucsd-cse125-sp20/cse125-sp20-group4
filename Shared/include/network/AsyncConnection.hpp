@@ -298,8 +298,12 @@ class AsyncConnection {
         Tptr dest;
         decode( message, dest );
 
-        // Queue received object
-        inQueue->push( dest );
+        if ( dest == nullptr ) {
+            LOGGER->error( "Message could not get decoded: '{}'", message );
+        } else {
+            // Queue received object
+            inQueue->push( dest );
+        }
         return true;
 
     }

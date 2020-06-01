@@ -83,7 +83,7 @@ std::map<std::string, std::function<void()>> GameState::updateTimers() {
             timers.erase(it);
         }
     }
-    log->info("Finished updating timers");
+    log->trace("Finished updating timers");
     log->trace("{} timers expired of {}", callbacks.size(), timers.size());
     return callbacks;
 }

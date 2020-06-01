@@ -33,10 +33,10 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 #define LOGFILE_NAME "log/server.log"
-#define LOGLEVEL spdlog::level::warn
+#define LOGLEVEL spdlog::level::info
 
 #define MAX_CLIENTS 5
-#define SERVER_TICK 20
+#define SERVER_TICK 30
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 #define DEFAULT_CONFIG_FILE "Config/config.ini"
