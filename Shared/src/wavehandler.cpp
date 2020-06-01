@@ -18,7 +18,23 @@ void WaveHandler::loadWaveData() {
     running = false;
 
     waveEnemies.clear();
+
     // TODO: set up waves
+    std::vector<EnemyData> w1;
+    EnemyData e;
+    e.type = "SampleEnemy1";
+    e.count = 30;
+    w1.push_back( e );
+    waveEnemies.push_back( w1 );
+
+    std::vector<EnemyData> w2;
+    e.type = "SampleEnemy2";
+    e.count = 10;
+    w2.push_back( e );
+    e.type = "SampleEnemy3";
+    e.count = 20;
+    w2.push_back( e );
+    waveEnemies.push_back( w2 );
 
     waveNum = 0;
     waveActive = false;
@@ -37,12 +53,14 @@ static std::string timeToStr( const WaveHandler::Clock::time_point & t ) {
 
 void WaveHandler::start() {
 
-    LOGGER->info( "Starting waves." );
-    waveNum = 1;
-    waveActive = false;
-    startTime = START_TIME( DEFAULT_READY_TIME );
-    running = true;
-    LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+    if ( !running ) {
+        LOGGER->info( "Starting waves." );
+        waveNum = 1;
+        waveActive = false;
+        startTime = START_TIME( DEFAULT_READY_TIME );
+        running = true;
+        LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+    }
 
 }
 
@@ -50,6 +68,10 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
 
     if ( !running ) {
         return State::NOT_RUNNING;
+    }
+
+    if ( waveNum > waveEnemies.size() ) {
+        return State::NO_CHANGE;
     }
 
     if ( waveActive ) {
@@ -65,14 +87,19 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
             LOGGER->info( "Wave {} completed, waiting for next wave.", waveNum );
             waveNum++;
             waveActive = false;
-            startTime = START_TIME( DEFAULT_READY_TIME );
-            LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
-            return State::PRE_WAVE;
+            if ( waveNum > waveEnemies.size() ) {
+                LOGGER->info( "All waves done." );
+                return State::DONE;
+            } else {
+                startTime = START_TIME( DEFAULT_READY_TIME );
+                LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+                return State::PRE_WAVE;
+            }
         }
     } else {
         if ( Clock::now() > startTime ) {
             // Start wave
-            LOGGER->info( "Wave {} starting." );
+            LOGGER->info( "Wave {} starting.", waveNum );
             waveActive = true;
             return State::WAVE;
         }
@@ -88,9 +115,13 @@ WaveHandler::State WaveHandler::getWaveInfo( unsigned int & wave, Clock::time_po
         return State::NOT_RUNNING;
     }
 
+    if ( waveNum > waveEnemies.size() ) {
+        return State::DONE;
+    }
+
     wave = waveNum;
     start = startTime;
-    enemies = waveEnemies[waveNum];
+    enemies = waveEnemies[waveNum - 1];
     return waveActive ? State::WAVE : State::PRE_WAVE;
 
 }

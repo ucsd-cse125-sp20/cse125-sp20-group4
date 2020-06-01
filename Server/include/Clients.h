@@ -43,6 +43,13 @@ class Clients {
     std::shared_ptr<Client> getClient( const std::string & id ) const;
 
     /**
+     * Retrieves the number of clients currently connected to the server.
+     *
+     * @return The number of connected clients.
+     */
+    unsigned int getClientCount() const;
+
+    /**
      * Sends the given event to all clients.
      *
      * @param e The event to send.

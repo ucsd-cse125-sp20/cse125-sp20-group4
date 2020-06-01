@@ -6,9 +6,12 @@
 #include <atomic>
 #include <chrono>
 #include <deque>
+#include <random>
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
+
+#include <glm/vec3.hpp>
 
 #include <EventClasses/event.h>
 #include <EventClasses/UpdateEvent.h>
@@ -33,6 +36,9 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "8080"
 
+#define SPAWNS_PER_TICK 1
+#define SPAWN_DELAY 30
+
 static const std::chrono::duration TICK_PERIOD = std::chrono::milliseconds( SERVER_TICK );
 
 static std::atomic<bool> running = true;
@@ -43,6 +49,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     auto log = getLogger( "Server" );
 
+    std::default_random_engine rng;
+
     // ************** SETUP GAME STATE ****************
     GameState gameState;
     gameState.initialize();
@@ -51,6 +59,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     waveHandler.loadWaveData();
 
     GameStateHandler gameStateHandler;
+    std::deque<std::shared_ptr<Enemy>> pendingSpawns;
 
     while ( running ) {
 
@@ -93,14 +102,48 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 break;
 
             case WaveHandler::State::WAVE:
+            {
+                std::vector<glm::vec3> spawns; // TODO: obtain spawns
+                spawns.push_back( glm::vec3( 1.0f, 0.0f, 1.0f ) );
+                spawns.push_back( glm::vec3( 5.0f, 5.0f, 5.0f ) );
+                spawns.push_back( glm::vec3( 3.0f, 0.0f, 5.0f ) );
+                if ( spawns.size() == 0 ) {
+                    log->error( "No locations to spawn enemies were defined." );
+                    break;
+                }
+
+                std::uniform_int_distribution<unsigned int> spawnIndices( 0, ( unsigned int ) spawns.size() - 1 );
                 for ( auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++ ) {
+                    log->debug( "Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum );
                     for ( unsigned int i = 0; i < it->count; i++ ) {
-                        // Spawn enemy
+                        const glm::vec3 & spawn = spawns[spawnIndices( rng )];
+                        const std::string id = "wave" + std::to_string( waveNum ) + "-enemy-" + it->type + "-" + std::to_string( i );
+                        std::shared_ptr<Enemy> e = std::make_shared<Enemy>( id, spawn.x, spawn.y, spawn.z );
+                        pendingSpawns.push_back( e );
                     }
                 }
                 // Notify clients?
                 break;
+            }
 
+            case WaveHandler::State::DONE:
+                // Notify client that game is won
+                break;
+
+        }
+
+        for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
+
+            std::shared_ptr<Enemy> e = pendingSpawns.front();
+            pendingSpawns.pop_front();
+            log->trace( "Spawning enemy '{}'.", e->getId() );
+            gameState.createObject( e, e->getId() );
+
+        }
+
+        // TODO: client voting system?
+        if ( clients->getClientCount() > 0 ) {
+            waveHandler.start();
         }
         
         // *************** GAME LOGIC END ***************
