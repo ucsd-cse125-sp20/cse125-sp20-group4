@@ -82,6 +82,8 @@ int Window::width;
 int Window::height;
 int Window::money;
 bool Window::holding;
+double Window::lX;
+double Window::lY;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -126,6 +128,9 @@ void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position,
 void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     Window::money = 100;
     Window::holding = false;
+    Window::lX = 0;
+    Window::lY= 0;
+
     // Set up graphics
     Shaders::initializeShaders();
 
@@ -275,15 +280,19 @@ void Window::idle_callback() {
     // Rotate camera (trackball)
     double cursorX, cursorY;
     glfwGetCursorPos( window, &cursorX, &cursorY );
-    cursorX = X_POS( cursorX );
-    cursorY = Y_POS( cursorY );
+    /*cursorX = X_POS( cursorX );
+    cursorY = Y_POS( cursorY );*/
+    double dx = cursorX - Window::lX;
+    double dy = cursorY - Window::lY;
+    Window::lX = cursorX;
+    Window::lY = cursorY;
 #pragma warning( push )
 #pragma warning( disable: 4244 )
-    if ( std::abs( cursorX ) > X_DEAD_ZONE ) {
-        rotateCamera( X_SPEED( ( float ) cursorX ), glm::vec3( 0.0f, -1.0f, 0.0f ) );
+    if ( dx != 0.0 ) {
+        rotateCamera(dx * 0.005, glm::vec3( 0.0f, -1.0f, 0.0f ) );
     }
-    if ( std::abs( cursorY ) > Y_DEAD_ZONE ) {
-        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
+    if ( dy!= 0.0 ) {
+        rotateCamera( dy * 0.005, glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
 
