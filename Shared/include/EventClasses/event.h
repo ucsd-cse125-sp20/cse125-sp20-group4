@@ -5,15 +5,15 @@
 #include "ObjectClasses/object.h"
 
 class Event {
-
-    private:
-    const std::string objectId;
-
-    public:
-    Event( const std::string & objectId );
-
+public:
+    enum class EventType { GEvent, OEvent, UEvent, JEvent };
+    Event( const std::string & objectId, const EventType type );
+    const Event::EventType getType() const;
     const std::string & getObjectId() const;
     virtual std::string serialize() const;
-    virtual void apply( std::shared_ptr<Object> object ) const = 0;
+
+private:
+    const std::string objectId;
+    const EventType type;
 
 };

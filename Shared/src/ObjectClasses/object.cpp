@@ -1,15 +1,14 @@
 #include "ObjectClasses/object.h"
 #include "logger.h"
-
-Object::Object(const Object& obj) : Object(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ()) {}
+Object::Object(const Object& obj) : Object(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.canCollide()) {}
 
 Object::Object(std::string id) : Object(id, 0.0f, 0.0f, 0.0f) {}
 
 Object::Object(std::string id, float x, float y, float z) : Object(id, x, y, z, 0.0f, 1.0f, 0.0f) {} //was 1.0f, 0.0f, 0.0f
 
-Object::Object(std::string id, float x, float  y, float z, float dirX, float dirY, float dirZ): Object::Object(id, x, y, z, dirX, dirY, dirZ, 0.0f, 0.0f, 0.0f){}
+Object::Object(std::string id, float x, float  y, float z, float dirX, float dirY, float dirZ): Object::Object(id, x, y, z, dirX, dirY, dirZ, 0.0f, 0.0f, 0.0f, false){}
 
-Object::Object(std::string id, float x, float  y, float z, float dirX, float dirY, float dirZ, float width, float height, float length) {
+Object::Object(std::string id, float x, float  y, float z, float dirX, float dirY, float dirZ, float width, float height, float length, bool isCollidable) {
     auto log = getLogger("Object");
     this->id = id;
     setPosition(x, y, z);
@@ -18,6 +17,7 @@ Object::Object(std::string id, float x, float  y, float z, float dirX, float dir
     setWidth(width);
     setHeight(height);
     setLength(length);
+    setCanCollide(isCollidable);
     log->trace("Creating Object with id {}, position ({}, {}, {}), width {}, length {}, height {}, and orientation ({}, {}, {})", id, x, y, z, width, length, height, dirX, dirY, dirZ);
 }
 
@@ -83,6 +83,10 @@ void Object::setLength(float newLength) {
     this->length = newLength;
 }
 
+void Object::setCanCollide(bool newvalue) {
+    this->collide = newvalue;
+}
+
 std::string Object::getId() const {
     return this->id;
 }
@@ -143,6 +147,10 @@ float Object::getHeight() const { //Y size
     return this->height;
 }
 
+bool Object::canCollide() const {
+    return this->collide;
+}
+
 bool Object::contains(const glm::vec3 pt) const {
     if (pt.x < this->getPositionX() + (this->getWidth() / 2) && pt.x > this->getPositionX() - (this->getWidth() / 2)) {
         return true;
@@ -158,6 +166,9 @@ bool Object::contains(const glm::vec3 pt) const {
 }
 
 bool Object::collides(const Object & obj) const {
+    if (!obj.canCollide()) {
+        return false;
+    }
     if (obj.getPositionX() - (obj.getWidth() / 2)  < this->getPositionX() + (this->getWidth() / 2) && obj.getPositionX() + (obj.getWidth() / 2) > this->getPositionX() - (this->getWidth() / 2)) {
         return true;
     }
@@ -171,7 +182,9 @@ bool Object::collides(const Object & obj) const {
 
 }
 
-
+std::shared_ptr<Object> Object::clone() const {
+    return std::make_shared<Object>(*this);
+}
 
 std::string Object::serialize() const {
     auto log = getLogger("Object");

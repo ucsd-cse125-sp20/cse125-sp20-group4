@@ -1,5 +1,5 @@
 #include "EventClasses/Factories/RotateEventFactory.h"
-#include "EventClasses/RotateEvent.h"
+#include "EventClasses/Object/RotateEvent.h"
 
 std::shared_ptr<Event> RotateEventFactory::create( std::string serial ) {
     

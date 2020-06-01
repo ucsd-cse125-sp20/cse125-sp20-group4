@@ -365,3 +365,8 @@ cache*.json
 index*.json
 .ninja_deps
 .ninja_log
+
+FMOD/SoundEffects/.cache
+FMOD/SoundEffects/.restore
+FMOD/SoundEffects/.unsaved
+FMOD/SoundEffects/.user

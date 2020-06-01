@@ -3,12 +3,14 @@
 #pragma warning(disable:4201)
 
 #include <algorithm>
+#include <deque>
 #include <iostream>
 #include <vector>
 
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <EventClasses/events.h>
+#include <logger.h>
 
 #include "Window.h"
 #include "MapLoader.h"
@@ -19,20 +21,27 @@
 #include "drawing/model/LoadedModel.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
-#include "drawing/ParticleGenerator.h"
-#include "drawing/texture.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/fonts/IconsFontAwesome5.h"
+#include "imgui/fonts/IconsMaterialDesign.h"
+#include "imgui/fonts/IconsForkAwesome.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
 #define GLM_FORCE_RADIANS
 #endif
 
-const char * window_title = "CSE 125 Project";
+static const auto LOGGER = getLogger( "Window" );
+
+static const char * window_title = "CSE 125 Project";
 
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
 
-#define DEFAULT_CAMERA_POS glm::vec3( 2.0f, 2.0f, 0.0f )
+#define DEFAULT_CAMERA_POS glm::vec3( 0.0f, 0.0f, 0.0f )
 #define DEFAULT_CAMERA_DIR glm::vec3( 0.0f, 0.0f, 1.0f )//-glm::normalize( DEFAULT_CAMERA_POS )
 
 #define POINT_SIZE_FACTOR 0.5f
@@ -58,9 +67,21 @@ const char * window_title = "CSE 125 Project";
 Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
-std::vector<ParticleGenerator*> pgens;
+
+// Audio data
+FMOD::Studio::System * Window::audioSystem;
+FMOD::Studio::Bank * Window::bankMaster;
+FMOD::Studio::Bank * Window::bankMasterStrings;
 
 std::string Window::playerName = "cube4"; 
+
+
+GLFWwindow* Window::window = nullptr;
+
+int Window::width;
+int Window::height;
+int Window::money;
+bool Window::holding;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -69,57 +90,94 @@ void Window::rotateCamera( float angle, glm::vec3 axis ) {
         glm::vec3 newDir = ROTATE( cam->getDir(), angle, axis );
         cam->rotate( newDir );
         if ( isPlayer ) { // Send player movement to server
-            server->pushEvent( std::make_shared<RotateEvent>( playerName, newDir ) );
+            server->send( std::make_shared<RotateEvent>( playerName, newDir ) );
         }
     }
 
 }
 
-GLFWwindow * Window::window = nullptr;
+void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position, const glm::vec3 & velocity, const glm::vec3 & direction ) {
 
-int Window::width;
-int Window::height;
+    // Position
+    attr.position.x = position.x;
+    attr.position.y = position.y;
+    attr.position.z = position.z;
 
-void Window::initialize( Server * ser ) {
+    // Velocity
+    attr.velocity.x = velocity.x;
+    attr.velocity.y = velocity.y;
+    attr.velocity.z = velocity.z;
 
+    // Direction
+    attr.forward.x = direction.x;
+    attr.forward.y = direction.y;
+    attr.forward.z = direction.z;
+
+    // Up
+    static const glm::vec3 UP( 0.0f, 1.0f, 0.0f );
+    glm::vec3 up = glm::normalize( glm::cross( glm::cross( direction, UP ), direction ) );
+    attr.up.x = up.x;
+    attr.up.y = up.y;
+    attr.up.z = up.z;
+
+}
+
+
+void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
+    Window::money = 100;
+    Window::holding = false;
+    // Set up graphics
     Shaders::initializeShaders();
+
+    // Set up sound
+    Window::audioSystem = audio;
+
+    // Load audio banks
+    LOGGER->info( "Loading audio banks." );
+    
+    FMOD_RESULT res = audioSystem->loadBankFile( "Sounds/Master.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bankMaster );
+    if ( res != FMOD_OK ) {
+        LOGGER->critical( "Could not load master bank ({}).", res );
+        throw std::runtime_error( "Failed to initialize audio." );
+    } else {
+        LOGGER->info( "Loaded master bank." );
+    }
+
+    res = audioSystem->loadBankFile( "Sounds/Master.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bankMasterStrings );
+    if ( res != FMOD_OK ) {
+        LOGGER->critical( "Could not load master bank strings ({}).", res );
+        throw std::runtime_error( "Failed to initialize audio." );
+    } else {
+        LOGGER->info( "Loaded master bank strings." );
+    }
+
+    // Load audio samples
+    bankMaster->loadSampleData();
+
+    // Set up game state
     world = new World();
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    cam = Camera::addCamera( "default", DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
-
-    world->addEntity( new CameraEntity( "cube4", 0.0f, new EmptyModel(), DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR, 1.0f, false ) );
-    world->addEntity(new Entity("cube5", new RectangularCuboid(glm::vec3(1.0f), 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-
-
-    //MapLoader* loader = new MapLoader("Maps/map1");
-
-    //std::vector<Entity*> entities = loader->getEntities();
-
-    //for (auto it = entities.begin(); it != entities.end(); it++) {
-    
-    //    world->addEntity(*it);
-    
-    //}
-
-    // add test particle generators
-    Texture* tex = new Texture();
-    tex->loadTextureFromFile("Textures/smoke.png", true);
-    pgens.push_back(new ParticleGenerator(Shaders::particle(), tex, 1000, 1.0f));
-
-    cam = Camera::getCamera( "cube4" );
+    world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
     // Debugging entities
-    world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
+    //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
 
 }
 
 void Window::clean_up() {
 
+    // Clean up game state
     Camera::removeCamera( "spectator" );
 
     delete( world );
+
+    // Clean up audio
+    LOGGER->info( "Unloading audio banks." );
+    bankMaster->unload();
+
+    // Clean up graphics
     Shaders::deleteShaders();
 
 }
@@ -128,7 +186,7 @@ GLFWwindow * Window::create_window( int windowWidth, int windowHeight ) {
 
     // Initialize GLFW.
     if ( !glfwInit() ) {
-        fprintf( stderr, "Failed to initialize GLFW\n" );
+        LOGGER->critical( "Failed to initialize GLFW" );
         return NULL;
     }
 
@@ -155,7 +213,7 @@ GLFWwindow * Window::create_window( int windowWidth, int windowHeight ) {
 
     // Check if the window could not be created
     if ( !newWindow ) {
-        fprintf( stderr, "Failed to open GLFW window.\n" );
+        LOGGER->critical( "Failed to open GLFW window." );
         glfwTerminate();
         return NULL;
     }
@@ -197,6 +255,17 @@ static glm::vec3 movement( 0.0f, 0.0f, 0.0f ); // Camera movement direction.
 
 void Window::idle_callback() {
 
+    // Handle incoming events
+    std::deque<std::shared_ptr<Event>> events;
+    server->receiveAll( events );
+    LOGGER->debug( "Number of events: {}", events.size() );
+    while ( !events.empty() ) {
+        
+        handleEvent( events.front() );
+        events.pop_front();
+
+    }
+
     // Translate camera
     if ( ( movement.x != 0.0f ) || ( movement.y != 0.0f ) || ( movement.z != 0.0f ) ) {
         glm::vec4 move = glm::inverse( cam->getV() ) * glm::vec4( movement, 1.0f );
@@ -218,10 +287,99 @@ void Window::idle_callback() {
     }
 #pragma warning( pop )
 
-    //update particles
-    for (ParticleGenerator* pgen : pgens)
-        pgen->Update(0.01f, world->getEntity("cube5"), 10);
+    // Update audio positioning
+    FMOD_3D_ATTRIBUTES attributes;
+    set3DParams( attributes, cam->getPos(), glm::vec3( 0.0f ), cam->getDir() );
+    FMOD_RESULT res = audioSystem->setListenerAttributes( 0, &attributes );
+    if ( res != FMOD_OK ) {
+        LOGGER->warn( "Error while updating listener position ({}).", res );
+    }
 
+}
+void drawInfoGui() {   
+    bool* p_open = new bool(true);
+    const float DISTANCE = 10.0f;
+    static int corner = 2;
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+    if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("Round: 0");
+        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
+        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
+        if (Window::holding) {
+            ImGui::Text("You are loaded Bish");
+        }
+        ImGui::End();
+    }
+
+}
+void drawReadyGui() {
+    bool* p_open = new bool(true);
+    const float DISTANCE = 10.0f;
+    static int corner = 1;
+    int money = Window::money;
+    
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    if (ImGui::Begin("Ready Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        // TODO check if readied up
+        if (false) {
+            ImGui::Text(ICON_FA_BATH "%d of 5 Ready",2);
+        } else {
+            ImGui::Text("Press R to ready up");
+        }
+        ImGui::End();
+    }
+
+}
+void drawEndGui() {
+    bool* p_open = new bool(true);
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 window_pos = ImVec2( io.DisplaySize.x *0.5f, io.DisplaySize.y * 0.5f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
+    if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("Game Over");
+        ImGui::Text("Score: %d", Window::money);
+        ImGui::End();
+    }
+
+}
+void Window::drawGui() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    LOGGER->info("About to draw gui");
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowBorderSize = 5;
+    style.FrameBorderSize = 0;
+    style.PopupBorderSize = 0;
+    switch (world->phase) {
+    case World::Phase::READY:
+        drawReadyGui();
+        break;
+    case World::Phase::ROUND:
+        drawInfoGui();
+        break;
+    case World::Phase::END:
+        drawEndGui();
+        drawInfoGui();
+        break;
+    }
+    LOGGER->info("gui drawn");
+    
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Window::display_callback( GLFWwindow * ) {
@@ -230,17 +388,18 @@ void Window::display_callback( GLFWwindow * ) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
+
     // Render scene.
     world->draw( cam->getToView() );
-    
-    for (ParticleGenerator* pgen : pgens)
-        pgen->Draw(cam->getToView(), cam->getPos());
+
+    drawGui();
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
     // Swap buffers
     glfwSwapBuffers( window );
 }
+
 
 static float pointSize = 1.0f;
 
@@ -260,7 +419,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                    server->send( std::make_shared<MoveForwardEvent>( playerName ) );
                 }
                 break;
 
@@ -268,7 +427,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                    server->send( std::make_shared<MoveBackwardEvent>( playerName ) );
                 }
                 break;
 
@@ -276,7 +435,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                    server->send( std::make_shared<MoveLeftEvent>( playerName ) );
                 }
                 break;
 
@@ -284,7 +443,18 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                    server->send( std::make_shared<MoveRightEvent>( playerName ) );
+                }
+                break;
+
+            case GLFW_KEY_SPACE: // Place an object
+                if (cam->name == Window::playerName) {
+                    if (Window::holding) {
+                        server->send(std::make_shared<PlaceEvent>(playerName));
+                    } else {
+                        // TODO update to select correct item
+                        server->send(std::make_shared<PickUpEvent>(playerName, "0"));
+                    }
                 }
                 break;
 
@@ -297,6 +467,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_E: // Start moving up.
                 if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
+                } else if (cam->name == Window::playerName && Window::holding) {
+                    server->send(std::make_shared<UseEvent>(playerName));
                 }
                 break;
 
@@ -342,7 +514,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveForwardEvent>( playerName ) );
+                    server->send( std::make_shared<StopForwardEvent>( playerName ) );
                 }
                 break;
 
@@ -350,7 +522,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.z -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveBackwardEvent>( playerName ) );
+                    server->send( std::make_shared<StopBackwardEvent>( playerName ) );
                 }
                 break;
 
@@ -358,7 +530,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x += CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveLeftEvent>( playerName ) );
+                    server->send( std::make_shared<StopLeftEvent>( playerName ) );
                 }
                 break;
 
@@ -366,7 +538,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
                 if ( cam->isFreeCamera() ) {
                     movement.x -= CAMERA_MOVEMENT_SPEED;
                 } else if ( cam->name == Window::playerName ) {
-                    server->pushEvent( std::make_shared<MoveRightEvent>( playerName ) );
+                    server->send( std::make_shared<StopRightEvent>( playerName ) );
                 }
                 break;
 
@@ -457,4 +629,34 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 
     // Nothing
 
+}
+
+void Window::handleEvent( const std::shared_ptr<Event> & e ) {
+
+    LOGGER->warn("{} XXXX {}", Window::playerName, e->serialize());
+    if (e->getType() == Event::EventType::JEvent) {
+        Window::playerName = e->getObjectId();
+        LOGGER->warn("Set my ID to {}", e->getObjectId());
+    } else if(e->getType() == Event::EventType::GEvent){
+        auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
+        world->handleUpdates(uEvent, Window::playerName);
+        // update my data
+        auto it = uEvent->updates.find(Window::playerName);
+        if (it != uEvent->updates.end()) {
+            auto player = std::static_pointer_cast<Player>(it->second);
+            money = player->getMoney();
+            if (player->getHeldItem() != nullptr) {
+                holding = true;
+            } else
+            {
+                holding = false;
+            }
+            cam = Camera::getCamera(playerName);
+            LOGGER->warn("Updated player");
+        } else {
+            LOGGER->warn("Failed to find {}", playerName);
+        }
+    } else {
+        world->handleUpdates(e, Window::playerName);
+    }
 }

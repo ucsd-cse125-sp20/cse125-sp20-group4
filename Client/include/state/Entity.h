@@ -1,6 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <fmod_studio.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
@@ -38,6 +39,10 @@ class Entity {
     const Axis axis;
 
     virtual void updateModelMatrix();
+
+    private:
+    FMOD::Studio::EventDescription * movingSound;
+    FMOD::Studio::EventInstance * movingSoundEvent;
 
 };
 
