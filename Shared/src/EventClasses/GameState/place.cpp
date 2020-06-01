@@ -24,13 +24,15 @@ void PlaceEvent::apply(GameState* gamestate) const
         } else{
             ori = glm::normalize(ori);
         }
-        pos = pos + ori * object->getWidth() * 3.0f;
+        pos = pos + ori * object->getWidth() * 2.0f;
+        gamestate->map->GridifyMapPos(pos);
         //TODO check for collision
-        //TODO update map
-        item->setPosition(pos.x,pos.y,pos.z);
-        gamestate->createObject(item);
-        object->setHeldItem(nullptr);
-        log->warn("Just Placed an item");
+        if (!gamestate->map->containsObject(pos)) {
+            item->setPosition(pos.x, pos.y, pos.z);
+            gamestate->createObject(item);
+            object->setHeldItem(nullptr);
+            log->warn("Just Placed an item");
+        }
         
     }
 }

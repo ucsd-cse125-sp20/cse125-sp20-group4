@@ -9,3 +9,7 @@ std::string GreenObject::serialize() const
 const std::string& GreenObject::getTag() {
     return TAG;
 }
+
+std::shared_ptr<Object> GreenObject::clone() const {
+    return std::make_shared<GreenObject>();
+}

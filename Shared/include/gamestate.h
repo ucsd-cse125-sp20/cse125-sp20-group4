@@ -19,7 +19,7 @@ private:
 
 public:
     bool deletes;
-    MapRep map;
+    MapRep* map;
     GameState();
     void createObject(std::shared_ptr<Object> obj);
     void createObject(std::shared_ptr<Object> obj, std::string id);

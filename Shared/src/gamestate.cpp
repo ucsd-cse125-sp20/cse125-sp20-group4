@@ -12,7 +12,7 @@ GameState::GameState() {
     this->timers = std::map<std::string, std::shared_ptr<Timer>>();
     this->dirty = true;
     this->deletes = false;
-    this->map = MapRep(100, 100);
+    this->map = new MapRep(100, 100);
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
@@ -26,7 +26,7 @@ void GameState::createObject(std::shared_ptr<Object> obj, std::string id) {
     obj->dirty = true;
     this->setDirty(true);
     // update map
-    this->map.addObject(obj, obj->getPosition());
+    this->map->addObject(obj, obj->getPosition());
     log->trace("Created GameState object with id: {}", id);
 }
 
@@ -37,7 +37,7 @@ void GameState::deleteObject(std::string id) {
     it = this->gameObjects.find(id);
     if (it != this->gameObjects.end()) {
         // update map
-        this->map.removeObject(it->second->getPosition());
+        this->map->removeObject(it->second->getPosition());
         this->addDeletions(it->second->getId());
         this->gameObjects.erase(it);
         this->deletes = true;
@@ -164,7 +164,7 @@ std::string GameState::serialize() {
 void GameState::initialize() {
     auto log = getLogger("GameState");
     /* set the phase*/
-    log->info("Starting Game State: {}", this->serialize());
+    log->trace("Starting Game State: {}", this->serialize());
  }
 
 std::string GameState::getUpdates() {
