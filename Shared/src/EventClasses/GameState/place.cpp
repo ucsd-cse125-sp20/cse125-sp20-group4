@@ -12,7 +12,7 @@ void PlaceEvent::apply(GameState* gamestate) const
     // get object
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
-    if (object != nullptr && object->getHeldItem()->getTag().compare("Barricade")==0) {
+    if (object != nullptr && object->getHeldItem() !=nullptr && object->getHeldItem()->getTag().compare("Barricade")==0) {
         log->debug("Placing object: {}", object->getHeldItem()->serialize());
         // get item in player inventory
         std::shared_ptr<Object> item = object->getHeldItem();

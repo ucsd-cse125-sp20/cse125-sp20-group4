@@ -140,16 +140,16 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 gs->createObject(obj);
                 break;
             case 'v':
-                // bottom left corner shelf
-                log->info("Made a blc shelf");
-                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                // top right corner shelf
+                log->info("Made a trc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
             case 'w':
-                // top right corner shelf
-                log->info("Made a trc shelf");
-                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
+                // bottom left corner shelf
+                log->info("Made a blc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
