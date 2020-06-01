@@ -102,14 +102,14 @@ const glm::vec3 & MovingObject::getRelativeVelocity() const {
 }
 
 float MovingObject::getNextPositionX() const {
-    return getPositionX() + getVelocityX()/10;
+    return getPositionX() + getVelocityX()/50;
 }
 
 float MovingObject::getNextPositionY() const {
-    return getPositionY() + getVelocityY() / 10;
+    return getPositionY() + getVelocityY() / 50;
 }
 float MovingObject::getNextPositionZ() const {
-    return getPositionZ() + getVelocityZ() / 10;
+    return getPositionZ() + getVelocityZ() / 50;
 }
 
 float MovingObject::getNextPositionCollisionX(){
@@ -117,7 +117,7 @@ float MovingObject::getNextPositionCollisionX(){
         isCollidedX = false; 
         return getPositionX(); 
 	}
-    return getPositionX() + getVelocityX()/10;
+    return getPositionX() + getVelocityX()/50;
 }
 
 float MovingObject::getNextPositionCollisionY(){
@@ -125,14 +125,14 @@ float MovingObject::getNextPositionCollisionY(){
         isCollidedY = false; 
         return getPositionY(); 
 	}
-    return getPositionY() + getVelocityY() / 10;
+    return getPositionY() + getVelocityY() / 50;
 }
 float MovingObject::getNextPositionCollisionZ(){
     if(isCollidedZ){
         isCollidedZ = false; 
         return getPositionZ(); 
 	}
-    return getPositionZ() + getVelocityZ() / 10;
+    return getPositionZ() + getVelocityZ() / 50;
 }
 
 

@@ -10,6 +10,7 @@
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
 #include "state/CameraEntity.h"
+#include "Drawing/model/LoadedModel.h"
 
 
 static const auto LOGGER = getLogger( "World" );
@@ -34,7 +35,6 @@ void World::draw( const glm::mat4x4 & toView ) const {
 
     LOGGER->trace( "Starting world draw." );
     for ( auto it = entities.begin(); it != entities.end(); it++ ) {
-
         it->second->draw( toView );
 
     }
@@ -96,32 +96,36 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
         LOGGER->debug("Number of updates: {}", map.size());
 
         for (auto it = map.begin(); it != map.end(); it++) {
-            //auto entity = this->getEntity(it->second->getId());
             auto entity = this->getEntity(it->first);
             if (entity != nullptr) {
                 LOGGER->debug("Updating entity '{}'.", it->second->getId());
-                entity->setDirection( it->second->getOrientation() );
+                if (it->first.compare(id) != 0) {
+                    entity->setDirection(it->second->getOrientation());
+                }
                 entity->setPosition(it->second->getPosition());
             } else {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getId());
                 LOGGER->debug("Yeeting this {}, {}", map.at(it->second->getId())->serialize(), std::dynamic_pointer_cast<std::shared_ptr<Barricade>>(map.at(it->second->getId())) != nullptr);
 
 
-
-                if (map.at(it->second->getId())->serialize().find("Barricade") != std::string::npos) {
+                if (it->first.compare(id)==0) {
+                    LOGGER->debug("Making a player");
+                    auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model->setColor(glm::vec3(1.0f, 0.0f, 0));
+                    addEntity(new CameraEntity(it->second->getId(),0.2f, (model), it->second->getPosition(), it->second->getOrientation(),0.05f));
+                } else if (map.at(it->second->getId())->serialize().find("Barricade") != std::string::npos) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 0.0f, 0));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation()));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
                 }
                 else if (map.at(it->second->getId())->serialize().find("Shelf") != std::string::npos) {
                     LOGGER->debug("Making a shelf");
 
-                    auto model = new LoadedModel("Models/barricade.dae", Shaders::phong());
+                    auto model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 0));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation()));
-                }
-                else {
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
+                } else {
                     LOGGER->debug("Making a cube");
 
                     addEntity(new Entity(it->second->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
