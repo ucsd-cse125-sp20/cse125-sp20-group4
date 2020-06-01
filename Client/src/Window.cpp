@@ -405,7 +405,7 @@ void Window::display_callback( GLFWwindow * ) {
 static float pointSize = 1.0f;
 
 void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, int mods ) {
-    
+
     // Check for a key press
     if ( action == GLFW_PRESS ) {
         // Check if escape was pressed

@@ -57,13 +57,17 @@ void Connection::send( const std::string & message ) const {
         LOGGER->warn( "Only sent {} out of {} bytes!", sent, buf.size() );
     }
 
+    // LOGGER->trace( "Sent message.", message );
+
 }
 
 std::string Connection::receive() {
 
+    // LOGGER->trace( "Waiting for message." );
+
     std::string message;
     unsigned int errorCount = 0;
-    do {
+    while ( !extractMessage( inboundBuffer, message ) ) {
 
         //LOGGER->trace( "Listening for more messages." );
         char inbuf[BUFLEN];
@@ -80,7 +84,7 @@ std::string Connection::receive() {
         }
         //LOGGER->trace( "Buffer: {}", inboundBuffer );
 
-    } while ( !extractMessage( inboundBuffer, message ) );
+    }
     LOGGER->trace( "Received message: '{}'", message );
     return message;
 
@@ -98,6 +102,10 @@ void  Connection::insertMessage( const std::string & message, std::string & buff
 #define MESSAGE_END( pos ) ( ( pos ) + 1 )
 
 bool  Connection::extractMessage( std::string & buffer, std::string & message ) {
+
+    if ( buffer.empty() ) { // No data buffered
+        return false;
+    }
 
     size_t startPos = buffer.find( START_MSG ); // Find message start
     if ( startPos != 0 ) {
