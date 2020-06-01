@@ -273,6 +273,10 @@ class AsyncConnection {
             return true; // Discard
         }
 
+        // Attach counter
+        static unsigned int counter = 0;
+        message = std::to_string( counter++ ) + ":" + message;
+
         // Send
         LOGGER->trace( "Sending encoded message '{}'", message );
         conn->send( message );
@@ -302,6 +306,12 @@ class AsyncConnection {
         LOGGER->trace( "Received encoded message '{}'", message );
         Tptr dest;
         decode( message, dest );
+
+        // Remove counter
+        size_t pos = message.find( ":" );
+        if ( pos != std::string::npos ) {
+            message = message.substr( pos + 1 );
+        }
 
         if ( dest == nullptr ) {
             LOGGER->error( "Message could not get decoded: '{}'", message );
