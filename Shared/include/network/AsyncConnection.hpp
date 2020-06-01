@@ -301,6 +301,7 @@ class AsyncConnection {
             close( false ); // Signal stopping
             return false; // Stop
         }
+        LOGGER->trace( "Received encoded message '{}'", message );
 
         // Remove counter
         size_t pos = message.find( ":" );
@@ -311,7 +312,6 @@ class AsyncConnection {
         }
 
         // Decode object
-        LOGGER->trace( "Received encoded message '{}'", message );
         Tptr dest;
         decode( message, dest );
 
