@@ -299,6 +299,7 @@ class AsyncConnection {
         }
 
         // Decode object
+        LOGGER->trace( "Received encoded message '{}'", message );
         Tptr dest;
         decode( message, dest );
 
