@@ -6,7 +6,7 @@ JoinEvent::JoinEvent(std::string id) : GameStateEvent(id) {}
 void JoinEvent::apply(GameState* gamestate) const
 {
     auto log = getLogger("JoinEvent");
-    log->warn("Player Joined: {}",this->getObjectId());
+    log->info("Player Joined: {}",this->getObjectId());
     //gamestate->addPlayer(this->id);
     gamestate->makeDirty();
 }

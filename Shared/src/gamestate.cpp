@@ -131,7 +131,7 @@ void GameState::applyEvent(std::shared_ptr<Event> event) {
     std::map<std::string, std::shared_ptr<Object>>::iterator it;
     switch (event->getType()) {
     case Event::EventType::OEvent:
-        log->info("Applying an Object Event: {}", event->serialize());
+        log->trace("Applying an Object Event: {}", event->serialize());
         it = gameObjects.find(event->getObjectId());
         if (it != gameObjects.end()) {
             std::dynamic_pointer_cast<ObjectEvent>(event)->apply(it->second);
@@ -139,7 +139,7 @@ void GameState::applyEvent(std::shared_ptr<Event> event) {
         }
         break;
     case Event::EventType::GEvent:
-        log->info("Applying a GameState Event: {}", std::dynamic_pointer_cast<GameStateEvent>(event)->serialize());
+        log->trace("Applying a GameState Event: {}", std::dynamic_pointer_cast<GameStateEvent>(event)->serialize());
         std::dynamic_pointer_cast<GameStateEvent>(event)->apply(this);
         break;
     }
