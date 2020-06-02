@@ -22,7 +22,7 @@ void MovingEvent::apply(std::shared_ptr<Object> object) const {
     glm::vec3 newVel = obj->getRelativeVelocity() + this->getDirection();
     bool isValid = newVel.x<2.0 && newVel.x>-2.0 && newVel.y<2.0 && newVel.y>-2.0 && newVel.z<2.0 && newVel.z>-2.0;
     if (isValid) {
-        log->info("Applying {} with direction({}, {}, {}) Old rel velocity was({}, {}, {}) and New is({}, {}, {})", this->serialize(), this->direction.x, this->direction.y, this->direction.z, obj->getRelativeVelocity().x, obj->getRelativeVelocity().y, obj->getRelativeVelocity().z, newVel.x, newVel.y, newVel.z);
+        log->trace("Applying {} with direction({}, {}, {}) Old rel velocity was({}, {}, {}) and New is({}, {}, {})", this->serialize(), this->direction.x, this->direction.y, this->direction.z, obj->getRelativeVelocity().x, obj->getRelativeVelocity().y, obj->getRelativeVelocity().z, newVel.x, newVel.y, newVel.z);
         if (glm::all(epsilonEqual(newVel, glm::vec3(0, 0, 0), EPSILON))) {
             obj->setRelativeVelocity(glm::vec3(0, 0, 0));
         } else {

@@ -7,7 +7,7 @@ PickUpEvent::PickUpEvent(std::string id, std::string targetId) : GameStateEvent(
 void PickUpEvent::apply(GameState* gamestate) const
 {
     auto log = getLogger("PickUpEvent");
-    log->warn("Pick up event: {}", serialize());
+    log->trace("Pick up event: {}", serialize());
     // get object
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // calculate where player is looking
@@ -17,9 +17,9 @@ void PickUpEvent::apply(GameState* gamestate) const
 
     // check if found
     if (object != nullptr && itemObject != nullptr && object->getHeldItem()==nullptr) {
-        log->warn("passed first check trying to get item from {}",itemObject->getId());
+        log->trace("passed first check trying to get item from {}",itemObject->getId());
         if (glm::distance(object->getPosition(), itemObject->getPosition()) < 2.0f && itemObject->getFactory() != nullptr) {
-            log->warn("passed second check");
+            log->trace("passed second check");
             std::shared_ptr<Object> item = itemObject->getItem();
             if (item->getTag().compare("Barricade")==0) {
                 // check if player has enough dough
@@ -33,10 +33,10 @@ void PickUpEvent::apply(GameState* gamestate) const
                 object->setHeldItem(item);
             }
             gamestate->setDirty(true);
-            log->warn("Just picked up an item {}",item->serialize());
+            log->debug("Just picked up an item {}",item->serialize());
         }
     } else {
-        log->warn("Trying to picked up but no");
+        log->trace("Trying to picked up but no");
     }
 }
 

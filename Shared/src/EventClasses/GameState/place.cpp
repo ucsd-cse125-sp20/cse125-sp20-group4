@@ -31,7 +31,7 @@ void PlaceEvent::apply(GameState* gamestate) const
             item->setPosition(pos.x, pos.y, pos.z);
             gamestate->createObject(item);
             object->setHeldItem(nullptr);
-            log->warn("Just Placed an item");
+            log->debug("Just Placed an item");
         }
         
     }

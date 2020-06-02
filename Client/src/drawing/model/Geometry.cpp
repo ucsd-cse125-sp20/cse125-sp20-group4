@@ -69,8 +69,6 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
     const glm::vec3 horizontalDirection = glm::normalize( glm::vec3( direction.x, 0.0f, direction.z ) );
     float horizontalAngle = glm::acos( glm::dot( FOWARD, horizontalDirection ) );
     glm::vec3 horizontalAxis = glm::cross( FOWARD, horizontalDirection );
-    //if (horizontalAxis.y <= 0.01f && horizontalAxis.y >= -0.01f) horizontalAxis = glm::vec3(0, 1.0f, 0);
-    //horizontalAxis = glm::normalize(horizontalAxis);
     glm::mat4x4 horizontalRotate = ROTATE( I, horizontalAngle, horizontalAxis );
 
     float verticalAngle = glm::acos( glm::dot( horizontalDirection, direction ) );
