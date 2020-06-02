@@ -1,3 +1,4 @@
+#include <cmath>
 #include <stdexcept>
 #include <unordered_set>
 
@@ -6,7 +7,9 @@
 #include "logger.h"
 #include "drawing/model/Geometry.h"
 
-#define ROTATE( base, angle, axis ) ( angle ) == 0.0f ? ( base ) : glm::rotate( ( base ), ( angle ), ( axis ) )
+#define SMALL_THRESHOLD 0.001
+#define VERY_SMALL( n ) ( std::abs( n ) < SMALL_THRESHOLD )
+#define ROTATE( base, angle, axis ) ( ( std::isnan( angle ) || VERY_SMALL( angle ) ) ? ( base ) : glm::rotate( ( base ), ( angle ), ( axis ) ) )
 
 static const auto LOGGER = getLogger( "Geometry" );
 
@@ -66,8 +69,8 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
     const glm::vec3 horizontalDirection = glm::normalize( glm::vec3( direction.x, 0.0f, direction.z ) );
     float horizontalAngle = glm::acos( glm::dot( FOWARD, horizontalDirection ) );
     glm::vec3 horizontalAxis = glm::cross( FOWARD, horizontalDirection );
-    if (horizontalAxis.y <= 0.01f && horizontalAxis.y >= -0.01f) horizontalAxis = glm::vec3(0, 1.0f, 0);
-    horizontalAxis = glm::normalize(horizontalAxis);
+    //if (horizontalAxis.y <= 0.01f && horizontalAxis.y >= -0.01f) horizontalAxis = glm::vec3(0, 1.0f, 0);
+    //horizontalAxis = glm::normalize(horizontalAxis);
     glm::mat4x4 horizontalRotate = ROTATE( I, horizontalAngle, horizontalAxis );
 
     float verticalAngle = glm::acos( glm::dot( horizontalDirection, direction ) );

@@ -1,5 +1,7 @@
 #pragma warning(disable:4201)
 
+#include <stdexcept>
+
 #include "drawing/model/LoadedModel.h"
 
 LoadedModel::LoadedModel(const std::string file, const Shader& shaderProgram) : Geometry(shaderProgram, GL_TRIANGLES)
@@ -9,7 +11,7 @@ LoadedModel::LoadedModel(const std::string file, const Shader& shaderProgram) : 
     const aiScene* scene = import.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        throw("WHAT IN THE FUCK");
+        throw std::runtime_error( "Could not load model." );
     }
 
     processNode(scene->mRootNode, scene);
@@ -93,7 +95,8 @@ void LoadedModel::draw(const glm::mat4x4& model, const glm::mat4x4& view, const 
     glUniform1iv(dOnLoc, 1, &dOn);
     glUniform1iv(shadowsOnLoc, 1, &sOn);
     
-    Geometry::draw(model, view, direction);
+    //Geometry::draw(model, view, direction);
+    Geometry::draw( model, view, glm::normalize( glm::vec3( direction.x, 0.0f, direction.z ) ) );
 
 }
 
