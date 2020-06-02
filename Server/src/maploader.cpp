@@ -16,7 +16,7 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
         int x = 0;
         for (auto it = line.begin(); it < line.end(); it++, x++)
         {
-            position = glm::vec3(x, 0.0, z);
+            position = glm::vec3(x, 0.0f, z);
             std::shared_ptr<Object> obj;
             std::shared_ptr<IObjectFactory> fac = nullptr;
             switch (*it) {
@@ -161,16 +161,16 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 gs->createObject(obj);
                 break;
             case '0':
-                gs->createObject(std::make_shared<Player>("client-0", position.x, position.y, position.z), "client-0");
+                gs->createObject(std::make_shared<Player>("client-0", position.x, 0.0f, position.z), "client-0");
                 break;
             case '1':
-                gs->createObject(std::make_shared<Player>("client-1", position.x, position.y, position.z), "client-1");
+                gs->createObject(std::make_shared<Player>("client-1", position.x, 0.0f, position.z), "client-1");
                 break;
             case '2':
-                gs->createObject(std::make_shared<Player>("client-2", position.x, position.y, position.z), "client-2");
+                gs->createObject(std::make_shared<Player>("client-2", position.x, 0.0f, position.z), "client-2");
                 break;
             case '3':
-                gs->createObject(std::make_shared<Player>("client-3", position.x, position.y, position.z), "client-3");
+                gs->createObject(std::make_shared<Player>("client-3", position.x, 0.0f, position.z), "client-3");
                 break;
             }
         }

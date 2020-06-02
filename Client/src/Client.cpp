@@ -2,15 +2,6 @@
 //
 
 #pragma warning(disable:4201)
-
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/fonts/IconsFontAwesome5.h"
-#include "imgui/fonts/IconsMaterialDesign.h"
-#include "imgui/fonts/IconsForkAwesome.h"
-
 #include <iostream>
 
 //#define GLFW_INCLUDE_GLEXT
@@ -35,6 +26,7 @@
 #include "ObjectClasses/object.h"
 #include "deserializer.h"
 #include "inih/INIReader.h"
+#include "UiHandler.h"
 
 
 #pragma comment (lib, "Ws2_32.lib")
@@ -193,28 +185,8 @@ int main_inner( void ) {
     // Initialize objects/pointers for rendering
     Window::initialize( server, audioSystem );
 
-    // Imgui
-    ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    ImGuiIO& io = ImGui::GetIO();
-    //io.Fonts->AddFontDefault();
-    ImFontConfig config;
-    config.MergeMode = true;
-    config.GlyphMinAdvanceX = 35.0f; // Use if you want to make the icon monospaced
-    io.Fonts->AddFontFromFileTTF("fonts/Bangers-Regular.ttf", 30.0f);
+    UiHandler::initialize();
 
-    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    io.Fonts->AddFontFromFileTTF("fonts/fa-solid-900.ttf" , 30.0f, &config, icon_ranges);
-
-    //static const ImWchar icon_ranges[] = { ICON_MIN_MD, ICON_MAX_MD, 0 };
-    //io.Fonts->AddFontFromFileTTF("fonts/MaterialIcons-Regular.ttf", 30.0f, &config, icon_ranges);
-
-    //static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_FK, 0 };
-    //io.Fonts->AddFontFromFileTTF("fonts/forkawesome-webfont.ttf", 30.0f, &config, icon_ranges);
-    io.Fonts->Build();
     // Loop while GLFW window should stay open
     while ( !glfwWindowShouldClose( window ) ) {
 
@@ -231,10 +203,7 @@ int main_inner( void ) {
 
     }
 
-    //Imgui cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    UiHandler::cleanup();
 
     Window::clean_up();
 

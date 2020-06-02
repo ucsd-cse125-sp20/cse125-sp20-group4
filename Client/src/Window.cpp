@@ -21,13 +21,6 @@
 #include "drawing/model/LoadedModel.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/fonts/IconsFontAwesome5.h"
-#include "imgui/fonts/IconsMaterialDesign.h"
-#include "imgui/fonts/IconsForkAwesome.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -303,105 +296,7 @@ void Window::idle_callback() {
     pmanager->update();
 
 }
-void drawInfoGui() {   
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 2;
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-    if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Round: 0");
-        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
-        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
-        switch (Window::holding) {
-            case 0:
-                ImGui::Text("Pick Up an Item");
-            break;
-            case 1:
-                ImGui::Text("You are holding a RED Item");
-                break;
-            case 2:
-                ImGui::Text("You are holding a GREEN Item");
-                break;
-            case 3:
-                ImGui::Text("You are holding a BLUE Item");
-                break;
-            case 4:
-                ImGui::Text("You are holding a BARRICADE");
-                break;
-        }\
-        ImGui::End();
-    }
-
-}
-void drawReadyGui() {
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 1;
-    int money = Window::money;
-    
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-    if (ImGui::Begin("Ready Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        // TODO check if readied up
-        if (false) {
-            ImGui::Text(ICON_FA_BATH "%d of 5 Ready",2);
-        } else {
-            ImGui::Text("Press R to ready up");
-        }
-        ImGui::End();
-    }
-
-}
-void drawEndGui() {
-    bool* p_open = new bool(true);
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2( io.DisplaySize.x *0.5f, io.DisplaySize.y * 0.5f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
-    if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Game Over");
-        ImGui::Text("Score: %d", Window::money);
-        ImGui::End();
-    }
-
-}
-void Window::drawGui() {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    LOGGER->trace("About to draw gui");
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowBorderSize = 5;
-    style.FrameBorderSize = 0;
-    style.PopupBorderSize = 0;
-    switch (world->phase) {
-    case World::Phase::READY:
-        drawReadyGui();
-        break;
-    case World::Phase::ROUND:
-        drawInfoGui();
-        break;
-    case World::Phase::END:
-        drawEndGui();
-        drawInfoGui();
-        break;
-    }
-    LOGGER->trace("gui drawn");
-    
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
 
 void Window::display_callback( GLFWwindow * ) {
 
@@ -409,11 +304,10 @@ void Window::display_callback( GLFWwindow * ) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
-
     // Render scene.
     world->draw( cam->getToView() );
 
-    drawGui();
+    UiHandler::drawGui();
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
