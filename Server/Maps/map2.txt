@@ -1,0 +1,20 @@
+uffffffffffffffffffffv
+k                    p
+k  pk pk  pk  pk pk  p
+k  pk pk  pk  pk pk  p
+k  pk pk  pk  pk pk  p
+k  pk pk  pk  pk pk  p
+k  pk pk  pk  pk pk  p
+k  pk pk  pk  pk pk  p
+k  pk            pk  p
+k  pk    0 1     pk  p
+k  pk    3 2     pk  p
+k  pk            pk  p
+k  pk aaabcdeaaa pk  p
+k  pk ffffffffff pk  p
+k  pk            pk  p
+k  pk            pk  p
+k  pk aaaaaaaaaa pk  p
+k  pk ffffffffff pk  p
+k                    p
+waaaaaaaaaaaaaaaaaaaax

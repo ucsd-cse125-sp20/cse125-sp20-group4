@@ -31,6 +31,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+out/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -355,3 +356,17 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# CMake files
+.cmake/
+
+#some cache stuff
+cache*.json
+index*.json
+.ninja_deps
+.ninja_log
+
+FMOD/SoundEffects/.cache
+FMOD/SoundEffects/.restore
+FMOD/SoundEffects/.unsaved
+FMOD/SoundEffects/.user
