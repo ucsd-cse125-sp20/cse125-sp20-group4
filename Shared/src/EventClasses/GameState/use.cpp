@@ -12,7 +12,7 @@ void UseEvent::apply(GameState* gamestate) const
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
     if (object != nullptr && object->getHeldItem() != nullptr && object->getHeldItem()->getTag().compare("Barricade")!=0) {
-        log->warn("Using item");
+        log->debug("Using item");
         // get item in player inventory
         std::shared_ptr<UseableObject> item = std::dynamic_pointer_cast<UseableObject>(object->getHeldItem());
         // TODO: determine how to use event
@@ -34,7 +34,7 @@ void UseEvent::apply(GameState* gamestate) const
         }
         object->setHeldItem(nullptr);
         gamestate->setDirty(true);
-        log->warn("Using an item and killed {}",count);
+        log->debug("Using an item and killed {}",count);
     }
 }
 

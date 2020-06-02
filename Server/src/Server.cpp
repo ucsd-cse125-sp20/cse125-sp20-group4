@@ -198,7 +198,7 @@ int main_inner( void ) {
     else {
         port = set_port;
     }
-    spdlog::warn("Starting server on port: {}", port);
+    spdlog::info("Starting server on port: {}", port);
 
 
     // Initialize Winsock

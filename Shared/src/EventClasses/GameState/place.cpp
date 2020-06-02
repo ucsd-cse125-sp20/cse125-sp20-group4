@@ -12,7 +12,7 @@ void PlaceEvent::apply(GameState* gamestate) const
     // get object
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
-    if (object != nullptr && object->getHeldItem()->getTag().compare("Barricade")==0) {
+    if (object != nullptr && object->getHeldItem() !=nullptr && object->getHeldItem()->getTag().compare("Barricade")==0) {
         log->debug("Placing object: {}", object->getHeldItem()->serialize());
         // get item in player inventory
         std::shared_ptr<Object> item = object->getHeldItem();
@@ -24,13 +24,15 @@ void PlaceEvent::apply(GameState* gamestate) const
         } else{
             ori = glm::normalize(ori);
         }
-        pos = pos + ori * object->getWidth() * 3.0f;
+        pos = pos + ori * object->getWidth() * 2.0f;
+        gamestate->map->GridifyMapPos(pos);
         //TODO check for collision
-        //TODO update map
-        item->setPosition(pos.x,pos.y,pos.z);
-        gamestate->createObject(item);
-        object->setHeldItem(nullptr);
-        log->warn("Just Placed an item");
+        if (!gamestate->map->containsObject(pos)) {
+            item->setPosition(pos.x, pos.y, pos.z);
+            gamestate->createObject(item);
+            object->setHeldItem(nullptr);
+            log->debug("Just Placed an item");
+        }
         
     }
 }

@@ -18,7 +18,7 @@ std::shared_ptr<NotifyEvent> NotifyEvent::deserialize(const std::string& seriali
     size_t last = pos + 1;
     std::string id = serialized.substr(last, end - last);
     auto log = getLogger("NotifyEvent");
-    log->info("Just created a Notify event");
+    log->debug("Just created a Notify event");
     return std::shared_ptr<NotifyEvent>(new NotifyEvent(id));
 }
 

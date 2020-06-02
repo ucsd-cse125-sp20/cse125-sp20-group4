@@ -26,7 +26,7 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
             case 'd':
             case 'e':
                 // shelf facing up
-                log->info("Made an upward shelf");
+                log->debug("Made an upward shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
                 switch (*it)
                 {
@@ -54,7 +54,7 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
             case 'i':
             case 'j':
                 // shelf facing down
-                log->info("Made a down shelf");
+                log->debug("Made a down shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, -1.0f, 0.0f, 0.0f);
                 switch (*it)
                 {
@@ -82,7 +82,7 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
             case 'n':
             case 'o':
                 // shelf facing right
-                log->info("Made a right shelf");
+                log->debug("Made a right shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
                 switch (*it)
                 {
@@ -110,7 +110,7 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
             case 's':
             case 't':
                 // shelf facing left
-                log->info("Made a left shelf");
+                log->debug("Made a left shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
                 switch (*it)
                 {
@@ -134,28 +134,28 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 break;
             case 'u':
                 // top left corner shelf
-                log->info("Made a tlc shelf");
+                log->debug("Made a tlc shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, -1.0f, 0.0f, 0.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
             case 'v':
-                // bottom left corner shelf
-                log->info("Made a blc shelf");
-                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                // top right corner shelf
+                log->debug("Made a trc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
             case 'w':
-                // top right corner shelf
-                log->info("Made a trc shelf");
-                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, -1.0f);
+                // bottom left corner shelf
+                log->debug("Made a blc shelf");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
             case 'x':
                 // bottom right corner shelf
-                log->info("Made a brc shelf");
+                log->debug("Made a brc shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);

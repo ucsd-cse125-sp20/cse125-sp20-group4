@@ -81,9 +81,11 @@ GLFWwindow* Window::window = nullptr;
 int Window::width;
 int Window::height;
 int Window::money;
-bool Window::holding;
+
+int Window::holding;
 double Window::lX;
 double Window::lY;
+
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -128,7 +130,7 @@ void Window::set3DParams( FMOD_3D_ATTRIBUTES & attr, const glm::vec3 & position,
 void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     
     Window::money = 100;
-    Window::holding = false;
+    Window::holding = 0;
     Window::lX = 0;
     Window::lY= 0;
 
@@ -321,9 +323,23 @@ void drawInfoGui() {
         ImGui::Text("Round: 0");
         ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
         ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
-        if (Window::holding) {
-            ImGui::Text("You are loaded Bish");
-        }
+        switch (Window::holding) {
+            case 0:
+                ImGui::Text("Pick Up an Item");
+            break;
+            case 1:
+                ImGui::Text("You are holding a RED Item");
+                break;
+            case 2:
+                ImGui::Text("You are holding a GREEN Item");
+                break;
+            case 3:
+                ImGui::Text("You are holding a BLUE Item");
+                break;
+            case 4:
+                ImGui::Text("You are holding a BARRICADE");
+                break;
+        }\
         ImGui::End();
     }
 
@@ -459,9 +475,9 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
 
             case GLFW_KEY_SPACE: // Place an object
                 if (cam->name == Window::playerName) {
-                    if (Window::holding) {
+                    if (Window::holding ==  4) {
                         server->send(std::make_shared<PlaceEvent>(playerName));
-                    } else {
+                    } else if (holding == 0){
                         // TODO update to select correct item
                         server->send(std::make_shared<PickUpEvent>(playerName, "0"));
                     }
@@ -477,7 +493,7 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_E: // Start moving up.
                 if ( cam->isFreeCamera() ) {
                     movement.y += CAMERA_MOVEMENT_SPEED;
-                } else if (cam->name == Window::playerName && Window::holding) {
+                } else if (cam->name == Window::playerName && Window::holding > 0 && Window::holding < 4) {
                     server->send(std::make_shared<UseEvent>(playerName));
                 }
                 break;
@@ -656,10 +672,17 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
             auto player = std::static_pointer_cast<Player>(it->second);
             money = player->getMoney();
             if (player->getHeldItem() != nullptr) {
-                holding = true;
-            } else
-            {
-                holding = false;
+                if (player->getHeldItem()->getTag().compare("Red")==0) {
+                    holding = 1;
+                } else if (player->getHeldItem()->getTag().compare("Green") == 0) {
+                    holding = 2;
+                } else if (player->getHeldItem()->getTag().compare("Blue") == 0) {
+                    holding = 3;
+                } else if (player->getHeldItem()->getTag().compare("Barricade") == 0) {
+                    holding = 4;
+                } 
+            } else {
+                holding = 0;
             }
             cam = Camera::getCamera(playerName);
             LOGGER->trace( "Updated player ");

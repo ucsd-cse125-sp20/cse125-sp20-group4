@@ -27,7 +27,7 @@ std::shared_ptr<DeleteEvent> DeleteEvent::deserialize(const std::string& seriali
         res.push_back(token);
     }
     auto log = getLogger("Delete");
-    log->info("Just created a delete event");
+    log->debug("Just created a delete event");
     return std::shared_ptr<DeleteEvent>(new DeleteEvent(res));
 }
 

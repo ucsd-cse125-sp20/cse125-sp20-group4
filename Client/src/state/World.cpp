@@ -124,7 +124,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
-                    model->setColor(glm::vec3(1.0f, 0.0f, 0));
+                    model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
                 } else if (it->second->getTag().compare("Shelf") == 0) {
 

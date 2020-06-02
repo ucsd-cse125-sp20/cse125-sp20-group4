@@ -1,34 +1,49 @@
 #include "MapRep.h"
+#include "logger.h"
+MapRep::block::block() {
+	this->obj = nullptr;
+	this->value = 0;
+}
+
+MapRep::block::block(std::shared_ptr<Object> obj, int val) {
+	this->obj = obj;
+	this->value = val;
+}
 
 MapRep::MapRep(int height, int width) : height(height), width(width) {
 	// set the map to be empty at the beginning
 	for (int r = 0; r < height; r++) {
 		for (int c = 0; c < width; c++) {
-			map[r][c] = 0;
+			map[r][c] = block(nullptr,0);
 		}
 	}
 }
 
 void MapRep::addObject(std::shared_ptr<Object> object, glm::vec3 pos)
 {
+	auto log = getLogger("MapRep");
 	xy_coord coord = mapPosToCoord(pos);
 	if (!coordInBounds(coord)) return;
 	// Barricade = 5 in case we implement weighted pathing
 	if (std::dynamic_pointer_cast<Barricade>(object) != nullptr) {
-		map[coord.x][coord.z] = 5;
+		map[coord.x][coord.z] = block(object, 5);
 	}
 	// Any other object = 100
 	else {
-		map[coord.x][coord.z] = 100;
+		map[coord.x][coord.z] = block(object,100);
 	}
+
+	log->trace("adding object to map");
 }
 
 void MapRep::removeObject(glm::vec3 pos)
 {
 	xy_coord coord = mapPosToCoord(pos);
 	if (!coordInBounds(coord)) return;
-	if (map[coord.x][coord.z] == 5)
-		map[coord.x][coord.z] = 0;
+	if (map[coord.x][coord.z].obj != nullptr) {
+		map[coord.x][coord.z].obj = nullptr;
+		map[coord.x][coord.z].value = 0;
+	}
 }
 
 bool MapRep::containsObject(glm::vec3 pos)
@@ -36,7 +51,23 @@ bool MapRep::containsObject(glm::vec3 pos)
 	xy_coord coord = mapPosToCoord(pos);
 	if (!coordInBounds(coord))
 		return true;
-	return map[coord.x][coord.z] != 0;
+	return map[coord.x][coord.z].value != 0;
+}
+
+std::shared_ptr<Object> MapRep::getObjectAtCoord(xy_coord pos) {
+	if (!coordInBounds(pos))
+		return nullptr;
+	return map[pos.x][pos.z].obj;
+}
+
+
+std::shared_ptr<Object> MapRep::getObjectAtPos(glm::vec3 pos) {
+	auto log = getLogger("MapRep");
+	xy_coord coords = mapPosToCoord(pos);
+	log->trace("Getting object at position ({},{},{}), coords ({},0,{})", pos.x, pos.y, pos.z,coords.x,coords.z);
+	if (!coordInBounds(coords))
+		return nullptr;
+	return map[coords.x][coords.z].obj;
 }
 
 std::vector<glm::vec3> MapRep::getPath(glm::vec3 /*start*/, glm::vec3 /*end*/)
@@ -92,10 +123,12 @@ std::vector<glm::vec3> MapRep::getPath(glm::vec3 /*start*/, glm::vec3 /*end*/)
 
 MapRep::xy_coord MapRep::mapPosToCoord(glm::vec3 pos)
 {
+	auto log = getLogger("MapRep");
 	xy_coord coord;
-	coord.x = (int)(pos.x + 0.5f);
-	coord.z = (int)(pos.z + 0.5f);
-	return xy_coord();
+	coord.x = int(round(pos.x));
+	coord.z = int(round(pos.z));
+	log->trace("Converting to coords from pos ({},X,{}) to ({},X,{})", pos.x, pos.z, coord.x, coord.z);
+	return coord;
 }
 glm::vec3 MapRep::coordToMapPos(xy_coord pos) {
 	return glm::vec3(pos.x, 0.0, pos.z);
@@ -103,4 +136,11 @@ glm::vec3 MapRep::coordToMapPos(xy_coord pos) {
 
 bool MapRep::coordInBounds(xy_coord coord) {
 	return coord.x >= 0 && coord.x < height && coord.z >= 0 && coord.z < width;
+}
+
+
+void MapRep::GridifyMapPos(glm::vec3& pos) {
+	pos.x = round(pos.x);
+	pos.y = 0.0f;
+	pos.z = round(pos.z);
 }
