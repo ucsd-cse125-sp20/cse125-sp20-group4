@@ -230,6 +230,7 @@ int main( void ) {
 
     initLogging( LOGFILE_NAME, LOGLEVEL );
     spdlog::info( "Client starting up." );
+    //getLogger("AsyncConnection")->set_level(spdlog::level::trace);
     try {
         int statusCode = main_inner();
         spdlog::info( "Client shutting down." );

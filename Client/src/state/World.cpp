@@ -18,7 +18,10 @@ static const auto LOGGER = getLogger( "World" );
 
 /* Constructor and destructor */
 
-World::World() : entities(), phase(World::Phase::ROUND) {}
+World::World() : entities() {
+    phase.state = READY_STATE;
+    phase.count = 0;
+}
 
 World::~World() {
 
