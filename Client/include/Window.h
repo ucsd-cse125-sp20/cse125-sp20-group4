@@ -47,7 +47,7 @@ class Window {
     static ParticleManager* pmanager;
     static std::string playerName;
     static bool ready;
-
+    static Entity* selected;
     static int money;
     static int holding;
 
@@ -69,6 +69,7 @@ class Window {
     static void mouse_button_callback( GLFWwindow * window, int button, int action, int mods );
     static void mouse_scroll_callback( GLFWwindow * window, double xoffset, double yoffset );
     static void drawGui();
+    static glm::vec3 lookingAt();
 };
 
 #endif
