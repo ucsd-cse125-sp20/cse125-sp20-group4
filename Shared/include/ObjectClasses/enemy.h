@@ -27,7 +27,7 @@ public:
     virtual std::string serialize() const override;
     virtual std::shared_ptr<Object> clone() const;
 
-
+    bool reachedTarget = false;
     static Enemy& deserialize(std::string serial);
     ItemType weakness;
 };

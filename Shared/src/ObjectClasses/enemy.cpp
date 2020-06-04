@@ -49,6 +49,7 @@ void Enemy::setVelocityFromCmd() {
         setVelocityX(0);
         setVelocityY(0);
         setVelocityZ(0);
+        reachedTarget = true;
     }
 }
 
