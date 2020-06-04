@@ -42,6 +42,7 @@ static const char * window_title = "CSE 125 Project";
 #define ROTATION_THRESHOLD 0.0001f
 #define CAMERA_MOVEMENT_SPEED 0.1f
 #define DIRECTIONAL_LIGHT_ROTATION_RATE RADIANS( 1.0f )
+#define SENSITIVITY 0.005f
 
 #define BASE_PAN_SPEED RADIANS( 1.0f )
 #define X_DEAD_ZONE ( Window::width / 2 ) * 0.6
@@ -292,10 +293,10 @@ void Window::idle_callback() {
 #pragma warning( push )
 #pragma warning( disable: 4244 )
     if ( dx != 0.0 ) {
-        rotateCamera(dx * 0.005, glm::vec3( 0.0f, -1.0f, 0.0f ) );
+        rotateCamera(dx * SENSITIVITY, glm::vec3( 0.0f, -1.0f, 0.0f ) );
     }
-    if ( dy!= 0.0 ) {
-        rotateCamera( dy * 0.005, glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
+    if ( dy != 0.0 ) {
+        rotateCamera( dy * SENSITIVITY, glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
 
