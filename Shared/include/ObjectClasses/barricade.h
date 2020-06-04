@@ -4,8 +4,8 @@
 
 class Barricade : public Object {
 protected:
-	bool up;
-	int durability;
+	mutable bool up;
+	mutable int durability;
 	const int degradeFactor = 10;
 public:
 	Barricade();
@@ -16,11 +16,11 @@ public:
 	const std::string& getTag();
 
 	bool isUp() const;
-	void toggleUp();
-	void setUp(bool upValue);
+	void toggleUp() const;
+	void setUp(bool upValue) const;
 	int getDurability() const;
-	void setDurability(int newDurability);
-	void degradeBarricade();
+	void setDurability(int newDurability) const;
+	void degradeBarricade() const;
 	virtual std::shared_ptr<Object> clone() const override;
 
 	//(de)serialize functions

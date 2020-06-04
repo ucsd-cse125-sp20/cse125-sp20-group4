@@ -28,6 +28,12 @@ public:
     virtual std::string serialize() const override;
     virtual std::shared_ptr<Object> clone() const;
 
+    virtual void handleXCollision(const Object& obj);
+    virtual void handleXCollision(const MovingObject& obj);
+    virtual void handleYCollision(const Object& obj);
+    virtual void handleYCollision(const MovingObject& obj);
+    virtual void handleZCollision(const Object& obj);
+    virtual void handleZCollision(const MovingObject& obj);
 
     static Enemy& deserialize(std::string serial);
     ItemType weakness;

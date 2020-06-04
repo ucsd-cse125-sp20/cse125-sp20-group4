@@ -18,11 +18,11 @@ bool Barricade::isUp() const {
 	return this->up;
 }
 
-void Barricade::toggleUp() {
+void Barricade::toggleUp() const {
 	this->setUp(!this->isUp());
 }
 
-void Barricade::setUp(bool upValue) {
+void Barricade::setUp(bool upValue) const {
 	auto log = getLogger(TAG);
 	this->up = upValue;
 	this->setCanCollide(upValue);
@@ -44,12 +44,12 @@ int Barricade::getDurability() const{
 	return this->durability;
 }
 
-void Barricade::degradeBarricade() {
+void Barricade::degradeBarricade() const {
 	this->setDurability(this->getDurability() - this->degradeFactor);
 	this->dirty = true;
 }
 
-void Barricade::setDurability(int newDurability) {
+void Barricade::setDurability(int newDurability) const {
 	auto log = getLogger(TAG);
 	this->durability = newDurability;
 	log->trace("Set durability of barricade with it {} to status {}", this->getId(), newDurability);
