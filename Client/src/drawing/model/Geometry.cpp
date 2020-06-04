@@ -2,13 +2,17 @@
 #include <stdexcept>
 #include <unordered_set>
 
+#include "glm/gtc/constants.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "logger.h"
 #include "drawing/model/Geometry.h"
 
-#define SMALL_THRESHOLD 0.001
-#define VERY_SMALL( n ) ( std::abs( n ) < SMALL_THRESHOLD )
+constexpr float APPROX_THRESHOLD = 0.001;
+constexpr float VERY_SMALL_THRESHOLD = APPROX_THRESHOLD;
+#define VERY_SMALL( n ) ( std::abs( n ) < VERY_SMALL_THRESHOLD )
+constexpr float HALF_ROT_THRESHOLD = glm::pi<float>() - APPROX_THRESHOLD;
+#define HALF_ROT( n ) ( std::abs( n ) > HALF_ROT_THRESHOLD )
 #define ROTATE( base, angle, axis ) ( ( std::isnan( angle ) || VERY_SMALL( angle ) ) ? ( base ) : glm::rotate( ( base ), ( angle ), ( axis ) ) )
 
 static const auto LOGGER = getLogger( "Geometry" );
@@ -64,11 +68,12 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
     // Calculate rotation matrix for direction
     // NOTE: assume direction is a unit vector
     static const glm::vec3 FOWARD( 0.0f, 0.0f, 1.0f );
+    static const glm::vec3 UP( 0.0f, 1.0f, 0.0f );
     static const glm::mat4x4 I( 1.0f );
 
     const glm::vec3 horizontalDirection = glm::normalize( glm::vec3( direction.x, 0.0f, direction.z ) );
     float horizontalAngle = glm::acos( glm::dot( FOWARD, horizontalDirection ) );
-    glm::vec3 horizontalAxis = glm::cross( FOWARD, horizontalDirection );
+    glm::vec3 horizontalAxis = HALF_ROT( horizontalAngle ) ? UP : glm::cross( FOWARD, horizontalDirection );
     glm::mat4x4 horizontalRotate = ROTATE( I, horizontalAngle, horizontalAxis );
 
     float verticalAngle = glm::acos( glm::dot( horizontalDirection, direction ) );

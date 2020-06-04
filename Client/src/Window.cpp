@@ -21,13 +21,6 @@
 #include "drawing/model/LoadedModel.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/fonts/IconsFontAwesome5.h"
-#include "imgui/fonts/IconsMaterialDesign.h"
-#include "imgui/fonts/IconsForkAwesome.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -67,6 +60,7 @@ static const char * window_title = "CSE 125 Project";
 Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
+ParticleManager* Window::pmanager;
 
 // Audio data
 FMOD::Studio::System * Window::audioSystem;
@@ -85,6 +79,9 @@ int Window::money;
 int Window::holding;
 double Window::lX;
 double Window::lY;
+
+
+bool Window::ready;
 
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
@@ -133,6 +130,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     Window::holding = 0;
     Window::lX = 0;
     Window::lY= 0;
+    Window::ready = false;
 
     // Set up graphics
     Shaders::initializeShaders();
@@ -168,6 +166,8 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
     world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+
+    pmanager = new ParticleManager();
 
     // Debugging entities
     //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
@@ -307,106 +307,11 @@ void Window::idle_callback() {
         LOGGER->warn( "Error while updating listener position ({}).", res );
     }
 
-}
-void drawInfoGui() {   
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 2;
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-    if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Round: 0");
-        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
-        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
-        switch (Window::holding) {
-            case 0:
-                ImGui::Text("Pick Up an Item");
-            break;
-            case 1:
-                ImGui::Text("You are holding a RED Item");
-                break;
-            case 2:
-                ImGui::Text("You are holding a GREEN Item");
-                break;
-            case 3:
-                ImGui::Text("You are holding a BLUE Item");
-                break;
-            case 4:
-                ImGui::Text("You are holding a BARRICADE");
-                break;
-        }\
-        ImGui::End();
-    }
+    //update particles
+    pmanager->update();
 
 }
-void drawReadyGui() {
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 1;
-    int money = Window::money;
-    
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-    if (ImGui::Begin("Ready Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        // TODO check if readied up
-        if (false) {
-            ImGui::Text(ICON_FA_BATH "%d of 5 Ready",2);
-        } else {
-            ImGui::Text("Press R to ready up");
-        }
-        ImGui::End();
-    }
 
-}
-void drawEndGui() {
-    bool* p_open = new bool(true);
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2( io.DisplaySize.x *0.5f, io.DisplaySize.y * 0.5f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
-    if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Game Over");
-        ImGui::Text("Score: %d", Window::money);
-        ImGui::End();
-    }
-
-}
-void Window::drawGui() {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    LOGGER->trace("About to draw gui");
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowBorderSize = 5;
-    style.FrameBorderSize = 0;
-    style.PopupBorderSize = 0;
-    switch (world->phase) {
-    case World::Phase::READY:
-        drawReadyGui();
-        break;
-    case World::Phase::ROUND:
-        drawInfoGui();
-        break;
-    case World::Phase::END:
-        drawEndGui();
-        drawInfoGui();
-        break;
-    }
-    LOGGER->trace("gui drawn");
-    
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
 
 void Window::display_callback( GLFWwindow * ) {
 
@@ -414,11 +319,10 @@ void Window::display_callback( GLFWwindow * ) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
 
-
     // Render scene.
     world->draw( cam->getToView() );
 
-    drawGui();
+    UiHandler::drawGui();
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
@@ -501,6 +405,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_R: // Reset camera position.
                 if ( cam->isFreeCamera() ) {
                     cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
+                } else if (cam->name == Window::playerName) {
+                    server->send(std::make_shared<ReadyEvent>(playerName));
                 }
                 break;
 
@@ -663,16 +569,17 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
     if (e->getType() == Event::EventType::JEvent) {
         Window::playerName = e->getObjectId();
         LOGGER->info("Set my ID to {}", e->getObjectId());
-    } else if(e->getType() == Event::EventType::GEvent){
+    } else if (e->getType() == Event::EventType::GEvent) {
         auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
         world->handleUpdates(uEvent, Window::playerName);
         // update my data
-        auto it = uEvent->updates.find( Window::playerName );
-        if ( it != uEvent->updates.end() ) {
+        auto it = uEvent->updates.find(Window::playerName);
+        if (it != uEvent->updates.end()) {
             auto player = std::static_pointer_cast<Player>(it->second);
             money = player->getMoney();
+            Window::ready = player->ready;
             if (player->getHeldItem() != nullptr) {
-                if (player->getHeldItem()->getTag().compare("Red")==0) {
+                if (player->getHeldItem()->getTag().compare("Red") == 0) {
                     holding = 1;
                 } else if (player->getHeldItem()->getTag().compare("Green") == 0) {
                     holding = 2;
@@ -680,15 +587,18 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
                     holding = 3;
                 } else if (player->getHeldItem()->getTag().compare("Barricade") == 0) {
                     holding = 4;
-                } 
+                }
             } else {
                 holding = 0;
             }
             cam = Camera::getCamera(playerName);
-            LOGGER->trace( "Updated player ");
+            LOGGER->trace("Updated player ");
         } else {
-            LOGGER->trace( "Failed to find {}", playerName );
+            LOGGER->trace("Failed to find {}", playerName);
         }
+    } else if (e->getType() == Event::EventType::PEvent) {
+        Phase& p = (std::dynamic_pointer_cast<UpdatePhaseEvent>(e)->phase);
+        world->phase.update(p);
     } else {
         world->handleUpdates( e, Window::playerName );
     }

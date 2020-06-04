@@ -7,6 +7,7 @@
 #include <logger.h>
 #include "ObjectClasses/objects.h"
 
+#include "window.h"
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
 #include "state/CameraEntity.h"
@@ -17,7 +18,10 @@ static const auto LOGGER = getLogger( "World" );
 
 /* Constructor and destructor */
 
-World::World() : entities(), phase(World::Phase::ROUND) {}
+World::World() : entities() {
+    phase.state = READY_STATE;
+    phase.count = 0;
+}
 
 World::~World() {
 
@@ -33,13 +37,18 @@ World::~World() {
 
 void World::draw( const glm::mat4x4 & toView ) const {
 
-    LOGGER->trace( "Starting world draw." );
+    LOGGER->trace( "Starting entity draw." );
     for ( auto it = entities.begin(); it != entities.end(); it++ ) {
         it->second->draw( toView );
 
     }
-    LOGGER->trace( "World draw done." );
+    LOGGER->trace( "Entity draw done." );
 
+
+    LOGGER->trace("Starting particle draw.");
+    Window::pmanager->draw( toView, Window::cam->getPos());
+
+    LOGGER->trace("Particle draw done.");
 }
 
 Entity * World::getEntity( const std::string & name ) const {
@@ -74,13 +83,18 @@ Entity * World::removeEntity( const std::string & name ) {
     LOGGER->debug( "Removing entity '{}' to world.", name );
     Entity * e = found->second;
     entities.erase( name );
+
+    //create particle when the entity is deleted
+    Window::pmanager->addExplosion(e);
+
     return e;
 
 }
+
 void World::createNewEntity(std::shared_ptr<Object> entity,std::string id) {
     if (entity->getId().compare(id)==0) {
         addEntity(new CameraEntity(id, 0.0f, new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), entity->getPosition(), entity->getOrientation(), 1.0f, false));
-        LOGGER->warn("Created Player camera entity");
+        LOGGER->trace("Created Player camera entity");
     } else {
         addEntity(new Entity(entity->getId(), new RectangularCuboid(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), entity->getPosition(), entity->getOrientation()));
     }
@@ -107,20 +121,24 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getTag());
 
                 if (it->first.compare(id)==0) {
-                    LOGGER->debug("Making a player");
+                    LOGGER->debug("Making a player at pos ({},{},{})",it->second->getPositionX(), it->second->getPositionY(),it->second->getPositionZ());
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    addEntity(new CameraEntity(it->second->getId(),0.8f, (model), it->second->getPosition(), it->second->getOrientation(),0.13f));
+                    entity = new CameraEntity(it->second->getId(), 1.0f, (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
+                    addEntity(entity);
+                    Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Player") == 0) {
                     LOGGER->debug("Making a Player");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.13f));
+                    entity = new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
+                    addEntity(entity);
+                    Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Enemy") == 0) {
                     LOGGER->debug("Making a Enemy");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 0.0f, 0));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.13f));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.09f));
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());

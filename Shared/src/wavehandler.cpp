@@ -23,16 +23,16 @@ void WaveHandler::loadWaveData() {
     std::vector<EnemyData> w1;
     EnemyData e;
     e.type = "SampleEnemy1";
-    e.count = 0; //30;
+    e.count = 10; //30;
     w1.push_back( e );
     waveEnemies.push_back( w1 );
 
     std::vector<EnemyData> w2;
     e.type = "SampleEnemy2";
-    e.count = 0;  10;
+    e.count = 10;//  10;
     w2.push_back( e );
     e.type = "SampleEnemy3";
-    e.count = 0;  20;
+    e.count = 10; // 20;
     w2.push_back( e );
     waveEnemies.push_back( w2 );
 

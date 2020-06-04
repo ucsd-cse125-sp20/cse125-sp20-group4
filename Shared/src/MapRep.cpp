@@ -70,53 +70,57 @@ std::shared_ptr<Object> MapRep::getObjectAtPos(glm::vec3 pos) {
 	return map[coords.x][coords.z].obj;
 }
 
-std::vector<glm::vec3> MapRep::getPath(glm::vec3 /*start*/, glm::vec3 /*end*/)
+std::vector<glm::vec3> MapRep::getPath(glm::vec3 start, glm::vec3 end)
 {
-	/*
+	
 	xy_coord start_coord = mapPosToCoord(start);
 	xy_coord end_coord = mapPosToCoord(end);
 	if (!coordInBounds(start_coord) || !coordInBounds(end_coord))
 		return std::vector<glm::vec3>();
-	std::unordered_map<xy_coord, xy_coord> visited;
+	std::unordered_map<xy_coord, xy_coord, XyHash> visited;
 	std::queue<xy_coord> queue;
 
 	queue.push(start_coord);
-	visited.emplace(start_coord, NULL);
+	//visited.emplace(start_coord, NULL);
+	visited.insert(std::pair<xy_coord, xy_coord>(start_coord, start_coord));
+
 	while (!queue.empty()) {
-		xy_coord coord = queue.pop();
+		xy_coord coord = queue.front();
+		queue.pop();
 
 		// rebuild path when the end is found
 		if (coord.x == end_coord.x && coord.z == end_coord.z) {
 			std::list<glm::vec3> solution;
-			while (visited[coord] != &start_coord) {
-				solution.push_front(glm::vec3(coord->x, 0, coord->z));
+			while (!(visited[coord] == start_coord)) {
+				solution.push_front(glm::vec3(coord.x, 0, coord.z));
 				coord = visited[coord];
 			}
-			return solution;
+			return std::vector<glm::vec3>(solution.begin(), solution.end()); //changed to make it return vectors
 		}
 
-		xy_coord adj_coord(coord.x - 1, coord.z, &coord);
-		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z] == 1 &&) {
+		xy_coord adj_coord{ coord.x - 1, coord.z }; // , & coord;
+		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z].value == 1) {
 			queue.push(adj_coord);
 			visited.emplace(adj_coord, coord);
 		}
-		xy_coord adj_coord(coord.x + 1, coord.z, &coord);
-		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z] == 1) {
+	    adj_coord = xy_coord{ coord.x + 1, coord.z };//, & coord);
+		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z].value == 1) {
 			queue.push(adj_coord);
 			visited.emplace(adj_coord, coord);
 		}
-		xy_coord adj_coord(coord.x, coord.z - 1, &coord);
-		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z] == 1) {
+		adj_coord = xy_coord{ coord.x, coord.z - 1 };//, & coord
+
+		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z].value == 1) {
 			queue.push(adj_coord);
 			visited.emplace(adj_coord, coord);
 		}
-		xy_coord adj_coord(coord.x, coord.z + 1, &coord);
-		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z] == 1) {
+		adj_coord = xy_coord{ coord.x, coord.z + 1 };// , & coord);
+		if (coordInBounds(adj_coord) && map[adj_coord.x][adj_coord.z].value == 1) {
 			queue.push(adj_coord);
 			visited.emplace(adj_coord, coord);
 		}
 	}
-	*/
+	
 
 	return std::vector<glm::vec3>();
 }

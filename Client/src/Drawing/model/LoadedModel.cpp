@@ -58,7 +58,7 @@ void LoadedModel::processMesh(aiMesh *mesh) {
         }
     }
 
-    initialize(vertices, colors, vertices, faces);
+    initialize(vertices, colors, normals, faces);
 
 }
 

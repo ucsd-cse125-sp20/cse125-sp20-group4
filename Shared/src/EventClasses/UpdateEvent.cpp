@@ -37,6 +37,7 @@ UpdateEvent::UpdateEvent( const std::unordered_map<std::string, std::shared_ptr<
         if (iter->second->dirty == true) {
             auto pair = std::pair<std::string, std::shared_ptr<Object>>(iter->first, iter->second->clone()); //needs to make underlying object
             //LOGGER->trace("{}", pair.second->serialize());
+            LOGGER->info("{}", pair.second->serialize());
             this->updates.insert(pair);
         }
         iter++;

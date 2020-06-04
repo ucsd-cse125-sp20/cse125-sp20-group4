@@ -1,3 +1,5 @@
+#pragma warning(disable:4201)
+
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <logger.h>
@@ -42,6 +44,12 @@ const glm::vec3 & Entity::getDirection() const {
 
 }
 
+const glm::vec3& Entity::getVelocity() const {
+
+    return velocity;
+
+}
+
 const float & Entity::getScale() const {
 
     return scale;
@@ -75,6 +83,8 @@ void Entity::setPosition( const glm::vec3 & pos ) {
             LOGGER->warn( "Error while updating sound event position ({}).", res );
         }
     }
+
+    velocity = pos - position;
 
     position = pos;
     updateModelMatrix();

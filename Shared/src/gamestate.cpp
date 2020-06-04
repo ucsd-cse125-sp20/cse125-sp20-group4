@@ -13,6 +13,7 @@ GameState::GameState() {
     this->dirty = true;
     this->deletes = false;
     this->map = new MapRep(100, 100);
+    this->phase = std::make_shared<Phase>(START_STATE, 100, 0, 0);
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
@@ -205,6 +206,7 @@ void GameState::resetDirty() {
     this->dirty = false;
     this->deletes = false;
     this->deletedIds.clear();
+    this->phase->dirty = false;
 }
 
 void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> object) {
@@ -244,4 +246,5 @@ void GameState::makeDirty() {
     for (auto it = this->gameObjects.begin(); it != this->gameObjects.end();it++){
         it->second->dirty = true;
     }
+    this->phase->dirty = true;
 }

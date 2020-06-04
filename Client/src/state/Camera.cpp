@@ -53,6 +53,12 @@ const glm::mat4x4 & Camera::getV() const {
 
 }
 
+const glm::mat4x4 & Camera::getP() const {
+
+    return P;
+
+}
+
 const glm::mat4x4 & Camera::getToView() const {
 
     return toView;

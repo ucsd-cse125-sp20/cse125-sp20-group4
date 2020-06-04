@@ -10,17 +10,61 @@
 
 
 class MapRep {
-
+public:
 	struct xy_coord {
 		int x, z;
+
+		xy_coord() {
+			x = 0;
+			z = 0;
+		};
+
+		xy_coord(const xy_coord& other) {
+			x = other.x;
+			z = other.z;
+		};
+
+		xy_coord(int xIn, int zIn) {
+			x = xIn;
+			z = zIn;
+		};
+
+
+		bool operator== (const xy_coord& c1) const {
+			return (x == c1.x && z == c1.z);
+		};
+		
+		bool operator!= (const xy_coord& c1) const {
+			return (x != c1.x || z != c1.z);
+		};
+
+		bool operator< (const xy_coord& c1) const {
+			return (x + z < c1.x + c1.z);
+		};
+
+		size_t operator() (const xy_coord& c1) const {
+			return (c1.x + 10 * c1.z);
+		};
+
+		//bool operator()(const xy_coord& c1) const {}
+
 	};
+
+	struct XyHash {
+		inline size_t operator()(const MapRep::xy_coord& c1) const{
+			size_t value = (c1.x + 10 * c1.z);
+
+			return value;
+		}
+	};
+
 	struct block {
 		std::shared_ptr<Object> obj = nullptr;
 		int value;
 		block();
 		block(std::shared_ptr<Object>obj, int val);
 	};
-public:
+
 	
 	void addObject(std::shared_ptr<Object> object, glm::vec3 pos);
 	void removeObject(glm::vec3 pos);
@@ -41,3 +85,5 @@ private:
 	int height, width;
 
 };
+
+

@@ -19,6 +19,7 @@ class Camera {
     const glm::vec3 & getPos() const;
     const glm::vec3 & getDir() const;
     const glm::mat4x4 & getV() const;
+    const glm::mat4x4 & getP() const;
     const glm::mat4x4 & getToView() const;
 
     virtual void update( const glm::vec3 & pos, const glm::vec3 & dir );
