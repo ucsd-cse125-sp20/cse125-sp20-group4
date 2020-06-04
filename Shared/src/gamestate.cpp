@@ -134,6 +134,15 @@ void GameState::updateState() {
                 deleteObject(barricade_ptr->getId());
             }
         }
+        std::shared_ptr<Enemy> enemy = std::dynamic_pointer_cast<Enemy>(it->second);
+        if (enemy != nullptr && enemy->reachedTarget) {
+            deleteObject(enemy->getId());
+            phase->health -= 1;
+            if (phase->health <= 0) {
+                phase->state = END_STATE;
+                phase->dirty = true;
+            }
+        }
 
     }
 
