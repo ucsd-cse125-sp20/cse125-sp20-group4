@@ -80,6 +80,28 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
         gameState.resetDirty();
         
+        if (spawnCooldown == 0) {
+            for (unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++) {
+
+                std::shared_ptr<Enemy> e = pendingSpawns.front();
+                pendingSpawns.pop_front();
+                log->info("Spawning enemy '{}'.", e->getId());
+                gameState.createObject(e, e->getId());
+
+            }
+            log->info("{}", gameState.serialize());
+
+            spawnCooldown = SPAWN_DELAY;
+        }
+        else {
+            spawnCooldown--;
+        }
+
+        // TODO: client voting system?
+        if (clients->getClientCount() > 0) {
+            waveHandler.start();
+        }
+
         std::deque<std::shared_ptr<Event>> events;
         clients->receiveAll( events );
         log->trace( "{} events in the event queue.", events.size() );
@@ -124,7 +146,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
                 std::uniform_int_distribution<unsigned int> spawnIndices( 0, ( unsigned int ) spawns.size() - 1 );
                 for ( auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++ ) {
-                    log->debug( "Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum );
+                    log->info( "Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum );
                     for ( unsigned int i = 0; i < it->count; i++ ) {
                         const glm::vec3 & spawn = spawns[spawnIndices( rng )];
                         const std::string id = "wave" + std::to_string( waveNum ) + "-enemy-" + it->type + "-" + std::to_string( i );
@@ -133,6 +155,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                     }
                 }
                 spawnCooldown = 0;
+
 
                 // Notify clients?
                 break;
@@ -143,14 +166,17 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 break;
         }
 
+        /*
         if ( spawnCooldown == 0 ) {
             for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
                 std::shared_ptr<Enemy> e = pendingSpawns.front();
                 pendingSpawns.pop_front();
-                log->trace( "Spawning enemy '{}'.", e->getId() );
+                log->info( "Spawning enemy '{}'.", e->getId() );
                 gameState.createObject( e, e->getId() );
                 e->setPathList(gameState.map->getPath(e->getPosition(), glm::vec3(0.0, 0.0, 0.0))); // TODO put real destination position here
             }
+            log->info("{}", gameState.serialize());
+
             spawnCooldown = SPAWN_DELAY;
         } else {
             spawnCooldown--;
@@ -160,7 +186,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         if ( clients->getClientCount() > 0 ) {
             waveHandler.start();
         }
-        
+        */
         // *************** GAME LOGIC END ***************
         std::chrono::time_point tickEnd = std::chrono::steady_clock::now();
         std::chrono::duration tickTime = std::chrono::duration_cast<std::chrono::milliseconds>( tickEnd - tickStart );

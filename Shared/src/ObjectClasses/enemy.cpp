@@ -45,6 +45,11 @@ void Enemy::setVelocityFromCmd() {
     }
 }
 
+std::shared_ptr<Object> Enemy::clone() const {
+    return std::make_shared<Enemy>(*this);
+}
+
+
 std::string Enemy::serialize() const {
     auto log = getLogger("Enemy");
     std::string res = TAG+":" + MovingObject::serialize() + "," + std::to_string(static_cast<int>(weakness));

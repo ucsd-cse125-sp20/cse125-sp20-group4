@@ -15,12 +15,14 @@ private:
 	struct MapCoord {
 		int x, z;
 	};
+
 	struct block {
 		std::shared_ptr<Object> obj = nullptr;
 		int pathCost;
 		block();
 		block(std::shared_ptr<Object>obj, int val);
 	};
+
 	block map[MAX_DIM][MAX_DIM];
 	int height, width;
 public:
