@@ -15,7 +15,7 @@ class CameraEntity : public Camera, public Entity {
     bool isFreeCamera() const;
 
     void update( const glm::vec3 & pos, const glm::vec3 & dir );
-    void setPosition( const glm::vec3 & position );
+    void setPosition( const glm::vec3 & position, bool directionChanged = false );
     void setDirection( const glm::vec3 & direction );
 
     protected:
