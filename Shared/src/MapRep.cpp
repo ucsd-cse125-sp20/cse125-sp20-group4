@@ -142,7 +142,7 @@ std::list<glm::vec3> MapRep::getPath(glm::vec3 start, glm::vec3 end)
 		}
 	}
 	
-	delete nodes;
+	delete[] nodes;
 	return pathlist;
 }
 
