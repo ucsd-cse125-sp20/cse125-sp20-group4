@@ -42,6 +42,7 @@ static const char * window_title = "CSE 125 Project";
 #define ROTATION_THRESHOLD 0.0001f
 #define CAMERA_MOVEMENT_SPEED 0.1f
 #define DIRECTIONAL_LIGHT_ROTATION_RATE RADIANS( 1.0f )
+#define SENSITIVITY 0.005f
 
 #define BASE_PAN_SPEED RADIANS( 1.0f )
 #define X_DEAD_ZONE ( Window::width / 2 ) * 0.6
@@ -74,7 +75,12 @@ GLFWwindow* Window::window = nullptr;
 int Window::width;
 int Window::height;
 int Window::money;
+
 int Window::holding;
+double Window::lX;
+double Window::lY;
+
+
 bool Window::ready;
 Entity* Window::selected;
 Entity* Window::redHeld;
@@ -83,6 +89,7 @@ Entity* Window::blueHeld;
 
 FMOD::Studio::EventDescription * Window::ambientMusic;
 FMOD::Studio::EventInstance * Window::ambientMusicEvent;
+
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -128,7 +135,10 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     
     Window::money = 100;
     Window::holding = 0;
+    Window::lX = 0;
+    Window::lY= 0;
     Window::ready = false;
+
     // Set up graphics
     Shaders::initializeShaders();
 
@@ -306,15 +316,19 @@ void Window::idle_callback() {
     // Rotate camera (trackball)
     double cursorX, cursorY;
     glfwGetCursorPos( window, &cursorX, &cursorY );
-    cursorX = X_POS( cursorX );
-    cursorY = Y_POS( cursorY );
+    /*cursorX = X_POS( cursorX );
+    cursorY = Y_POS( cursorY );*/
+    double dx = cursorX - Window::lX;
+    double dy = cursorY - Window::lY;
+    Window::lX = cursorX;
+    Window::lY = cursorY;
 #pragma warning( push )
 #pragma warning( disable: 4244 )
-    if ( std::abs( cursorX ) > X_DEAD_ZONE ) {
-        rotateCamera( X_SPEED( ( float ) cursorX ), glm::vec3( 0.0f, -1.0f, 0.0f ) );
+    if ( dx != 0.0 ) {
+        rotateCamera(dx * SENSITIVITY, glm::vec3( 0.0f, -1.0f, 0.0f ) );
     }
-    if ( std::abs( cursorY ) > Y_DEAD_ZONE ) {
-        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
+    if ( dy != 0.0 ) {
+        rotateCamera( dy * SENSITIVITY, glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
 

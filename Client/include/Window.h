@@ -52,7 +52,11 @@ class Window {
     static Entity* greenHeld;
     static Entity* blueHeld;
     static int money;
+
     static int holding;
+    static double lX;
+    static  double lY;
+
 
     // Audio data
     static FMOD::Studio::System * audioSystem;
