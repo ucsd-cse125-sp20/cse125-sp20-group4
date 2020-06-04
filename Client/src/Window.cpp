@@ -76,6 +76,7 @@ int Window::width;
 int Window::height;
 int Window::money;
 int Window::holding;
+bool Window::ready;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -121,6 +122,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     
     Window::money = 100;
     Window::holding = 0;
+    Window::ready = false;
     // Set up graphics
     Shaders::initializeShaders();
 
@@ -390,6 +392,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_R: // Reset camera position.
                 if ( cam->isFreeCamera() ) {
                     cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
+                } else if (cam->name == Window::playerName) {
+                    server->send(std::make_shared<ReadyEvent>(playerName));
                 }
                 break;
 
@@ -552,16 +556,17 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
     if (e->getType() == Event::EventType::JEvent) {
         Window::playerName = e->getObjectId();
         LOGGER->info("Set my ID to {}", e->getObjectId());
-    } else if(e->getType() == Event::EventType::GEvent){
+    } else if (e->getType() == Event::EventType::GEvent) {
         auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
         world->handleUpdates(uEvent, Window::playerName);
         // update my data
-        auto it = uEvent->updates.find( Window::playerName );
-        if ( it != uEvent->updates.end() ) {
+        auto it = uEvent->updates.find(Window::playerName);
+        if (it != uEvent->updates.end()) {
             auto player = std::static_pointer_cast<Player>(it->second);
             money = player->getMoney();
+            Window::ready = player->ready;
             if (player->getHeldItem() != nullptr) {
-                if (player->getHeldItem()->getTag().compare("Red")==0) {
+                if (player->getHeldItem()->getTag().compare("Red") == 0) {
                     holding = 1;
                 } else if (player->getHeldItem()->getTag().compare("Green") == 0) {
                     holding = 2;
@@ -569,15 +574,18 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
                     holding = 3;
                 } else if (player->getHeldItem()->getTag().compare("Barricade") == 0) {
                     holding = 4;
-                } 
+                }
             } else {
                 holding = 0;
             }
             cam = Camera::getCamera(playerName);
-            LOGGER->trace( "Updated player ");
+            LOGGER->trace("Updated player ");
         } else {
-            LOGGER->trace( "Failed to find {}", playerName );
+            LOGGER->trace("Failed to find {}", playerName);
         }
+    } else if (e->getType() == Event::EventType::PEvent) {
+        Phase& p = (std::dynamic_pointer_cast<UpdatePhaseEvent>(e)->phase);
+        world->phase.update(p);
     } else {
         world->handleUpdates( e, Window::playerName );
     }

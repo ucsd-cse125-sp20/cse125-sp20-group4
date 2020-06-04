@@ -28,6 +28,7 @@
 #include "deserializer.h"
 #include "maploader.h"
 #include "inih/INIReader.h"
+#include "phases/updatephaseevent.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -57,6 +58,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     auto log = getLogger( "Server" );
 
+    //getLogger("AsyncConnection")->set_level(spdlog::level::trace);
     std::default_random_engine rng;
 
     // ************** SETUP GAME STATE ****************
@@ -119,7 +121,10 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             std::shared_ptr<DeleteEvent> deletes = std::make_shared<DeleteEvent>(gameState.getDeletions());
             clients->broadcast(deletes);
         }
-
+        if (gameState.phase->dirty) {
+            // send 
+            clients->broadcast(std::make_shared<UpdatePhaseEvent>(gameState.phase));
+        }
         WaveHandler::State waveState = waveHandler.update( gameState );
 
         unsigned int waveNum;

@@ -44,18 +44,25 @@ void UiHandler::drawGui() {
     ImGui::NewFrame();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowBorderSize = 5;
+    style.WindowBorderSize = 0;
     style.FrameBorderSize = 0;
     style.PopupBorderSize = 0;
-    switch (Window::world->phase) {
-    case World::Phase::READY:
+    
+    switch (Window::world->phase.state) {
+    case START_STATE:
         drawTitle();
+        drawReadyUp();
         break;
-    case World::Phase::ROUND:
+    case READY_STATE:
+        drawPlayerInfo();
+        drawReadyUp();
+        break;
+    case ROUND_STATE:
         drawPlayerInfo();
         break;
-    case World::Phase::END:
+    case END_STATE:
         drawEnd();
+        drawReadyUp();
         break;
     }
 
@@ -71,29 +78,18 @@ void UiHandler::drawTitle() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
     if (ImGui::Begin("Title", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
 
         ImGui::Text("GAME Title");
         ImGui::End();
     }
-    window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.95f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    if (ImGui::Begin("2nd Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        // TODO check if readied up
-        if (false) {
-            ImGui::Text(ICON_FA_BATH "%d of 5 Ready", 2);
-        } else {
-            ImGui::Text("Press sdasd to ready up");
-        }
-        ImGui::End();
-    }
 }
 void UiHandler::drawPlayerInfo() {
     bool* p_open = new bool(true);
     const float DISTANCE = 10.0f;
-    static int corner = 2;
+    int corner = 2;
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
@@ -102,9 +98,6 @@ void UiHandler::drawPlayerInfo() {
     ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
     if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
-        ImGui::Text("Round: 0");
-        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
-        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
         switch (Window::holding) {
         case 0:
             ImGui::Text("Pick Up an Item");
@@ -122,7 +115,30 @@ void UiHandler::drawPlayerInfo() {
             ImGui::Text("You are holding a BARRICADE");
             break;
         }
-            ImGui::End();
+        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
+        ImGui::End();
+    }
+
+    corner = 1;
+    window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+    window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+    if (ImGui::Begin("TP Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::world->phase.health);
+        ImGui::End();
+    }
+
+
+    window_pos = ImVec2(io.DisplaySize.x*0.5f, 0.0f);
+    window_pos_pivot = ImVec2(0.5f,0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+    if (ImGui::Begin("Round Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("Round: %d",Window::world->phase.wave);
+        ImGui::End();
     }
 }
 void UiHandler::drawEnd() {
@@ -130,11 +146,11 @@ void UiHandler::drawEnd() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
     if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         ImGui::Text("Game Over");
-        ImGui::Text("Score: %d", Window::money);
+        ImGui::Text("Score: %d", Window::world->phase.count);
         ImGui::End();
     }
 }
@@ -143,15 +159,16 @@ void UiHandler::drawReadyUp() {
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
-    window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.95f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, -1.0f));
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
     if (ImGui::Begin("2nd Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         // TODO check if readied up
-        if (false) {
-            ImGui::Text(ICON_FA_BATH "%d of 5 Ready", 2);
+        if (Window::ready) {
+            ImGui::Text(ICON_FA_CHECK "%d of 5 Ready", Window::world->phase.count);
         } else {
-            ImGui::Text("Press sdasd to ready up");
+            ImGui::Text("Press R to ready up");
         }
         ImGui::End();
     }

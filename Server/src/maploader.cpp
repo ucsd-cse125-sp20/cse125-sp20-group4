@@ -1,6 +1,8 @@
 #include "maploader.h"
 #include "logger.h"
 #include "ObjectClasses/Factories/factories.h"
+#include "ObjectClasses/spawnpoint.h"
+#include "ObjectClasses/toiletpaper.h"
 void MapLoader::LoadMap(std::string file, GameState* gs)
 {
     auto log = getLogger("MapLoader");
@@ -158,6 +160,18 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 log->debug("Made a brc shelf");
                 obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
+                gs->createObject(obj);
+                break;
+            case 'y':
+                // mob spawn
+                log->debug("Made a mob spawn");
+                obj = std::make_shared<SpawnPoint>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                gs->createObject(obj);
+                break;
+            case 'z':
+                // target
+                log->debug("Made a target");
+                obj = std::make_shared<ToiletPaper>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
                 gs->createObject(obj);
                 break;
             case '0':

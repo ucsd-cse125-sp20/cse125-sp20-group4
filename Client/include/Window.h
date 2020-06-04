@@ -42,7 +42,7 @@ class Window {
     static Server * server;
     static ParticleManager* pmanager;
     static std::string playerName;
-
+    static bool ready;
 
     static int money;
     static int holding;

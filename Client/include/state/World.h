@@ -9,13 +9,13 @@
 #include <ObjectClasses/object.h>
 
 #include "state/Entity.h"
+#include "phases/phase.h"
 
 class World {
 
     public:
     World();
     ~World();
-    enum class Phase {READY, END, ROUND};
     Phase phase;
     void draw( const glm::mat4x4 & toView ) const;
     Entity * getEntity( const std::string & name ) const;

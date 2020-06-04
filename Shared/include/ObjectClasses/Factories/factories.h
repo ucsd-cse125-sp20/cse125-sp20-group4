@@ -5,3 +5,5 @@
 #include "shelffactory.h"
 #include "useablefactory.h"
 #include "enemyfactory.h"
+#include "toiletpaperfactory.h"
+#include "spawnpointfactory.h"

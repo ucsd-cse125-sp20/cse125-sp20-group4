@@ -8,6 +8,7 @@
 #include "EventClasses/event.h"
 #include "ObjectClasses/objects.h"
 #include "MapRep.h"
+#include "phases/phase.h"
 class GameState
 {
 private:
@@ -18,9 +19,12 @@ private:
     bool dirty;
 
 public:
+    GameState();
+
+    std::shared_ptr<Phase> phase;
     bool deletes;
     MapRep* map;
-    GameState();
+
     void createObject(std::shared_ptr<Object> obj);
     void createObject(std::shared_ptr<Object> obj, std::string id);
     std::shared_ptr<Object> getObject(std::string id);
