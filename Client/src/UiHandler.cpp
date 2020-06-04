@@ -150,7 +150,7 @@ void UiHandler::drawEnd() {
     if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         ImGui::Text("Game Over");
-        ImGui::Text("Score: %d", Window::world->phase.count);
+        ImGui::Text("Score: %d", Window::world->phase.wave);
         ImGui::End();
     }
 }

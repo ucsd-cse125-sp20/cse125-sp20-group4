@@ -29,6 +29,8 @@ void MapRep::addObject(std::shared_ptr<Object> object, glm::vec3 pos)
 	// Barricade = 5 in case we implement weighted pathing
 	if (std::dynamic_pointer_cast<Barricade>(object) != nullptr) {
 		map[coord.x][coord.z] = block(object, 5);
+	} else if (std::dynamic_pointer_cast<Shelf>(object) != nullptr) {
+		map[coord.x][coord.z] = block(object, 10000);
 	}
 
 	log->trace("adding object to map");
@@ -61,7 +63,7 @@ std::shared_ptr<Object> MapRep::getObjectAtCoord(MapCoord pos) {
 std::shared_ptr<Object> MapRep::getObjectAtPos(glm::vec3 pos) {
 	auto log = getLogger("MapRep");
 	MapCoord coords = mapPosToCoord(pos);
-	log->trace("Getting object at position ({},{},{}), coords ({},0,{})", pos.x, pos.y, pos.z,coords.x,coords.z);
+	log->warn("Getting object at position ({},{},{}), coords ({},0,{})", pos.x, pos.y, pos.z,coords.x,coords.z);
 	if (!coordInBounds(coords))
 		return nullptr;
 	return map[coords.x][coords.z].obj;
