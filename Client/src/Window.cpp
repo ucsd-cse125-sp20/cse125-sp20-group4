@@ -322,9 +322,14 @@ void Window::display_callback( GLFWwindow * ) {
     // Clear the color and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
+    glm::vec3 tmp = glm::vec3(cam->getPos());
+    tmp.y = 0.0f;
     if (holding == 4) {
         selected->setPosition(round(lookingAt()) + glm::vec3(0.0f, 0.1f, 0.0f));
-        selected->draw(cam->getToView());
+        //TODO CHANGE
+        if (glm::distance(tmp, selected->getPosition()) < 12.0f) {
+            selected->draw(cam->getToView());
+        }
     }
 
     // Render scene.

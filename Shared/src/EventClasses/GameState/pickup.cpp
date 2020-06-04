@@ -13,7 +13,7 @@ void PickUpEvent::apply(GameState* gamestate) const
     // calculate where player is looking
     glm::vec3 dir = glm::vec3(object->getOrientationX(), 0.0f, object->getOrientationZ());
 
-    std::shared_ptr<Shelf> itemObject = std::dynamic_pointer_cast<Shelf>(gamestate->map->getObjectAtPos(object->getPosition() + dir*1.5f));
+    std::shared_ptr<Shelf> itemObject = std::dynamic_pointer_cast<Shelf>(gamestate->map->getObjectAtPos(object->getPosition() + dir*1.2f));
     std::shared_ptr<Barricade> barricade = std::dynamic_pointer_cast<Barricade>(gamestate->map->getObjectAtPos(object->getPosition() + dir * 1.5f));
 
     // check if found
