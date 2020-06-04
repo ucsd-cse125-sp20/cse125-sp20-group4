@@ -6,7 +6,7 @@
 
 class Enemy : public MovingObject {
 private:
-    float baseSpeed = 5.0;
+    float baseSpeed = 1.0;
     std::list<glm::vec3> pathList;
 
 public:

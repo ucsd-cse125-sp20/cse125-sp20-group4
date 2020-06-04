@@ -131,7 +131,7 @@ std::list<glm::vec3> MapRep::getPath(glm::vec3 start, glm::vec3 end)
 
 	std::list<glm::vec3> pathlist;
 	// rebuild path if the end is found
-	if (nodes[end_coord.x * width + end_coord.z].visited) {
+	if (nodes[flatten(end_coord)].visited) {
 		MapCoord backtrack = end_coord;
 		while (
 			nodes[flatten(backtrack)].prev.x != start_coord.x ||

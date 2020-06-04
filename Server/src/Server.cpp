@@ -87,7 +87,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 pendingSpawns.pop_front();
                 log->info("Spawning enemy '{}'.", e->getId());
                 gameState.createObject(e, e->getId());
-
+                e->setPathList(gameState.map->getPath(e->getPosition(), glm::vec3(1.0, 0.0, 9.0))); // TODO put real destination position here
             }
 
             spawnCooldown = SPAWN_DELAY;
@@ -136,8 +136,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             {
                 std::vector<glm::vec3> spawns; // TODO: obtain spawns
                 spawns.push_back( glm::vec3( 1.0f, 0.0f, 1.0f ) );
-                spawns.push_back( glm::vec3( 5.0f, 5.0f, 5.0f ) );
-                spawns.push_back( glm::vec3( 3.0f, 0.0f, 5.0f ) );
+                spawns.push_back( glm::vec3( 2.0f, 0.0f, 5.0f ) );
+                spawns.push_back(glm::vec3(1.0f, 0.0f, 5.0f));
                 if ( spawns.size() == 0 ) {
                     log->error( "No locations to spawn enemies were defined." );
                     break;

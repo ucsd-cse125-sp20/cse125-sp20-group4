@@ -2,6 +2,9 @@
 #include "logger.h"
 
 #include <cmath>
+
+#define MIN_DIST 0.05f
+
 const std::string& Enemy::getTag() {
     return TAG;
 }
@@ -24,17 +27,21 @@ void Enemy::setPathList(std::list<glm::vec3> inPathList) {
 void Enemy::setVelocityFromCmd() {
     while (!pathList.empty()) {
         // calc displacement to next command point
-        float dispX = this->getPositionX() - (float)pathList.front().x;
-        float dispY = this->getPositionY() - (float)pathList.front().y;
-        float dispZ = this->getPositionZ() - (float)pathList.front().z;
+        float dispX = pathList.front().x - this->getPositionX();
+        float dispY = pathList.front().y - this->getPositionY();
+        float dispZ = pathList.front().z - this->getPositionZ();
         float dispTotal = sqrt(pow(dispX, 2) + pow(dispY, 2) + pow(dispZ, 2));
-        // if displacement is basically 0, move to next command point
-        if (dispTotal < 0.0001) {
+        // if displacement is basically 0, start moving to next command point
+        if (dispTotal < MIN_DIST) {
+            setPositionX(pathList.front().x);
+            setPositionY(pathList.front().y);
+            setPositionZ(pathList.front().z);
             pathList.pop_front();
         } else {
             setVelocityX(baseSpeed * dispX / dispTotal);
             setVelocityY(baseSpeed * dispY / dispTotal);
             setVelocityZ(baseSpeed * dispZ / dispTotal);
+            break;
         }
     }
     if (pathList.empty()) {
