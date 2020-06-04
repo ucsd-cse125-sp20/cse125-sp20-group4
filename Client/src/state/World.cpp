@@ -124,7 +124,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     LOGGER->debug("Making a player at pos ({},{},{})", it->second->getPositionX(), it->second->getPositionY(), it->second->getPositionZ());
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    entity = new CameraEntity(it->second->getId(), 1.0f, (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
+                    entity = new CameraEntity(it->second->getId(), 1.5f, (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
                     addEntity(entity);
                     Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Player") == 0) {

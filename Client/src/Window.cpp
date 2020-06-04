@@ -76,6 +76,7 @@ int Window::height;
 int Window::money;
 int Window::holding;
 bool Window::ready;
+Entity* Window::selected;
 
 FMOD::Studio::EventDescription * Window::ambientMusic;
 FMOD::Studio::EventInstance * Window::ambientMusicEvent;
@@ -162,9 +163,13 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     world = new World();
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
-
+    
     world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
+    auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
+    model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+    selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f),0.4f);
+    
     pmanager = new ParticleManager();
 
     // Debugging entities
@@ -317,6 +322,10 @@ void Window::display_callback( GLFWwindow * ) {
     // Clear the color and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
+    if (holding == 4) {
+        selected->setPosition(round(lookingAt()) + glm::vec3(0.0f, 0.1f, 0.0f));
+        selected->draw(cam->getToView());
+    }
 
     // Render scene.
     world->draw( cam->getToView() );
@@ -379,7 +388,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_SPACE: // Place an object
                 if (cam->name == Window::playerName) {
                     if (Window::holding ==  4) {
-                        server->send(std::make_shared<PlaceEvent>(playerName));
+                        glm::vec3 pos = lookingAt();
+                        server->send(std::make_shared<PlaceEvent>(playerName,pos));
                     } else if (holding == 0){
                         // TODO update to select correct item
                         server->send(std::make_shared<PickUpEvent>(playerName, "0"));
@@ -488,6 +498,15 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
         }
     }
 
+}
+glm::vec3 Window::lookingAt() {
+    glm::vec3 planePoint(0.0f, 0.0f, 0.0f);
+    glm::vec3 planeNormal(0.0f, 1.0f, 0.0f);
+    glm::vec3 diff = Window::cam->getPos() - planePoint;
+    float prod1 = glm::dot(diff, planeNormal);
+    float prod2 = glm::dot(Window::cam->getDir(), planeNormal);
+    float prod3 = prod1 / prod2;
+    return Window::cam->getPos() - Window::cam->getDir() * prod3;
 }
 
 glm::vec3 Window::trackBallMapping( float x, float y ) {
