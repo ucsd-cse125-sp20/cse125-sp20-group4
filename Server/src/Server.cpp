@@ -141,17 +141,15 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             case WaveHandler::State::DONE:
                 // Notify client that game is won
                 break;
-
         }
 
         if ( spawnCooldown == 0 ) {
             for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
-
                 std::shared_ptr<Enemy> e = pendingSpawns.front();
                 pendingSpawns.pop_front();
                 log->trace( "Spawning enemy '{}'.", e->getId() );
                 gameState.createObject( e, e->getId() );
-
+                e->setPathList(gameState.map->getPath(e->getPosition(), glm::vec3(0.0, 0.0, 0.0))); // TODO put real destination position here
             }
             spawnCooldown = SPAWN_DELAY;
         } else {

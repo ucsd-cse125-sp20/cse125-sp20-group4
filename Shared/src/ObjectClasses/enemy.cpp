@@ -15,20 +15,34 @@ Enemy::Enemy(std::string id, float x, float y, float z, float orientationX, floa
     setCanCollide(true);
 }
 
+void Enemy::setPathList(std::list<glm::vec3> inPathList) {
+    pathList = inPathList;
+}
+
 // in game loop, if total displacement is less than some threshold,
 // pop command and call this again
 void Enemy::setVelocityFromCmd() {
-    float dispX = this->getNextPositionX() - (float) cmdStack.top().x;
-    float dispY = this->getNextPositionY() - (float) cmdStack.top().y;
-    float dispTotal = sqrt(pow(dispX, 2) + pow(dispY, 2));
-    setVelocityX(baseSpeed * dispX / dispTotal);
-    setVelocityY(baseSpeed * dispY / dispTotal);
-}
-
-bool Enemy::isEnemy() const {
-
-    return true;
-
+    while (!pathList.empty()) {
+        // calc displacement to next command point
+        float dispX = this->getPositionX() - (float)pathList.front().x;
+        float dispY = this->getPositionY() - (float)pathList.front().y;
+        float dispZ = this->getPositionZ() - (float)pathList.front().z;
+        float dispTotal = sqrt(pow(dispX, 2) + pow(dispY, 2) + pow(dispZ, 2));
+        // if displacement is basically 0, move to next command point
+        if (dispTotal < 0.0001) {
+            pathList.pop_front();
+        } else {
+            setVelocityX(baseSpeed * dispX / dispTotal);
+            setVelocityY(baseSpeed * dispY / dispTotal);
+            setVelocityZ(baseSpeed * dispZ / dispTotal);
+        }
+    }
+    if (pathList.empty()) {
+        // no path, so no move
+        setVelocityX(0);
+        setVelocityY(0);
+        setVelocityZ(0);
+    }
 }
 
 std::string Enemy::serialize() const {
