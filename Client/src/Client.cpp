@@ -135,7 +135,7 @@ int main_inner( void ) {
         spdlog::critical( "Could not initialize FMOD ({}).", res );
         throw std::runtime_error( "Failed to initialize audio." );
     }
-    audioSystem->initialize( AUDIO_CHANNELS_MAX, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr );
+    audioSystem->initialize( AUDIO_CHANNELS_MAX, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, nullptr );
 
     //initialize Winsock
     WSADATA wsaData;
