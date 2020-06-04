@@ -89,9 +89,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 pendingSpawns.pop_front();
                 log->info("Spawning enemy '{}'.", e->getId());
                 gameState.createObject(e, e->getId());
-
+                e->setPathList(gameState.map->getPath(e->getPosition(), glm::vec3(1.0, 0.0, 9.0))); // TODO put real destination position here
             }
-            log->info("{}", gameState.serialize());
 
             spawnCooldown = SPAWN_DELAY;
         }
@@ -142,8 +141,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             {
                 std::vector<glm::vec3> spawns; // TODO: obtain spawns
                 spawns.push_back( glm::vec3( 1.0f, 0.0f, 1.0f ) );
-                spawns.push_back( glm::vec3( 5.0f, 5.0f, 5.0f ) );
-                spawns.push_back( glm::vec3( 3.0f, 0.0f, 5.0f ) );
+                spawns.push_back( glm::vec3( 2.0f, 0.0f, 5.0f ) );
+                spawns.push_back(glm::vec3(1.0f, 0.0f, 5.0f));
                 if ( spawns.size() == 0 ) {
                     log->error( "No locations to spawn enemies were defined." );
                     break;
@@ -169,26 +168,10 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             case WaveHandler::State::DONE:
                 // Notify client that game is won
                 break;
-
         }
 
+        
         /*
-        if ( spawnCooldown == 0 ) {
-            for ( unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++ ) {
-
-                std::shared_ptr<Enemy> e = pendingSpawns.front();
-                pendingSpawns.pop_front();
-                log->info( "Spawning enemy '{}'.", e->getId() );
-                gameState.createObject( e, e->getId() );
-
-            }
-            log->info("{}", gameState.serialize());
-
-            spawnCooldown = SPAWN_DELAY;
-        } else {
-            spawnCooldown--;
-        }
-
         // TODO: client voting system?
         if ( clients->getClientCount() > 0 ) {
             waveHandler.start();

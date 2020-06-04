@@ -2,6 +2,9 @@
 #include "logger.h"
 
 #include <cmath>
+
+#define MIN_DIST 0.05f
+
 const std::string& Enemy::getTag() {
     return TAG;
 }
@@ -15,20 +18,38 @@ Enemy::Enemy(std::string id, float x, float y, float z, float orientationX, floa
     setCanCollide(true);
 }
 
+void Enemy::setPathList(std::list<glm::vec3> inPathList) {
+    pathList = inPathList;
+}
+
 // in game loop, if total displacement is less than some threshold,
 // pop command and call this again
 void Enemy::setVelocityFromCmd() {
-    float dispX = this->getNextPositionX() - (float) cmdStack.top().x;
-    float dispY = this->getNextPositionY() - (float) cmdStack.top().y;
-    float dispTotal = sqrt(pow(dispX, 2) + pow(dispY, 2));
-    setVelocityX(baseSpeed * dispX / dispTotal);
-    setVelocityY(baseSpeed * dispY / dispTotal);
-}
-
-bool Enemy::isEnemy() const {
-
-    return true;
-
+    while (!pathList.empty()) {
+        // calc displacement to next command point
+        float dispX = pathList.front().x - this->getPositionX();
+        float dispY = pathList.front().y - this->getPositionY();
+        float dispZ = pathList.front().z - this->getPositionZ();
+        float dispTotal = sqrt(pow(dispX, 2) + pow(dispY, 2) + pow(dispZ, 2));
+        // if displacement is basically 0, start moving to next command point
+        if (dispTotal < MIN_DIST) {
+            setPositionX(pathList.front().x);
+            setPositionY(pathList.front().y);
+            setPositionZ(pathList.front().z);
+            pathList.pop_front();
+        } else {
+            setVelocityX(baseSpeed * dispX / dispTotal);
+            setVelocityY(baseSpeed * dispY / dispTotal);
+            setVelocityZ(baseSpeed * dispZ / dispTotal);
+            break;
+        }
+    }
+    if (pathList.empty()) {
+        // no path, so no move
+        setVelocityX(0);
+        setVelocityY(0);
+        setVelocityZ(0);
+    }
 }
 
 std::shared_ptr<Object> Enemy::clone() const {

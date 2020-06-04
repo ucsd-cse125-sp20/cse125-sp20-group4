@@ -79,7 +79,10 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
     if ( waveActive ) {
         unsigned int remain = 0;
         for ( auto it = gs.getGameObjects().begin(); it != gs.getGameObjects().end(); it++ ) {
-            if ( it->second->isEnemy() ) {
+            Enemy *enemy = dynamic_cast<Enemy*>(it->second.get());
+            // check if dynamic cast not NULL
+            if (enemy) {
+                enemy->setVelocityFromCmd();
                 remain++;
             }
         }
