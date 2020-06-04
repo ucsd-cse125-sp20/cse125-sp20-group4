@@ -69,7 +69,6 @@ FMOD::Studio::Bank * Window::bankMasterStrings;
 
 std::string Window::playerName = "cube4"; 
 
-
 GLFWwindow* Window::window = nullptr;
 
 int Window::width;
@@ -77,6 +76,9 @@ int Window::height;
 int Window::money;
 int Window::holding;
 bool Window::ready;
+
+FMOD::Studio::EventDescription * Window::ambientMusic;
+FMOD::Studio::EventInstance * Window::ambientMusicEvent;
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -151,6 +153,11 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     // Load audio samples
     bankMaster->loadSampleData();
 
+    // Start background music
+    audioSystem->getEvent( "event:/background_music", &ambientMusic );
+    ambientMusic->createInstance( &ambientMusicEvent );
+    ambientMusicEvent->start();
+
     // Set up game state
     world = new World();
     server = ser;
@@ -171,6 +178,11 @@ void Window::clean_up() {
     Camera::removeCamera( "spectator" );
 
     delete( world );
+
+    // Stop background music
+    ambientMusicEvent->stop( FMOD_STUDIO_STOP_IMMEDIATE );
+    ambientMusicEvent->release();
+    ambientMusicEvent = nullptr;
 
     // Clean up audio
     LOGGER->info( "Unloading audio banks." );

@@ -50,9 +50,9 @@ void CameraEntity::update( const glm::vec3 & newPos, const glm::vec3 & newDir ) 
 
 }
 
-void CameraEntity::setPosition( const glm::vec3 & newPos ) {
+void CameraEntity::setPosition( const glm::vec3 & newPos, bool directionChanged ) {
 
-    Entity::setPosition( newPos );
+    Entity::setPosition( newPos, directionChanged );
     Camera::update( newPos + camOffset, dir );
 
 }

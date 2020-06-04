@@ -36,7 +36,8 @@ void PickUpEvent::apply(GameState* gamestate) const
             log->debug("Just picked up an item {}",item->serialize());
         }
     } else {
-        log->trace("Trying to picked up but no");
+        glm::vec3 tmp = object->getPosition() + dir * 1.5f;
+        log->trace("Trying to picked up but no {}, {}, {}",tmp.x,tmp.y,tmp.z);
     }
 }
 

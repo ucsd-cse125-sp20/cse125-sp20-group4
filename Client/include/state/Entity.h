@@ -22,7 +22,7 @@ class Entity {
     const glm::vec3 & getVelocity() const;
     const float & getScale() const;
 
-    virtual void setPosition( const glm::vec3 & position );
+    virtual void setPosition( const glm::vec3 & position, bool directionChanged = false );
     virtual void setDirection( const glm::vec3 & direction );
     virtual void setScale( const float & scale );
 

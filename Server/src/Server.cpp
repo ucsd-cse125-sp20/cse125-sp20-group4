@@ -29,6 +29,8 @@
 #include "maploader.h"
 #include "inih/INIReader.h"
 #include "phases/updatephaseevent.h"
+#include "ObjectClasses/toiletpaper.h"
+#include "ObjectClasses/spawnpoint.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -73,6 +75,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     std::deque<std::shared_ptr<Enemy>> pendingSpawns;
     unsigned int spawnCooldown = 0;
 
+    getLogger("PickUpEvent")->set_level(spdlog::level::trace);
     while ( running ) {
 
         std::chrono::time_point tickStart = std::chrono::steady_clock::now();
@@ -146,11 +149,16 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             case WaveHandler::State::WAVE:
             {
                 std::vector<glm::vec3> spawns; // TODO: obtain spawns
-                spawns.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
-                spawns.push_back(glm::vec3(2.0f, 0.0f, 5.0f));
-                spawns.push_back(glm::vec3(1.0f, 0.0f, 5.0f));
-                if (spawns.size() == 0) {
-                    log->error("No locations to spawn enemies were defined.");
+                // get all toilet paper targets
+                for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
+                    SpawnPoint* spawn = dynamic_cast<SpawnPoint*>(it->second.get());
+                    // check if dynamic cast not NULL
+                    if (spawn) {
+                        spawns.push_back(spawn->getPosition());
+                    }
+                }
+                if ( spawns.size() == 0 ) {
+                    log->error( "No locations to spawn enemies were defined." );
                     break;
                 }
 
@@ -195,8 +203,6 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             // send 
             clients->broadcast(std::make_shared<UpdatePhaseEvent>(gameState.phase));
         }
-        
-
         
         // *************** GAME LOGIC END ***************
         std::chrono::time_point tickEnd = std::chrono::steady_clock::now();

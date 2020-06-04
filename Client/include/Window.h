@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 #endif
 
+#include <cmath>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -29,6 +30,9 @@ class Window {
     static glm::vec3 trackBallMapping( float x, float y );
     static void rotateCamera( float angle, glm::vec3 axis );
     static void handleEvent( const std::shared_ptr<Event> & e );
+
+    static FMOD::Studio::EventDescription * ambientMusic;
+    static FMOD::Studio::EventInstance * ambientMusicEvent;
 
     public:
 

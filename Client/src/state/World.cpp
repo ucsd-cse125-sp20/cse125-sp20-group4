@@ -7,7 +7,7 @@
 #include <logger.h>
 #include "ObjectClasses/objects.h"
 
-#include "window.h"
+#include "Window.h"
 #include "state/World.h"
 #include "Drawing/model/RectangularCuboid.h"
 #include "state/CameraEntity.h"
@@ -113,10 +113,10 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
             auto entity = this->getEntity(it->first);
             if (entity != nullptr) {
                 LOGGER->debug("Updating entity '{}'.", it->second->getId());
-                if (it->first.compare(id) != 0) {
+                if (it->first != id) {
                     entity->setDirection(it->second->getOrientation());
                 }
-                entity->setPosition(it->second->getPosition());
+                entity->setPosition( it->second->getPosition(), glm::all( glm::epsilonEqual( entity->getDirection(), it->second->getOrientation(), 0.0001f ) ) );
             } else {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getTag());
 
