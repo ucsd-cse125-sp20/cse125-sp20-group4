@@ -30,10 +30,6 @@ void MapRep::addObject(std::shared_ptr<Object> object, glm::vec3 pos)
 	if (std::dynamic_pointer_cast<Barricade>(object) != nullptr) {
 		map[coord.x][coord.z] = block(object, 5);
 	}
-	// Any other object = 100
-	else {
-		map[coord.x][coord.z] = block(object, 100);
-	}
 
 	log->trace("adding object to map");
 }
