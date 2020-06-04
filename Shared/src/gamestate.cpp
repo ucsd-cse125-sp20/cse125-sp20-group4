@@ -124,6 +124,19 @@ void GameState::updateState() {
         
         it++;
     }
+
+    //check if barricades are down, and if so, delete it
+    while (it != this->gameObjects.end()) {
+        std::shared_ptr<Barricade> barricade_ptr = std::dynamic_pointer_cast<Barricade>(it->second);
+        it++;
+        if ( barricade_ptr != nullptr) {
+            if(!barricade_ptr->isUp()){
+                deleteObject(barricade_ptr->getId());
+            }
+        }
+
+    }
+
     log->debug("Finished updating state");
 }
 

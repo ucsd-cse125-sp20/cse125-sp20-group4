@@ -1,6 +1,6 @@
 #include "ObjectClasses/enemy.h"
 #include "logger.h"
-
+#include "ObjectClasses/barricade.h"
 #include <cmath>
 
 #define MIN_DIST 0.05f
@@ -50,6 +50,54 @@ void Enemy::setVelocityFromCmd() {
         setVelocityY(0);
         setVelocityZ(0);
     }
+}
+
+
+void Enemy::handleXCollision(const Object& obj) {
+    MovingObject::handleXCollision(obj);
+    try {
+        const Barricade& barricade = dynamic_cast<const Barricade&>(obj);
+        barricade.degradeBarricade();
+    }
+    catch (std::bad_cast e){
+        //not a barricade
+    }
+}
+    
+
+void Enemy::handleXCollision(const MovingObject& obj) {
+    MovingObject::handleXCollision(obj);
+}
+
+void Enemy::handleYCollision(const Object& obj) {
+    MovingObject::handleYCollision(obj);
+    try {
+        const Barricade& barricade = dynamic_cast<const Barricade&>(obj);
+        barricade.degradeBarricade();
+    }
+    catch (std::bad_cast e) {
+        //not a barricade
+    }
+
+}
+
+void Enemy::handleYCollision(const MovingObject& obj) {
+    MovingObject::handleYCollision(obj);
+}
+
+void Enemy::handleZCollision(const Object& obj) {
+    MovingObject::handleZCollision(obj);
+    try {
+        const Barricade& barricade = dynamic_cast<const Barricade&>(obj);
+        barricade.degradeBarricade();
+    }
+    catch (std::bad_cast e) {
+        //not a barricade
+    }
+}
+
+void Enemy::handleZCollision(const MovingObject& obj) {
+    MovingObject::handleZCollision(obj);
 }
 
 std::shared_ptr<Object> Enemy::clone() const {

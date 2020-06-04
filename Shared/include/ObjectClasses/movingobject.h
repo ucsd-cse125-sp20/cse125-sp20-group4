@@ -51,12 +51,12 @@ public:
     bool collides(const MovingObject & obj) const;
     bool collidesNext(const Object & obj) const;
     bool collidesNext(const MovingObject & obj) const;
-    void handleXCollision(const Object & obj);
-    void handleXCollision(const MovingObject & obj);
-    void handleYCollision(const Object & obj);
-    void handleYCollision(const MovingObject & obj);
-    void handleZCollision(const Object & obj);
-    void handleZCollision(const MovingObject & obj);
+    virtual void handleXCollision(const Object & obj);
+    virtual void handleXCollision(const MovingObject & obj);
+    virtual void handleYCollision(const Object & obj);
+    virtual void handleYCollision(const MovingObject & obj);
+    virtual void handleZCollision(const Object & obj);
+    virtual void handleZCollision(const MovingObject & obj);
 
     virtual std::shared_ptr<Object> clone() const override;
 

@@ -29,6 +29,8 @@
 #include "maploader.h"
 #include "inih/INIReader.h"
 #include "phases/updatephaseevent.h"
+#include "ObjectClasses/toiletpaper.h"
+#include "ObjectClasses/spawnpoint.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -83,13 +85,23 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         gameState.resetDirty();
         
         if (spawnCooldown == 0) {
+            std::vector<glm::vec3> targets;
+            // get all toilet paper targets
+            for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
+                ToiletPaper* target = dynamic_cast<ToiletPaper*>(it->second.get());
+                // check if dynamic cast not NULL
+                if (target) {
+                    targets.push_back(target->getPosition());
+                }
+            }
+            std::uniform_int_distribution<int> targetIndices(0, targets.size() - 1);
             for (unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++) {
-
                 std::shared_ptr<Enemy> e = pendingSpawns.front();
                 pendingSpawns.pop_front();
                 log->info("Spawning enemy '{}'.", e->getId());
                 gameState.createObject(e, e->getId());
-                e->setPathList(gameState.map->getPath(e->getPosition(), glm::vec3(1.0, 0.0, 9.0))); // TODO put real destination position here
+                // command to move to toilet paper
+                e->setPathList(gameState.map->getPath(e->getPosition(), targets[targetIndices(rng)]));
             }
 
             spawnCooldown = SPAWN_DELAY;
@@ -140,9 +152,14 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             case WaveHandler::State::WAVE:
             {
                 std::vector<glm::vec3> spawns; // TODO: obtain spawns
-                spawns.push_back( glm::vec3( 1.0f, 0.0f, 1.0f ) );
-                spawns.push_back( glm::vec3( 2.0f, 0.0f, 5.0f ) );
-                spawns.push_back(glm::vec3(1.0f, 0.0f, 5.0f));
+                // get all toilet paper targets
+                for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
+                    SpawnPoint* spawn = dynamic_cast<SpawnPoint*>(it->second.get());
+                    // check if dynamic cast not NULL
+                    if (spawn) {
+                        spawns.push_back(spawn->getPosition());
+                    }
+                }
                 if ( spawns.size() == 0 ) {
                     log->error( "No locations to spawn enemies were defined." );
                     break;
