@@ -160,6 +160,20 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
+            case 'y':
+                // mob spawn
+                log->debug("Made a mob spawn");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
+                gs->createObject(obj);
+                break;
+            case 'z':
+                // target
+                log->debug("Made a target");
+                obj = std::make_shared<Shelf>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
+                std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
+                gs->createObject(obj);
+                break;
             case '0':
                 gs->createObject(std::make_shared<Player>("client-0", position.x, 0.0f, position.z), "client-0");
                 break;
