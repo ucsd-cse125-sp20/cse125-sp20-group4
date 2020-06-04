@@ -120,8 +120,8 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
             } else {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getTag());
 
-                if (it->first.compare(id)==0) {
-                    LOGGER->debug("Making a player at pos ({},{},{})",it->second->getPositionX(), it->second->getPositionY(),it->second->getPositionZ());
+                if (it->first.compare(id) == 0) {
+                    LOGGER->debug("Making a player at pos ({},{},{})", it->second->getPositionX(), it->second->getPositionY(), it->second->getPositionZ());
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                     entity = new CameraEntity(it->second->getId(), 1.0f, (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
@@ -147,34 +147,43 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 } else if (it->second->getTag().compare("Shelf") == 0) {
 
                     auto shelf = std::dynamic_pointer_cast<Shelf>(it->second);
-                    glm::vec3 color = glm::vec3(0.5f,0.5f,0.5f);
-                    if (shelf->getFactory() != nullptr) {
-                        if (shelf->getItem()->getTag().compare("Barricade") == 0) {
-                            color = glm::vec3(0.6f, 0.3f, 0.0f);
-                        } else if (shelf->getItem()->getTag().compare("Red") == 0) {
-                            color = glm::vec3(1.0f, 0.0f, 0.0f);
-                        } else if (shelf->getItem()->getTag().compare("Green") == 0) {
-                            color = glm::vec3(0.0f, 1.0f, 0.0f);
-                        } else if (shelf->getItem()->getTag().compare("Blue") == 0) {
-                            color = glm::vec3(0.0f, 0.0f, 1.0f);
-                        }
-                    }
-                    
+                    glm::vec3 color = glm::vec3(0.5f, 0.5f, 0.5f);
+
                     LoadedModel* model;
                     if (shelf->isCorner == 0) {
                         LOGGER->debug("Making a shelf");
-                        // its a shelf
-                        model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
+                        if (shelf->getFactory() != nullptr) {
+                            if (shelf->getItem()->getTag().compare("Barricade") == 0) {
+                                color = glm::vec3(0.6f, 0.3f, 0.0f);
+                                model = new LoadedModel("Models/freezer.dae", Shaders::phong());
+                            } else if (shelf->getItem()->getTag().compare("Red") == 0) {
+                                color = glm::vec3(1.0f, 0.0f, 0.0f);
+                                model = new LoadedModel("Models/freezer.dae", Shaders::phong());
+                            } else if (shelf->getItem()->getTag().compare("Green") == 0) {
+                                color = glm::vec3(0.0f, 1.0f, 0.0f);
+                                model = new LoadedModel("Models/freezer.dae", Shaders::phong());
+                            } else if (shelf->getItem()->getTag().compare("Blue") == 0) {
+                                color = glm::vec3(0.0f, 0.0f, 1.0f);
+                                model = new LoadedModel("Models/freezer.dae", Shaders::phong());
+                            } 
+                        } else {
+                            model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
+                        }
                     } else {
-
                         LOGGER->debug("Making a corner shelf");
                         // its a corner
                         model = new LoadedModel("Models/corner_shelf.dae", Shaders::phong());
                     }
+                    if (model != nullptr) {
+                        model->setColor(color);
 
-                    model->setColor(color);
-
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
+                        addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
+                    }
+                } else if (it->second->getTag().compare("ToiletPaper") == 0) {
+                    LOGGER->debug("Making a tp");
+                    auto model = new LoadedModel("Models/tp.dae", Shaders::phong());
+                    model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
                 } else {
                     LOGGER->debug("Making a cube");
 

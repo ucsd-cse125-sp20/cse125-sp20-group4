@@ -27,6 +27,7 @@ public:
     virtual std::string serialize() const override;
     virtual std::shared_ptr<Object> clone() const;
 
+    bool reachedTarget = false;
     virtual void handleXCollision(const Object& obj);
     virtual void handleXCollision(const MovingObject& obj);
     virtual void handleYCollision(const Object& obj);

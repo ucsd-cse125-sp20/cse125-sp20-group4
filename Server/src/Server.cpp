@@ -67,6 +67,27 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     GameState gameState;
     MapLoader::LoadMap("Maps/map2.txt", &gameState);
     gameState.initialize();
+    std::vector<glm::vec3> targets;
+    // get all toilet paper targets
+    for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
+        ToiletPaper* target = dynamic_cast<ToiletPaper*>(it->second.get());
+        // check if dynamic cast not NULL
+        if (target) {
+            targets.push_back(target->getPosition());
+        }
+    }
+
+    std::vector<glm::vec3> spawns; // TODO: obtain spawns
+                // get all toilet paper targets
+    for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
+        SpawnPoint* spawn = dynamic_cast<SpawnPoint*>(it->second.get());
+        // check if dynamic cast not NULL
+        if (spawn) {
+            spawns.push_back(spawn->getPosition());
+        }
+    }
+
+    std::uniform_int_distribution<int> targetIndices(0, targets.size() - 1);
 
     WaveHandler waveHandler = WaveHandler();
     waveHandler.loadWaveData();
@@ -75,6 +96,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     std::deque<std::shared_ptr<Enemy>> pendingSpawns;
     unsigned int spawnCooldown = 0;
 
+    getLogger("PickUpEvent")->set_level(spdlog::level::trace);
+    getLogger("PlaceEvent")->set_level(spdlog::level::trace);
     while ( running ) {
 
         std::chrono::time_point tickStart = std::chrono::steady_clock::now();
@@ -83,44 +106,110 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         log->trace( "Start of gameplay loop" );
 
         gameState.resetDirty();
-        
-        if (spawnCooldown == 0) {
-            std::vector<glm::vec3> targets;
-            // get all toilet paper targets
-            for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
-                ToiletPaper* target = dynamic_cast<ToiletPaper*>(it->second.get());
-                // check if dynamic cast not NULL
-                if (target) {
-                    targets.push_back(target->getPosition());
-                }
-            }
-            std::uniform_int_distribution<int> targetIndices(0, targets.size() - 1);
-            for (unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++) {
-                std::shared_ptr<Enemy> e = pendingSpawns.front();
-                pendingSpawns.pop_front();
-                log->info("Spawning enemy '{}'.", e->getId());
-                gameState.createObject(e, e->getId());
-                // command to move to toilet paper
-                e->setPathList(gameState.map->getPath(e->getPosition(), targets[targetIndices(rng)]));
-            }
-
-            spawnCooldown = SPAWN_DELAY;
-        }
-        else {
-            spawnCooldown--;
-        }
-
-        // TODO: client voting system?
-        if (clients->getClientCount() > 0) {
-            waveHandler.start();
-        }
 
         std::deque<std::shared_ptr<Event>> events;
-        clients->receiveAll( events );
-        log->trace( "{} events in the event queue.", events.size() );
+        clients->receiveAll(events);
+        log->trace("{} events in the event queue.", events.size());
 
         // process all events
-        gameStateHandler.getNextState( &gameState, &events );
+        gameStateHandler.getNextState(&gameState, &events);
+
+        switch (gameState.phase->state) {
+        case START_STATE:
+        case READY_STATE:
+        case END_STATE:
+            if (gameState.phase->count >= 1) {
+                if (gameState.phase->state == READY_STATE) {
+                    gameState.phase->wave++;
+                } else {
+                    gameState.phase->wave = 1;
+                    gameState.phase->health = 100;
+                }
+                gameState.phase->state = ROUND_STATE;
+                gameState.phase->dirty = true;
+                waveHandler.start();
+                log->warn("STARTING ROUND");
+            }
+            break;
+        case ROUND_STATE:
+            if (gameState.phase->health <= 0) {
+                gameState.phase->state = END_STATE;
+                gameState.phase->dirty = true;
+                // TODO: remove all enemies
+                log->warn("Game Over");
+                break;
+            }
+            if (spawnCooldown == 0) {
+
+                for (unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++) {
+                    std::shared_ptr<Enemy> e = pendingSpawns.front();
+                    pendingSpawns.pop_front();
+                    log->info("Spawning enemy '{}'.", e->getId());
+                    gameState.createObject(e, e->getId());
+                    e->setPathList(gameState.map->getPath(e->getPosition(), targets[targetIndices(rng)]));
+                }
+
+                spawnCooldown = SPAWN_DELAY;
+            } else {
+                spawnCooldown--;
+            }
+            WaveHandler::State waveState = waveHandler.update(gameState);
+
+            unsigned int waveNum;
+            std::chrono::system_clock::time_point startTime;
+            std::vector<WaveHandler::EnemyData> waveEnemies;
+            waveHandler.getWaveInfo(waveNum, startTime, waveEnemies);
+
+            switch (waveState) {
+
+            case WaveHandler::State::PRE_WAVE:
+                // Send time to clients
+                if (gameState.phase->state != READY_STATE) {
+                    gameState.phase->count = 0;
+                    gameState.unready();
+                    gameState.phase->state = READY_STATE;
+                    gameState.phase->dirty = true;                    
+                } 
+                if (gameState.phase->count >= 1) {
+                    waveHandler.start();
+                }
+                break;
+
+            case WaveHandler::State::WAVE:
+            {
+                if ( spawns.size() == 0 ) {
+                    log->error( "No locations to spawn enemies were defined." );
+                    break;
+                }
+
+                std::uniform_int_distribution<unsigned int> spawnIndices(0, (unsigned int)spawns.size() - 1);
+                for (auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++) {
+                    log->info("Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum);
+                    for (unsigned int i = 0; i < it->count; i++) {
+                        const glm::vec3& spawn = spawns[spawnIndices(rng)];
+                        const std::string id = "wave" + std::to_string(waveNum) + "-enemy-" + it->type + "-" + std::to_string(i);
+                        std::shared_ptr<Enemy> e = std::make_shared<Enemy>(id, spawn.x, spawn.y, spawn.z);
+                        e->weakness = ItemType::RED;
+                        pendingSpawns.push_back(e);
+                    }
+                }
+                spawnCooldown = 0;
+
+                break;
+            }
+            case WaveHandler::State::DONE:
+                if (gameState.phase->state != END_STATE) {
+                    gameState.phase->state = END_STATE;
+                    gameState.phase->count = 0;
+                    gameState.phase->dirty = true;
+                    gameState.unready();
+                }
+                // Notify client that game is won
+                break;
+            }
+            break;
+        }
+        
         // TODO: check if we have hit the tick yet
 
         // send out new gameState if gamestate has changed
@@ -136,64 +225,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             // send 
             clients->broadcast(std::make_shared<UpdatePhaseEvent>(gameState.phase));
         }
-        WaveHandler::State waveState = waveHandler.update( gameState );
-
-        unsigned int waveNum;
-        std::chrono::system_clock::time_point startTime;
-        std::vector<WaveHandler::EnemyData> waveEnemies;
-        waveHandler.getWaveInfo( waveNum, startTime, waveEnemies );
-
-        switch ( waveState ) {
-
-            case WaveHandler::State::PRE_WAVE:
-                // Send time to clients
-                break;
-
-            case WaveHandler::State::WAVE:
-            {
-                std::vector<glm::vec3> spawns; // TODO: obtain spawns
-                // get all toilet paper targets
-                for (auto it = gameState.getGameObjects().begin(); it != gameState.getGameObjects().end(); it++) {
-                    SpawnPoint* spawn = dynamic_cast<SpawnPoint*>(it->second.get());
-                    // check if dynamic cast not NULL
-                    if (spawn) {
-                        spawns.push_back(spawn->getPosition());
-                    }
-                }
-                if ( spawns.size() == 0 ) {
-                    log->error( "No locations to spawn enemies were defined." );
-                    break;
-                }
-
-                std::uniform_int_distribution<unsigned int> spawnIndices( 0, ( unsigned int ) spawns.size() - 1 );
-                for ( auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++ ) {
-                    log->info( "Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum );
-                    for ( unsigned int i = 0; i < it->count; i++ ) {
-                        const glm::vec3 & spawn = spawns[spawnIndices( rng )];
-                        const std::string id = "wave" + std::to_string( waveNum ) + "-enemy-" + it->type + "-" + std::to_string( i );
-                        std::shared_ptr<Enemy> e = std::make_shared<Enemy>( id, spawn.x, spawn.y, spawn.z );
-                        pendingSpawns.push_back( e );
-                    }
-                }
-                spawnCooldown = 0;
-
-
-                // Notify clients?
-                break;
-            }
-
-            case WaveHandler::State::DONE:
-                // Notify client that game is won
-                break;
-        }
-
         
-        /*
-        // TODO: client voting system?
-        if ( clients->getClientCount() > 0 ) {
-            waveHandler.start();
-        }
-        */
         // *************** GAME LOGIC END ***************
         std::chrono::time_point tickEnd = std::chrono::steady_clock::now();
         std::chrono::duration tickTime = std::chrono::duration_cast<std::chrono::milliseconds>( tickEnd - tickStart );
