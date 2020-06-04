@@ -6,9 +6,9 @@ const std::string& Barricade::getTag() {
 }
 Barricade::Barricade(const Barricade& obj): Barricade(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getDurability(), obj.isUp()) {}
 
-Barricade::Barricade() : Object("ignore", 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1, 1, 1, false) {}
+Barricade::Barricade() : Object("ignore", 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1, 1, 1, true) {}
 
-Barricade::Barricade(std::string id, float xPos, float yPos, float zPos, float width, float height, float length, int durability, bool up) : Object(id, xPos, yPos, zPos, 1.0f, 0.0f, 0.0f, width, height, length, false) {
+Barricade::Barricade(std::string id, float xPos, float yPos, float zPos, float width, float height, float length, int durability, bool up) : Object(id, xPos, yPos, zPos, 1.0f, 0.0f, 0.0f, width, height, length, up) {
 	setUp(up);
 	setDurability(durability);
 }

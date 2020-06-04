@@ -52,10 +52,12 @@ void UiHandler::drawGui() {
     case START_STATE:
         drawTitle();
         drawReadyUp();
+
         break;
     case READY_STATE:
         drawPlayerInfo();
         drawReadyUp();
+
         break;
     case ROUND_STATE:
         drawPlayerInfo();

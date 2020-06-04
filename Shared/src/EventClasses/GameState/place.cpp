@@ -13,9 +13,11 @@ void PlaceEvent::apply(GameState* gamestate) const
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
     if (object != nullptr && object->getHeldItem() !=nullptr && object->getHeldItem()->getTag().compare("Barricade")==0) {
-        log->debug("Placing object: {}", object->getHeldItem()->serialize());
+        log->info("Placing object: {}", object->getHeldItem()->serialize());
         // get item in player inventory
-        std::shared_ptr<Object> item = object->getHeldItem();
+        //std::shared_ptr<Object> item = object->getHeldItem();
+        std::shared_ptr<Barricade> item = std::dynamic_pointer_cast<Barricade>(object->getHeldItem());
+
         glm::vec3 pos = glm::vec3(object->getPosition());
         glm::vec3 ori = object->getOrientation();
         ori.y = 0;
@@ -31,7 +33,7 @@ void PlaceEvent::apply(GameState* gamestate) const
             item->setPosition(pos.x, pos.y, pos.z);
             gamestate->createObject(item);
             object->setHeldItem(nullptr);
-            log->debug("Just Placed an item");
+            log->info("Just Placed an item");
         }
         
     }
