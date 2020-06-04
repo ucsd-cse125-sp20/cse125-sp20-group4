@@ -137,7 +137,15 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 } else if (it->second->getTag().compare("Enemy") == 0) {
                     LOGGER->debug("Making a Enemy");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
-                    model->setColor(glm::vec3(1.0f, 0.0f, 0));
+                    if (it->first.find("red") != std::string::npos) {
+                        model->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+                    }
+                    else if (it->first.find("green") != std::string::npos) {
+                        model->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+                    }
+                    else {
+                        model->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
+                    }
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.09f));
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
