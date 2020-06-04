@@ -77,6 +77,9 @@ int Window::money;
 int Window::holding;
 bool Window::ready;
 Entity* Window::selected;
+Entity* Window::redHeld;
+Entity* Window::greenHeld;
+Entity* Window::blueHeld;
 
 FMOD::Studio::EventDescription * Window::ambientMusic;
 FMOD::Studio::EventInstance * Window::ambientMusicEvent;
@@ -168,7 +171,19 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
 
     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
     model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+
     selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f),0.4f);
+
+    auto red = new LoadedModel("Models/can.dae", Shaders::phong());
+    red->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+    auto green = new LoadedModel("Models/can.dae", Shaders::phong());
+    green->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+    auto blue = new LoadedModel("Models/water.dae", Shaders::phong());
+    blue->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
+
+    redHeld = new Entity("selected", red, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.4f);
+    greenHeld = new Entity("selected", green, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.4f);
+    blueHeld = new Entity("selected", blue, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.4f);
     
     pmanager = new ParticleManager();
 
@@ -323,13 +338,39 @@ void Window::display_callback( GLFWwindow * ) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
     glm::vec3 tmp = glm::vec3(cam->getPos());
-    tmp.y = 0.0f;
-    if (holding == 4) {
+    switch (holding) {
+    case 1:
+        tmp.y = 0.5f;
+        tmp.x += cam->getDir().x;
+        tmp.z += cam->getDir().z;
+        redHeld->setPosition(tmp);
+        redHeld->setDirection(cam->getDir());
+        redHeld->draw(cam->getToView());
+        break;
+    case 2:
+        tmp.y = 0.5f;
+        tmp.x += cam->getDir().x;
+        tmp.z += cam->getDir().z;
+        greenHeld->setPosition(tmp);
+        greenHeld->setDirection(cam->getDir());
+        greenHeld->draw(cam->getToView());
+        break;
+    case 3:
+        tmp.y = 0.5f;
+        tmp.x += cam->getDir().x;
+        tmp.z += cam->getDir().z;
+        blueHeld->setPosition(tmp);
+        blueHeld->setDirection(cam->getDir());
+        blueHeld->draw(cam->getToView());
+        break;
+    case 4:
+        tmp.y = 0.0f;
         selected->setPosition(round(lookingAt()) + glm::vec3(0.0f, 0.1f, 0.0f));
         //TODO CHANGE
         if (glm::distance(tmp, selected->getPosition()) < 12.0f) {
             selected->draw(cam->getToView());
         }
+        break;
     }
 
     // Render scene.

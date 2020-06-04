@@ -48,6 +48,9 @@ class Window {
     static std::string playerName;
     static bool ready;
     static Entity* selected;
+    static Entity* redHeld;
+    static Entity* greenHeld;
+    static Entity* blueHeld;
     static int money;
     static int holding;
 
