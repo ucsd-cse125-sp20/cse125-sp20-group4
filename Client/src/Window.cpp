@@ -182,7 +182,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("default"), Shaders::phong());
+    auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("barrier"), Shaders::phong());
     model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
 
     selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
@@ -191,7 +191,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     red->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
     auto green = new LoadedModel("Models/can.dae", Window::tmanager->get("default"), Shaders::phong());
     green->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
-    auto blue = new LoadedModel("Models/water.dae", Window::tmanager->get("default"), Shaders::phong());
+    auto blue = new LoadedModel("Models/water.dae", Window::tmanager->get("water"), Shaders::phong());
     blue->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
 
     redHeld = new Entity("selected", red, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
