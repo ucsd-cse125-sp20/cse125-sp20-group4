@@ -6,7 +6,7 @@ ReadyEvent::ReadyEvent(std::string id) : GameStateEvent(id) {}
 void ReadyEvent::apply(GameState* gamestate) const
 {
     auto log = getLogger("ReadyEvent");
-    if(gamestate->phase->state == READY_STATE || gamestate->phase->state == START_STATE){
+    if(gamestate->phase->state == READY_STATE || gamestate->phase->state == START_STATE || gamestate->phase->state == END_STATE){
         std::shared_ptr<Player> player = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
         if (!player->ready) {
             gamestate->phase->count++;
