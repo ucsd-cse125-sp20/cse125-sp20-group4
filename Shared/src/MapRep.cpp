@@ -29,7 +29,7 @@ void MapRep::addObject(std::shared_ptr<Object> object, glm::vec3 pos)
 	// Barricade = 5 in case we implement weighted pathing
 	if (std::dynamic_pointer_cast<Barricade>(object) != nullptr) {
 		log->info("Adding a barricade to map");
-		map[coord.x][coord.z] = block(object, 5);
+		map[coord.x][coord.z] = block(object, 1);
 	} else if (std::dynamic_pointer_cast<Shelf>(object) != nullptr) {
 		map[coord.x][coord.z] = block(object, 10000);
 	}
