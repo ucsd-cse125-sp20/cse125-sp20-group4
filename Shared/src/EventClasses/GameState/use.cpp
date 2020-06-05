@@ -25,7 +25,7 @@ void UseEvent::apply(GameState* gamestate) const
             if ( enemy != nullptr && glm::distance(object->getPosition(),enemy->getPosition())<5.0f && enemy->weakness == itype) {
                 deletes.push_back(enemy->getId());
                 count++;
-                object->addMoney(1);
+                object->addMoney(3);
             }
         }
         while (!deletes.empty()) {
