@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <string>
-
 #include "ObjectClasses/object.h"
 
 class Event {
@@ -15,5 +14,4 @@ public:
 private:
     const std::string objectId;
     const EventType type;
-
 };

@@ -11,7 +11,7 @@ k                                     p
 k  0 aaaaaaaaaa   zz   aaaaaaaaaa 1   p
 k  3 ffffffffff   zz   ffffffffff 2   p
 k                                     p
-k                                     p
+k                 4                   p
 k  pn rk pk pk pk    pk pk pk po qk   p
 k  pk pk pk pk pk    pk pk pk pk pk   p
 k  pk pk pk pk pk    pk pk pk pk pk   p

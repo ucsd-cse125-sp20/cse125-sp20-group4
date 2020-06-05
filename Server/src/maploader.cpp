@@ -186,6 +186,9 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
             case '3':
                 gs->createObject(std::make_shared<Player>("client-3", position.x, 0.0f, position.z), "client-3");
                 break;
+            case '4':
+                gs->createObject(std::make_shared<Player>("client-4", position.x, 0.0f, position.z), "client-4");
+                break;
             }
         }
     }
