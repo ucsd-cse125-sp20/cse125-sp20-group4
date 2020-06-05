@@ -2,6 +2,9 @@
 #include "ObjectClasses/Useable/useable.h"
 #include "logger.h"
 #include <glm/glm.hpp>
+#include "SoundQueue.h"
+#include "EventClasses/SoundEvent.h"
+
 UseEvent::UseEvent(std::string id) : GameStateEvent(id) {}
 
 const std::string UseEvent::TAG = "UseEvent";
@@ -17,6 +20,30 @@ void UseEvent::apply(GameState* gamestate) const
         std::shared_ptr<UseableObject> item = std::dynamic_pointer_cast<UseableObject>(object->getHeldItem());
         // TODO: determine how to use event
         ItemType itype = item->itemType;
+
+        std::string sound;
+        switch ( itype ) {
+            
+            case ItemType::BLUE:
+                sound = "event:/use_blue";
+                break;
+
+            case ItemType::RED:
+                sound = "event:/use_red";
+                break;
+
+            case ItemType::GREEN:
+                sound = "event:/use_green";
+                break;
+
+            default:
+                sound = "";
+
+        }
+        if ( sound != "" ) {
+            SoundQueue::push( std::make_shared<SoundEvent>( sound, object->getPosition() ) );
+        }
+
         // loop over gamestate and remove all matching over add money for each removed
         std::deque<std::string> deletes;
         int count = 0;

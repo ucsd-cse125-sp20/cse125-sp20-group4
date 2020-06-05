@@ -31,6 +31,8 @@
 #include "phases/updatephaseevent.h"
 #include "ObjectClasses/toiletpaper.h"
 #include "ObjectClasses/spawnpoint.h"
+#include "EventClasses/SoundEvent.h"
+#include "SoundQueue.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -128,7 +130,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 gameState.phase->state = ROUND_STATE;
                 gameState.phase->dirty = true;
                 waveHandler.start();
-                log->warn("STARTING ROUND");
+                log->info("STARTING ROUND");
             }
             break;
         case ROUND_STATE:
@@ -136,7 +138,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 gameState.phase->state = END_STATE;
                 gameState.phase->dirty = true;
                 // TODO: remove all enemies
-                log->warn("Game Over");
+                log->info("Game Over");
                 break;
             }
             if (spawnCooldown == 0) {
@@ -144,7 +146,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 for (unsigned int i = 0; i < SPAWNS_PER_TICK && !pendingSpawns.empty(); i++) {
                     std::shared_ptr<Enemy> e = pendingSpawns.front();
                     pendingSpawns.pop_front();
-                    log->info("Spawning enemy '{}'.", e->getId());
+                    log->debug("Spawning enemy '{}'.", e->getId());
                     gameState.createObject(e, e->getId());
                     e->setPathList(gameState.map->getPath(e->getPosition(), targets[targetIndices(rng)]));
                 }
@@ -198,7 +200,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 for (unsigned int i = 0; i < waveSpawns.size(); i++) {
                     const glm::vec3& spawn = spawns[spawnIndices(rng)];
                     const std::string id = "wave" + std::to_string(waveNum) + "-enemy-" + waveSpawns[i] + "-" + std::to_string(i);
-                    log->info("Creating a {} on wave {}.", waveSpawns[i], waveNum);
+                    log->debug("Creating a {} on wave {}.", waveSpawns[i], waveNum);
                     std::shared_ptr<Enemy> e = std::make_shared<Enemy>(id, spawn.x, spawn.y, spawn.z);
                     if (waveSpawns[i] == "red") {
                         e->weakness = ItemType::RED;
@@ -209,7 +211,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                     else {
                         e->weakness = ItemType::BLUE;
                     }
-                    log->info("enemy weak to {} created.", e->weakness);
+                    log->debug("enemy weak to {} created.", e->weakness);
                     pendingSpawns.push_back(e);
                 }
                 
@@ -244,6 +246,16 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         if (gameState.phase->dirty) {
             // send 
             clients->broadcast(std::make_shared<UpdatePhaseEvent>(gameState.phase));
+        }
+
+        std::deque<std::shared_ptr<SoundEvent>> soundEvents;
+        SoundQueue::popAll( soundEvents );
+        while ( !soundEvents.empty() ) {
+
+            std::shared_ptr<SoundEvent> e = soundEvents.front();
+            soundEvents.pop_front();
+            clients->broadcast( e );
+
         }
         
         // *************** GAME LOGIC END ***************

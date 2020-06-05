@@ -681,7 +681,7 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
                 const glm::vec3 & pos = se->getPosition();
                 LOGGER->trace( "Setting sound position to {}, {}, {}.", pos.x, pos.y, pos.z );
                 FMOD_3D_ATTRIBUTES attributes;
-                Window::set3DParams( attributes, pos, glm::vec3( 0.0f ), glm::vec3( 0.0f ) );
+                Window::set3DParams( attributes, pos, glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
                 FMOD_RESULT res = instance->set3DAttributes( &attributes );
                 if ( res != FMOD_OK ) {
                     LOGGER->warn( "Error while setting sound event position ({}).", res );
