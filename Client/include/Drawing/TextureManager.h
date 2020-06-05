@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TEXTURE_MANAGER_H
+#define TEXTURE_MANAGER_H
 
 #include <unordered_map>
 #include <vector>
@@ -19,3 +20,4 @@ public:
     static Texture * get(const std::string texture);
 
 };
+#endif

@@ -5,13 +5,16 @@
 #include <unordered_map>
 
 #include "drawing/ParticleGenerator.h"
+#include "drawing/TextureManager.h"
 
 class ParticleManager {
 private:
 	std::vector<Entity *> entities;
 	std::unordered_map<Entity *, ParticleGenerator *> trails;
 	std::unordered_map<Entity *, ParticleGenerator *> explosions;
+	TextureManager* tmanager;
 public:
+	ParticleManager(TextureManager* tmanager);
 	void addTrail(Entity * entity);
 	void addExplosion(Entity * entity);
 	void update();

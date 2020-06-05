@@ -198,7 +198,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     greenHeld = new Entity("selected", green, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
     blueHeld = new Entity("selected", blue, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
     
-    pmanager = new ParticleManager();
+    pmanager = new ParticleManager(tmanager);
 
     std::vector<Texture*> textures = {
         tmanager->get("floor"),
