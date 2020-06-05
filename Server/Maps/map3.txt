@@ -1,0 +1,22 @@
+ufffffffffffffffffffffffffffffffffffffv
+ky                                   yp
+k  pk pk pk pk pk    pk pk pk pk pk   p
+k  pk pk pk pk po    rk pk pk pk pk   p
+k  pk pk pk pk pk    pk pk pk pk pk   p
+k  pk pk pk pk pk    pk pk pk pk pk   p
+k  pk pk pk pk pn    qk pk pk pk pk   p
+k  po qk pk pk pk    pk pk pk pn rk   p
+k                                     p
+k                p  k                 p
+k  0 aaaaaaaaaa  pzzk  aaaaaaaaaa 1   p
+k  3 ffffffffff  pzzk  ffffffffff 2   p
+k                p  k                 p
+k                                     p
+k  pn rk pk pk pk    pk pk pk po qk   p
+k  pk pk pk pk pn    tk pk pk pk pk   p
+k  pk pk pk pk pk    pk pk pk pk pk   p
+k  pk pk pk pk pk    pk pk pk pk pk   p
+k  pk pk pk pk pm    qk pk pk pk pk   p
+k  pk pk pk pk pk    pk pk pk pk pk   p
+ky                                   yp
+waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaax
