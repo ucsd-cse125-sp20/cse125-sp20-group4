@@ -35,7 +35,7 @@ void PlaceEvent::apply(GameState* gamestate) const
         gamestate->map->GridifyMapPos(gpos);
         log->warn("Placement Position: ({}, {}, {})", gpos.x, gpos.y, gpos.z);
         //TODO check for collision
-        if (!gamestate->map->containsObject(pos) && glm::distance(object->getPosition(),gpos)>1.0f) {
+        if (!gamestate->map->containsObject(pos) && glm::distance(object->getPosition(),gpos)>1.0f && glm::distance(object->getPosition(), gpos) < 4.0f) {
             log->debug("Placing object: {}", object->getHeldItem()->serialize());
             item->setPosition(gpos.x, gpos.y, gpos.z);
             gamestate->createObject(item);

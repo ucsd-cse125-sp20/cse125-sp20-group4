@@ -178,7 +178,8 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("barrier"), Shaders::phong());
-                    model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+                    //model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+                    model->setColor(glm::vec3(1.0f));
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else if (it->second->getTag().compare("Shelf") == 0) {
 
@@ -221,10 +222,10 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     auto model = new LoadedModel("Models/tp.dae", Window::tmanager->get("default"), Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
-                } /*else {
-                    LOGGER->debug("Making a cube");
-                    addEntity(new Entity(it->second->getId(), new RectangularCuboid(Window::tmanager->get("floor"), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
-                }*/
+                } else {
+                    LOGGER->debug("Making a spawner");
+                    addEntity(new Entity(it->second->getId(), new LoadedModel("Models/spawner.dae", Window::tmanager->get("default"), Shaders::phong()), it->second->getPosition(), it->second->getOrientation(), 0.5f ));
+                }
             }
         }
         break;

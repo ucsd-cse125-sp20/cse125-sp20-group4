@@ -14,7 +14,7 @@ ParticleGenerator::~ParticleGenerator() {
 
 }
 
-void ParticleGenerator::Update(float dt, Entity* entity, unsigned int newParticles, glm::vec3 offset) {
+void ParticleGenerator::Update(float dt, Entity* entity, unsigned int newParticles, glm::vec3 offset, glm::vec3 acc) {
     for (unsigned int i = 0; i < newParticles; ++i)
     {
         int unusedParticle = firstUnusedParticle();
@@ -43,8 +43,8 @@ void ParticleGenerator::Update(float dt, Entity* entity, unsigned int newParticl
 void ParticleGenerator::Draw(const glm::mat4x4& view, const glm::vec3& cameraPos) {
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
     glUseProgram(shader);
     glUniformMatrix4fv(glGetUniformLocation(shader, "pv"), 1, GL_FALSE, &view[0][0]);
