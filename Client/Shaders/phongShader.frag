@@ -99,6 +99,7 @@ const int NUM_CASCADES = 3;
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 coord;
 in vec4 ShadowCoord[NUM_CASCADES];
 in float shadowClipZ;
 
@@ -121,6 +122,7 @@ uniform sampler2DShadow shadowTextureID[NUM_CASCADES];
 uniform float cascadeEndClip[NUM_CASCADES];
 uniform bool shadowsOn;
 
+uniform sampler2D sprite;
 
 // Function prototypes
 vec3 calcDiffuse( vec3 lightColor, vec3 lightDir, vec3 normal );
@@ -210,7 +212,9 @@ void main() {
 	result.y = min( result.y, 1.0 );
 	result.z = min( result.z, 1.0 );
 
-	color = vec4( result * uColor, material.opacity );
+	//color = vec4( result * uColor, material.opacity );
+	color = texture(sprite, coord) * vec4( result * uColor, material.opacity );
+
 }
 
 // Calculates the diffuse component of the reflected light.

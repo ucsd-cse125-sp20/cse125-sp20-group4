@@ -28,7 +28,7 @@ void Shaders::initializeShaders() {
     shaders["curve"] = loadShaders( "curveShader" );
     shaders["flat"] = loadShaders( "flatShader" );
     shaders["phong"] = loadShaders( "phongShader" );
-    shaders["horizon"] = loadShaders( "horizonShader.vert", "flatShader.frag" );
+    //shaders["horizon"] = loadShaders( "horizonShader.vert", "flatShader.frag" );
     shaders["particle"] = loadShaders( "particleShader" );
 
 }

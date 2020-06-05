@@ -19,6 +19,7 @@
 #include "drawing/model/EmptyModel.h"
 #include "drawing/model/RectangularCuboid.h"
 #include "drawing/model/LoadedModel.h"
+#include "drawing/Walls.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
 #include "imgui/imgui.h"
@@ -68,6 +69,9 @@ Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
 ParticleManager* Window::pmanager;
+TextureManager* Window::tmanager;
+
+Walls* walls;
 
 // Audio data
 FMOD::Studio::System * Window::audioSystem;
@@ -130,6 +134,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     Window::holding = 0;
     // Set up graphics
     Shaders::initializeShaders();
+    tmanager->initializeTextures();
 
     // Set up sound
     Window::audioSystem = audio;
@@ -161,9 +166,19 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    //world->addEntity(new Entity("ceiling", new RectangularCuboid(Window::tmanager->get("ceiling"), glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
     pmanager = new ParticleManager();
+
+    std::vector<Texture*> textures = {
+        tmanager->get("floor"),
+        tmanager->get("ceiling"),
+        tmanager->get("wall"),
+        tmanager->get("wall"),
+        tmanager->get("wall"),
+        tmanager->get("wall")
+    };
+    walls = new Walls(textures, glm::vec3(0.0f), glm::vec3(30.0f, 3.0f, 30.0f));
 
     // Debugging entities
     //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
@@ -411,6 +426,7 @@ void Window::display_callback( GLFWwindow * ) {
 
 
     // Render scene.
+    walls->Draw( cam->getToView() );
     world->draw( cam->getToView() );
 
     drawGui();

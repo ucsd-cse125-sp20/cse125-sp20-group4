@@ -5,19 +5,13 @@
 void ParticleManager::addTrail(Entity* entity)
 {
 	entities.push_back(entity);
-
-	Texture* tex = new Texture();
-	tex->loadTextureFromFile("textures/smoke.png", true);
-	trails[entity] = new ParticleGenerator(Shaders::particle(), tex, 1000, 1);
+	trails[entity] = new ParticleGenerator(Shaders::particle(), new Texture("textures/smoke.png", true), 1000, 1);
 }
 
 void ParticleManager::addExplosion(Entity* entity)
 {
 	entities.push_back(entity);
-
-	Texture* tex = new Texture();
-	tex->loadTextureFromFile("textures/smoke.png", true);
-	explosions[entity] = new ParticleGenerator(Shaders::particle(), tex, 1000, 1);
+	explosions[entity] = new ParticleGenerator(Shaders::particle(), new Texture("textures/smoke.png", true), 1000, 1);
 	explosions[entity]->Update(0.001f, entity, 1000, glm::vec3(0.0f));
 }
 

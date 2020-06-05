@@ -6,8 +6,8 @@
 class RectangularCuboid : public Geometry {
 
     public:
-    RectangularCuboid( const glm::vec3 & color, float side );
-    RectangularCuboid( const glm::vec3 & color, float width, float height, float depth );
+    RectangularCuboid( Texture* texture, const glm::vec3 & color, float side );
+    RectangularCuboid( Texture* texture, const glm::vec3 & color, float width, float height, float depth );
 
 };
 

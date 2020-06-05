@@ -4,7 +4,7 @@
 
 #include "drawing/model/LoadedModel.h"
 
-LoadedModel::LoadedModel(const std::string file, const Shader& shaderProgram) : Geometry(shaderProgram, GL_TRIANGLES)
+LoadedModel::LoadedModel(const std::string file, Texture * texture, const Shader& shaderProgram) : Geometry( texture, shaderProgram, GL_TRIANGLES)
 {
 
     Assimp::Importer import;
@@ -18,6 +18,9 @@ LoadedModel::LoadedModel(const std::string file, const Shader& shaderProgram) : 
 }
 
 void LoadedModel::processNode(aiNode *node, const aiScene *scene) {
+    
+    //aiMesh* mesh = scene->mMeshes[node->mMeshes[0]];
+    //processMesh(mesh);
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         processMesh(mesh);
@@ -33,6 +36,7 @@ void LoadedModel::processMesh(aiMesh *mesh) {
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> colors;
     std::vector<glm::vec3> normals;
+    std::vector<glm::vec3> texCoords;
     std::vector<unsigned int> faces;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -48,6 +52,12 @@ void LoadedModel::processMesh(aiMesh *mesh) {
         normal.z = mesh->mNormals[i].z;
         normals.push_back(normal);
 
+        glm::vec3 texCoord;
+        texCoord.x = mesh->mTextureCoords[0][i].x;
+        texCoord.y = mesh->mTextureCoords[0][i].y;
+        texCoord.z = mesh->mTextureCoords[0][i].z;
+        texCoords.push_back(texCoord);
+
         colors.push_back(glm::vec3(1.0f));
     }
 
@@ -58,7 +68,7 @@ void LoadedModel::processMesh(aiMesh *mesh) {
         }
     }
 
-    initialize(vertices, colors, normals, faces);
+    initialize(vertices, colors, normals, texCoords, faces);
 
 }
 
