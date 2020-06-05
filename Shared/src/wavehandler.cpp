@@ -138,15 +138,16 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
             LOGGER->info( "Wave {} completed, waiting for next wave.", waveNum );
             waveNum++;
             waveActive = false;
-            if ( waveNum + 3 > waveEnemies.size() ) {
-                LOGGER->info( "generating next wave" );
-                generateWave(waveNum + 3);
+            /*
+            if ( MAX_WAVE > waveEnemies.size() ) {
                 //return State::DONE;
-            } else {
-                startTime = START_TIME( DEFAULT_READY_TIME );
-                LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
-                return State::PRE_WAVE;
-            }
+            } else {*/
+            startTime = START_TIME( DEFAULT_READY_TIME );
+            LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+            LOGGER->info("generating next wave");
+            generateWave(waveNum + 3);
+            return State::PRE_WAVE;
+            //}
         }
     } else {
         if ( Clock::now() > startTime ) {
