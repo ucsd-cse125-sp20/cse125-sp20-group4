@@ -11,6 +11,7 @@
 class Entity {
 
     public:
+    Entity( const std::string & name, Model * const model, const glm::vec3 position, const glm::vec3 direction, const std::string & movementSound, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
     Entity( const std::string & name, Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
     virtual ~Entity();
 

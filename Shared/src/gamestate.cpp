@@ -5,6 +5,7 @@
 #include <EventClasses\Object\ObjectEvent.h>
 #include <EventClasses\GameState\gamestateevent.h>
 #include <ObjectClasses/Factories/barricadefactory.h>
+#include "SoundQueue.h"
 
 GameState::GameState() {
     this->nextId = 0;
@@ -133,9 +134,11 @@ void GameState::updateState() {
         if ( barricade_ptr != nullptr) {
             if(!barricade_ptr->isUp()){
                 deleteObject(barricade_ptr->getId());
+                SoundQueue::push( std::make_shared<SoundEvent>( "event:/barricade_break", barricade_ptr->getPosition() ) );
             }
         }
         if (enemy != nullptr && enemy->reachedTarget) {
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/enemy_goal", enemy->getPosition() ) );
             deleteObject(enemy->getId());
             phase->health -= 2;
             phase->dirty = true;

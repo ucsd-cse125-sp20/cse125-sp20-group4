@@ -11,6 +11,7 @@
 #include "EventClasses/Factories/UpdateEventFactory.h"
 #include "EventClasses/Factories/DeleteEventFactory.h"
 #include "EventClasses/Factories/NotifyEventFactory.h"
+#include "EventClasses/Factories/SoundEventFactory.h"
 
 #include "phases/updatephasefactory.h"
 #include <cstddef>
@@ -46,6 +47,7 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair(ReadyEvent::TAG, std::make_unique<ReadyEventFactory>()));
     this->eventMapping.insert(std::make_pair(JoinEvent::TAG, std::make_unique<JoinEventFactory>()));
     this->eventMapping.insert(std::make_pair(UseEvent::TAG, std::make_unique<UseEventFactory>()));
+    this->eventMapping.insert( std::make_pair( SoundEvent::TAG, std::make_unique<SoundEventFactory>() ) );
 
     this->eventMapping.insert(std::make_pair("PhaseUpdate", std::make_unique<UpdatePhaseFactory>()));
 }

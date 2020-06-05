@@ -120,7 +120,7 @@ void setup_callbacks( GLFWwindow * window ) {
 
 int main_inner( void ) {
     INIReader client_config(DEFAULT_CONFIG_FILE);
-
+    
     spdlog::info( "Initializing COM." );
     HRESULT hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
     if ( FAILED( hr ) ) {
