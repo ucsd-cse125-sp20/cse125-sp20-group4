@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.00.00">
+	<object class="AudioFile" id="{9f8323dc-caa2-4528-aac5-959d691a9f4b}">
+		<property name="assetPath">
+			<value>use_green_mixdown.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>1</value>
+		</property>
+		<property name="length">
+			<value>1.7076041666666666</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{50c36e74-bd09-44bc-9ba4-167513c04613}</destination>
+		</relationship>
+	</object>
+</objects>

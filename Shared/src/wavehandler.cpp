@@ -21,23 +21,69 @@ void WaveHandler::loadWaveData() {
 
     // TODO: set up waves
     std::vector<EnemyData> w1;
-    EnemyData e;
-    e.type = "SampleEnemy1";
-    e.count = 0; //30;
-    w1.push_back( e );
+    EnemyData eRed;
+    EnemyData eBlue;
+    EnemyData eGreen;
+    eRed.type = "red";
+    eRed.count = 3; //30;
+    eBlue.type = "blue";
+    eBlue.count = 0;
+    eGreen.type = "green";
+    eGreen.count = 0;
+
+    w1.push_back( eRed );
+    w1.push_back(eBlue);
+    w1.push_back(eGreen);
+
+
     waveEnemies.push_back( w1 );
 
     std::vector<EnemyData> w2;
-    e.type = "SampleEnemy2";
-    e.count = 0;  10;
-    w2.push_back( e );
-    e.type = "SampleEnemy3";
-    e.count = 0;  20;
-    w2.push_back( e );
+    eRed.type = "red";
+    eRed.count = 3; //30;
+    eBlue.type = "blue";
+    eBlue.count = 3;
+    eGreen.type = "green";
+    eGreen.count = 0;
+    w2.push_back( eRed );
+    w2.push_back(eBlue);
+    w2.push_back(eGreen);
     waveEnemies.push_back( w2 );
+
+    std::vector<EnemyData> w3;
+    eRed.type = "red";
+    eRed.count = 3; //30;
+    eBlue.type = "blue";
+    eBlue.count = 3;
+    eGreen.type = "green";
+    eGreen.count = 3;
+
+    w3.push_back(eRed);
+    w3.push_back(eBlue);
+    w3.push_back(eGreen);
+    waveEnemies.push_back(w3);
 
     waveNum = 0;
     waveActive = false;
+
+}
+void WaveHandler::generateWave(int wave) {
+    int numEnemies = (wave * 2);
+    
+    EnemyData eRed;
+    EnemyData eBlue;
+    EnemyData eGreen;
+    std::vector<EnemyData> w;
+    eRed.type = "red";
+    eRed.count = numEnemies; //30;
+    eBlue.type = "blue";
+    eBlue.count = numEnemies;
+    eGreen.type = "green";
+    eGreen.count = numEnemies;
+    w.push_back(eRed);
+    w.push_back(eBlue);
+    w.push_back(eGreen);
+    waveEnemies.push_back(w);
 
 }
 
@@ -79,7 +125,10 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
     if ( waveActive ) {
         unsigned int remain = 0;
         for ( auto it = gs.getGameObjects().begin(); it != gs.getGameObjects().end(); it++ ) {
-            if ( it->second->isEnemy() ) {
+            Enemy *enemy = dynamic_cast<Enemy*>(it->second.get());
+            // check if dynamic cast not NULL
+            if (enemy) {
+                enemy->setVelocityFromCmd();
                 remain++;
             }
         }
@@ -89,14 +138,16 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
             LOGGER->info( "Wave {} completed, waiting for next wave.", waveNum );
             waveNum++;
             waveActive = false;
-            if ( waveNum > waveEnemies.size() ) {
-                LOGGER->info( "All waves done." );
-                return State::DONE;
-            } else {
-                startTime = START_TIME( DEFAULT_READY_TIME );
-                LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
-                return State::PRE_WAVE;
-            }
+            /*
+            if ( MAX_WAVE > waveEnemies.size() ) {
+                //return State::DONE;
+            } else {*/
+            startTime = START_TIME( DEFAULT_READY_TIME );
+            LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
+            LOGGER->info("generating next wave");
+            generateWave(waveNum + 3);
+            return State::PRE_WAVE;
+            //}
         }
     } else {
         if ( Clock::now() > startTime ) {

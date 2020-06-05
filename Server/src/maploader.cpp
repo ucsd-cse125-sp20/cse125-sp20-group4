@@ -1,6 +1,8 @@
 #include "maploader.h"
 #include "logger.h"
 #include "ObjectClasses/Factories/factories.h"
+#include "ObjectClasses/spawnpoint.h"
+#include "ObjectClasses/toiletpaper.h"
 void MapLoader::LoadMap(std::string file, GameState* gs)
 {
     auto log = getLogger("MapLoader");
@@ -16,7 +18,7 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
         int x = 0;
         for (auto it = line.begin(); it < line.end(); it++, x++)
         {
-            position = glm::vec3(x, 0.0, z);
+            position = glm::vec3(x, 0.0f, z);
             std::shared_ptr<Object> obj;
             std::shared_ptr<IObjectFactory> fac = nullptr;
             switch (*it) {
@@ -160,17 +162,32 @@ void MapLoader::LoadMap(std::string file, GameState* gs)
                 std::dynamic_pointer_cast<Shelf>(obj)->isCorner = 1;
                 gs->createObject(obj);
                 break;
+            case 'y':
+                // mob spawn
+                log->debug("Made a mob spawn");
+                obj = std::make_shared<SpawnPoint>("ignore", position.x, position.y, position.z, 0.0f, 0.0f, 1.0f);
+                gs->createObject(obj);
+                break;
+            case 'z':
+                // target
+                log->debug("Made a target");
+                obj = std::make_shared<ToiletPaper>("ignore", position.x, position.y, position.z, 1.0f, 0.0f, 0.0f);
+                gs->createObject(obj);
+                break;
             case '0':
-                gs->createObject(std::make_shared<Player>("client-0", position.x, position.y, position.z), "client-0");
+                gs->createObject(std::make_shared<Player>("client-0", position.x, 0.0f, position.z), "client-0");
                 break;
             case '1':
-                gs->createObject(std::make_shared<Player>("client-1", position.x, position.y, position.z), "client-1");
+                gs->createObject(std::make_shared<Player>("client-1", position.x, 0.0f, position.z), "client-1");
                 break;
             case '2':
-                gs->createObject(std::make_shared<Player>("client-2", position.x, position.y, position.z), "client-2");
+                gs->createObject(std::make_shared<Player>("client-2", position.x, 0.0f, position.z), "client-2");
                 break;
             case '3':
-                gs->createObject(std::make_shared<Player>("client-3", position.x, position.y, position.z), "client-3");
+                gs->createObject(std::make_shared<Player>("client-3", position.x, 0.0f, position.z), "client-3");
+                break;
+            case '4':
+                gs->createObject(std::make_shared<Player>("client-4", position.x, 0.0f, position.z), "client-4");
                 break;
             }
         }

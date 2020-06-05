@@ -1,5 +1,7 @@
 #include "EventClasses\GameState\pickup.h"
 #include "logger.h"
+#include "SoundQueue.h"
+
 PickUpEvent::PickUpEvent(std::string id, std::string targetId) : GameStateEvent(id) {
     this->targetId = targetId;
 }
@@ -13,18 +15,20 @@ void PickUpEvent::apply(GameState* gamestate) const
     // calculate where player is looking
     glm::vec3 dir = glm::vec3(object->getOrientationX(), 0.0f, object->getOrientationZ());
 
-    std::shared_ptr<Shelf> itemObject = std::dynamic_pointer_cast<Shelf>(gamestate->map->getObjectAtPos(object->getPosition() + dir*1.5f));
+    std::shared_ptr<Shelf> itemObject = std::dynamic_pointer_cast<Shelf>(gamestate->map->getObjectAtPos(object->getPosition() + dir*1.2f));
+    std::shared_ptr<Barricade> barricade = std::dynamic_pointer_cast<Barricade>(gamestate->map->getObjectAtPos(object->getPosition() + dir * 1.5f));
 
     // check if found
     if (object != nullptr && itemObject != nullptr && object->getHeldItem()==nullptr) {
         log->trace("passed first check trying to get item from {}",itemObject->getId());
         if (glm::distance(object->getPosition(), itemObject->getPosition()) < 2.0f && itemObject->getFactory() != nullptr) {
             log->trace("passed second check");
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/item_purchase", itemObject->getPosition() ) );
             std::shared_ptr<Object> item = itemObject->getItem();
             if (item->getTag().compare("Barricade")==0) {
                 // check if player has enough dough
-                if (object->getMoney() > 5) {
-                    object->subtractMoney(5);
+                if (object->getMoney() >= 15) {
+                    object->subtractMoney(15);
                     // put item into inventory
                     object->setHeldItem(item);
                 }
@@ -35,8 +39,20 @@ void PickUpEvent::apply(GameState* gamestate) const
             gamestate->setDirty(true);
             log->debug("Just picked up an item {}",item->serialize());
         }
+    } else if (barricade != nullptr && object->getHeldItem() == nullptr) {
+        log->trace("passed first check trying to get item from {}", barricade->getId());
+        if (glm::distance(object->getPosition(), barricade->getPosition()) < 2.0f) {
+            log->warn("passed second check");
+            auto bar = std::make_shared<Barricade>();
+            bar->setDurability(barricade->getDurability());
+            bar->setUp(barricade->isUp());
+            object->setHeldItem(bar);
+            gamestate->deleteObject(barricade->getId());
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/barricade_break", barricade->getPosition() ) );
+        }
     } else {
-        log->trace("Trying to picked up but no");
+        glm::vec3 tmp = object->getPosition() + dir * 1.5f;
+        log->trace("Trying to picked up but no {}, {}, {}",tmp.x,tmp.y,tmp.z);
     }
 }
 

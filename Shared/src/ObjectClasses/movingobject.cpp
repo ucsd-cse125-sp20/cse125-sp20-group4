@@ -5,7 +5,7 @@
 
 #include "glm/gtc/epsilon.hpp"
 #define EPSILON 0.0005f
-#define MOVEMENT_DIV 20
+#define MOVEMENT_DIV 7
 
 MovingObject::MovingObject(const MovingObject& obj) : MovingObject(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getOrientationX(), obj.getOrientationY(), obj.getOrientationZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getVelocityX(), obj.getVelocityY(), obj.getVelocityZ()) {}
 

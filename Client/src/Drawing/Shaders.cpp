@@ -28,7 +28,8 @@ void Shaders::initializeShaders() {
     shaders["curve"] = loadShaders( "curveShader" );
     shaders["flat"] = loadShaders( "flatShader" );
     shaders["phong"] = loadShaders( "phongShader" );
-    shaders["horizon"] = loadShaders( "horizonShader.vert", "flatShader.frag" );
+    //shaders["horizon"] = loadShaders( "horizonShader.vert", "flatShader.frag" );
+    shaders["particle"] = loadShaders( "particleShader" );
 
 }
 
@@ -58,6 +59,7 @@ const Shader & Shaders::curve() { return get( "curve" ); }
 const Shader & Shaders::flat() { return get( "flat" ); }
 const Shader & Shaders::phong() { return get( "phong" ); }
 const Shader & Shaders::horizon() { return get( "horizon" ); }
+const Shader& Shaders::particle() { return get("particle");  }
 
 /* Private functions */
 

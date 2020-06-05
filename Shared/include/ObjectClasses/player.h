@@ -17,12 +17,13 @@ public:
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ);
     Player(std::string id, float x, float y, float z, float orientationX, float orientationY, float orientationZ, float width, float height, float length, float velX, float velY, float velZ, int startingMoney, int hp, std::shared_ptr<Object> held);
     
+    bool ready = false;
     const std::string TAG = "Player";
     const std::string& getTag();
 
     //(de)serialize functions
     virtual std::string serialize() const override;
-
+   
     int getMoney() const;
     void setMoney(int newMoney);
     void addMoney(int amount);

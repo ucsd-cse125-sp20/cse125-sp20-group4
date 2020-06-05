@@ -46,7 +46,9 @@ std::shared_ptr<Object> EnemyFactory::create(std::string serial) { //TODO:Make m
 
     last = pos + 1;
     pos = serial.find(",", last);
-    int weakness = std::stoi(serial.substr(last, pos - last));
+    ItemType weakness = ItemType{ std::stoi(serial.substr(last, pos - last)) };
+    //int weakness = std::stoi(serial.substr(last, pos - last)) ;
+
 
     std::shared_ptr<Enemy> enemy = std::make_shared<Enemy>(id, posx, posy, posz, orx, ory, orz, velx, vely, velz);
 

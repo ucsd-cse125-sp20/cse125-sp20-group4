@@ -1,26 +1,42 @@
-#include "glm/gtc/matrix_transform.hpp"
+#pragma warning(disable:4201)
+
+#include <glm/gtc/epsilon.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <logger.h>
 
 #include "state/Entity.h"
 #include "Window.h"
 
-#include <glm/gtc/epsilon.hpp>
 #define EPSILON 0.0005f
+#define SOUND_COOLDOWN 30
 
 static const auto LOGGER = getLogger( "Entity" );
 
 /* Constructor */
 
-Entity::Entity( const std::string & name, const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+Entity::Entity( const std::string & name, Model * const model, const glm::vec3 position, const glm::vec3 direction, const std::string & movementSound, const float scale, const bool axisEnabled, const float axisScale ) :
         name( name ), model( model ), position( position ), direction( glm::normalize( direction ) ), scale( scale ), axis( axisEnabled, axisScale ) {
 
     updateModelMatrix();
 
-    Window::audioSystem->getEvent( "event:/player_walk", &movingSound );
-    movingSoundEvent = nullptr;
+    if ( movementSound == "" ) {
+        movingSound = nullptr;
+        movingSoundEvent = nullptr;
+    } else {
+        LOGGER->debug( "Using sound effect '{}' for entity movement.", movementSound );
+        FMOD_RESULT res = Window::audioSystem->getEvent( movementSound.c_str(), &movingSound );
+        if ( res != FMOD_OK ) {
+            LOGGER->error( "Could not get movement sound '{}' ({}).", movementSound, res );
+            movingSound = nullptr;
+        }
+        movingSoundEvent = nullptr;
+    }
 
 }
+
+Entity::Entity( const std::string & name, Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+    Entity( name, model, position, direction, "", scale, axisEnabled, axisScale ) {}
 
 Entity::~Entity() {
 
@@ -42,6 +58,12 @@ const glm::vec3 & Entity::getDirection() const {
 
 }
 
+const glm::vec3& Entity::getVelocity() const {
+
+    return velocity;
+
+}
+
 const float & Entity::getScale() const {
 
     return scale;
@@ -50,31 +72,45 @@ const float & Entity::getScale() const {
 
 /* Setters */
 
-void Entity::setPosition( const glm::vec3 & pos ) {
+void Entity::setPosition( const glm::vec3 & pos, bool directionChanged ) {
 
     auto log = getLogger( "Entity" );
     log->trace( "Setting position from ({}, {}, {}) to ({}, {}, {})", position.x, position.y, position.z, pos.x, pos.y, pos.z );
 
-    if ( pos == position ) {
+    if ( movingSound != nullptr ) {
         if ( movingSoundEvent != nullptr ) {
-            LOGGER->trace( "Stopping movement sound." );
-            movingSoundEvent->stop( FMOD_STUDIO_STOP_IMMEDIATE );
-            movingSoundEvent->release();
-            movingSoundEvent = nullptr;
+            FMOD_STUDIO_PLAYBACK_STATE state;
+            movingSoundEvent->getPlaybackState( &state );
+            if ( state == FMOD_STUDIO_PLAYBACK_STOPPED ) {
+                LOGGER->trace( "Movement sound ended." );
+                movingSoundEvent->release();
+                movingSoundEvent = nullptr;
+            }
         }
-    } else {
-        if ( movingSoundEvent == nullptr ) {
-            LOGGER->trace( "Starting movement sound." );
-            movingSound->createInstance( &movingSoundEvent );
-            movingSoundEvent->start();
-        }
-        FMOD_3D_ATTRIBUTES attributes;
-        Window::set3DParams( attributes, getPosition(), glm::vec3( 0.0f ), getDirection() );
-        FMOD_RESULT res = movingSoundEvent->set3DAttributes( &attributes );
-        if ( res != FMOD_OK ) {
-            LOGGER->warn( "Error while updating sound event position ({}).", res );
+
+        if ( glm::all( glm::epsilonEqual( pos, position, 0.0001f ) ) ) {
+            if ( movingSoundEvent != nullptr && directionChanged ) {
+                LOGGER->trace( "Stopping movement sound." );
+                movingSoundEvent->stop( FMOD_STUDIO_STOP_IMMEDIATE );
+                movingSoundEvent->release();
+                movingSoundEvent = nullptr;
+            }
+        } else {
+            if ( movingSoundEvent == nullptr ) {
+                LOGGER->trace( "Starting movement sound." );
+                movingSound->createInstance( &movingSoundEvent );
+                movingSoundEvent->start();
+            }
+            FMOD_3D_ATTRIBUTES attributes;
+            Window::set3DParams( attributes, getPosition(), glm::vec3( 0.0f ), getDirection() );
+            FMOD_RESULT res = movingSoundEvent->set3DAttributes( &attributes );
+            if ( res != FMOD_OK ) {
+                LOGGER->warn( "Error while updating sound event position ({}).", res );
+            }
         }
     }
+
+    velocity = pos - position;
 
     position = pos;
     updateModelMatrix();

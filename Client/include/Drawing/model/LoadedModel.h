@@ -18,7 +18,7 @@ private:
     void processMesh(aiMesh* mesh);
     
 public:
-    LoadedModel(const std::string file, const Shader& shaderProgram);
+    LoadedModel(const std::string file, Texture * texture, const Shader& shaderProgram);
 
     void draw(const glm::mat4x4& model, const glm::mat4x4& view, const glm::vec3& direction) const;
 

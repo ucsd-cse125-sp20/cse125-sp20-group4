@@ -24,7 +24,7 @@ MapLoader::MapLoader(const std::string mapFile) {
     glm::vec3 direction;
     float scale;
 
-    entities.push_back(new Entity("floor", new RectangularCuboid(glm::vec3(1.0f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    entities.push_back(new Entity("floor", new RectangularCuboid(new Texture("floor.jpg", false), glm::vec3(1.0f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
     int i = 0;
 
@@ -39,7 +39,7 @@ MapLoader::MapLoader(const std::string mapFile) {
             scale = 1.0f;
             switch (*it) {
                 case '+':
-                    model = new LoadedModel("Models/corner_shelf.dae", Shaders::phong());
+                    model = new LoadedModel("Models/corner_shelf.dae", new Texture("default.jpg", false), Shaders::phong());
                     if (x == 0 && z == 0) {
                         direction = glm::vec3(-1.0f, 0.0f, 0.0f); //close right
                     }
@@ -54,7 +54,7 @@ MapLoader::MapLoader(const std::string mapFile) {
                     }
                     break;
                 case '-':
-                    model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
+                    model = new LoadedModel("Models/edge_shelf.dae", new Texture("default.jpg", false), Shaders::phong());
                     if (z == 0) {
                         direction = glm::vec3(-1.0f, 0.0f, 0.0f);
                     }
@@ -63,7 +63,7 @@ MapLoader::MapLoader(const std::string mapFile) {
                     }
                     break;
                 case '|':
-                    model = new LoadedModel("Models/edge_shelf.dae", Shaders::phong());
+                    model = new LoadedModel("Models/edge_shelf.dae", new Texture("default.jpg", false), Shaders::phong());
                     if (x == 0) {
                         direction = glm::vec3(0.0f, 0.0f, 1.0f);
                     }
@@ -72,30 +72,30 @@ MapLoader::MapLoader(const std::string mapFile) {
                     }
                     break;
                 case '=':
-                    model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model = new LoadedModel("Models/shopper.dae", new Texture("default.jpg", false), Shaders::phong());
                     direction = glm::vec3(1.0f, 0.0f, 0.0f);
                     scale = 0.1f;
                     break;
                 case '1':
-                    model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model = new LoadedModel("Models/shopper.dae", new Texture("default.jpg", false), Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 0, 0));
                     direction = glm::vec3(1.0f, 0.0f, 0.0f);
                     scale = 0.1f;
                     break;
                 case '2':
-                    model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model = new LoadedModel("Models/shopper.dae", new Texture("default.jpg", false), Shaders::phong());
                     model->setColor(glm::vec3(0, 1.0f, 0));
                     direction = glm::vec3(1.0f, 0.0f, 0.0f);
                     scale = 0.1f;
                     break;
                 case '3':
-                    model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model = new LoadedModel("Models/shopper.dae", new Texture("default.jpg", false), Shaders::phong());
                     model->setColor(glm::vec3(0, 0, 1.0f));
                     direction = glm::vec3(1.0f, 0.0f, 0.0f);
                     scale = 0.1f;
                     break;
                 case '4':
-                    model = new LoadedModel("Models/shopper.dae", Shaders::phong());
+                    model = new LoadedModel("Models/shopper.dae", new Texture("default.jpg", false), Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 0));
                     direction = glm::vec3(1.0f, 0.0f, 0.0f);
                     scale = 0.1f;

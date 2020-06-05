@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 #endif
 
+#include <cmath>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -19,6 +20,8 @@
 #include "Server.h"
 #include "state/Camera.h"
 #include "state/World.h"
+#include "state/ParticleManager.h"
+#include "UiHandler.h"
 
 class Window {
 
@@ -28,6 +31,9 @@ class Window {
     static void rotateCamera( float angle, glm::vec3 axis );
     static void handleEvent( const std::shared_ptr<Event> & e );
 
+    static FMOD::Studio::EventDescription * ambientMusic;
+    static FMOD::Studio::EventInstance * ambientMusicEvent;
+
     public:
 
     static int width;
@@ -35,13 +41,23 @@ class Window {
 
     static GLFWwindow * window;
     static World * world;
+    static UiHandler* uiHandler;
     static Camera * cam;
     static Server * server;
+    static TextureManager * tmanager;
+    static ParticleManager* pmanager;
     static std::string playerName;
-
-
+    static bool ready;
+    static Entity* selected;
+    static Entity* redHeld;
+    static Entity* greenHeld;
+    static Entity* blueHeld;
     static int money;
+
     static int holding;
+    static double lX;
+    static  double lY;
+
 
     // Audio data
     static FMOD::Studio::System * audioSystem;
@@ -61,6 +77,7 @@ class Window {
     static void mouse_button_callback( GLFWwindow * window, int button, int action, int mods );
     static void mouse_scroll_callback( GLFWwindow * window, double xoffset, double yoffset );
     static void drawGui();
+    static glm::vec3 lookingAt();
 };
 
 #endif

@@ -3,7 +3,8 @@
 class PlaceEvent : public GameStateEvent
 {
 public:
-	PlaceEvent(std::string id);
+	glm::vec3 pos;
+	PlaceEvent(std::string id, glm::vec3& pos);
 
 	void apply(GameState* gamestate) const;
 	std::string serialize() const;

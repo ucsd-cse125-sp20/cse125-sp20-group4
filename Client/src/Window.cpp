@@ -19,15 +19,9 @@
 #include "drawing/model/EmptyModel.h"
 #include "drawing/model/RectangularCuboid.h"
 #include "drawing/model/LoadedModel.h"
+#include "drawing/Walls.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/fonts/IconsFontAwesome5.h"
-#include "imgui/fonts/IconsMaterialDesign.h"
-#include "imgui/fonts/IconsForkAwesome.h"
 
 // Use of degrees is deprecated. Use radians instead.
 #ifndef GLM_FORCE_RADIANS
@@ -36,7 +30,7 @@
 
 static const auto LOGGER = getLogger( "Window" );
 
-static const char * window_title = "CSE 125 Project";
+static const char * window_title = "The Last Roll";
 
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
@@ -49,6 +43,7 @@ static const char * window_title = "CSE 125 Project";
 #define ROTATION_THRESHOLD 0.0001f
 #define CAMERA_MOVEMENT_SPEED 0.1f
 #define DIRECTIONAL_LIGHT_ROTATION_RATE RADIANS( 1.0f )
+#define SENSITIVITY 0.005f
 
 #define BASE_PAN_SPEED RADIANS( 1.0f )
 #define X_DEAD_ZONE ( Window::width / 2 ) * 0.6
@@ -67,6 +62,10 @@ static const char * window_title = "CSE 125 Project";
 Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
+ParticleManager* Window::pmanager;
+TextureManager* Window::tmanager;
+
+Walls* walls;
 
 // Audio data
 FMOD::Studio::System * Window::audioSystem;
@@ -75,13 +74,26 @@ FMOD::Studio::Bank * Window::bankMasterStrings;
 
 std::string Window::playerName = "cube4"; 
 
-
 GLFWwindow* Window::window = nullptr;
 
 int Window::width;
 int Window::height;
 int Window::money;
+
 int Window::holding;
+double Window::lX;
+double Window::lY;
+
+
+bool Window::ready;
+Entity* Window::selected;
+Entity* Window::redHeld;
+Entity* Window::greenHeld;
+Entity* Window::blueHeld;
+
+FMOD::Studio::EventDescription * Window::ambientMusic;
+FMOD::Studio::EventInstance * Window::ambientMusicEvent;
+
 
 void Window::rotateCamera( float angle, glm::vec3 axis ) {
 
@@ -127,8 +139,13 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     
     Window::money = 100;
     Window::holding = 0;
+    Window::lX = 0;
+    Window::lY= 0;
+    Window::ready = false;
+
     // Set up graphics
     Shaders::initializeShaders();
+    tmanager->initializeTextures();
 
     // Set up sound
     Window::audioSystem = audio;
@@ -155,12 +172,44 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     // Load audio samples
     bankMaster->loadSampleData();
 
+    // Start background music
+    audioSystem->getEvent( "event:/background_music", &ambientMusic );
+    ambientMusic->createInstance( &ambientMusicEvent );
+    ambientMusicEvent->start();
+
     // Set up game state
     world = new World();
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
 
-    world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("barrier"), Shaders::phong());
+    //model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+    model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+
+    selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
+
+    auto red = new LoadedModel("Models/bottle.dae", Window::tmanager->get("bottle"), Shaders::phong());
+    red->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+    auto green = new LoadedModel("Models/watermelon.dae", Window::tmanager->get("watermelon"), Shaders::phong());
+    green->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+    auto blue = new LoadedModel("Models/water.dae", Window::tmanager->get("water"), Shaders::phong());
+    blue->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
+
+    redHeld = new Entity("selected", red, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
+    greenHeld = new Entity("selected", green, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
+    blueHeld = new Entity("selected", blue, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
+    
+    pmanager = new ParticleManager(tmanager);
+
+    std::vector<Texture*> textures = {
+        tmanager->get("floor"),
+        tmanager->get("ceiling"),
+        tmanager->get("wall"),
+        tmanager->get("wall"),
+        tmanager->get("wall"),
+        tmanager->get("wall")
+    };
+    walls = new Walls(textures, glm::vec3(-0.5f), glm::vec3(39.0f, 3.0f, 22.0f));
 
     // Debugging entities
     //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
@@ -173,6 +222,11 @@ void Window::clean_up() {
     Camera::removeCamera( "spectator" );
 
     delete( world );
+
+    // Stop background music
+    ambientMusicEvent->stop( FMOD_STUDIO_STOP_IMMEDIATE );
+    ambientMusicEvent->release();
+    ambientMusicEvent = nullptr;
 
     // Clean up audio
     LOGGER->info( "Unloading audio banks." );
@@ -276,15 +330,19 @@ void Window::idle_callback() {
     // Rotate camera (trackball)
     double cursorX, cursorY;
     glfwGetCursorPos( window, &cursorX, &cursorY );
-    cursorX = X_POS( cursorX );
-    cursorY = Y_POS( cursorY );
+    /*cursorX = X_POS( cursorX );
+    cursorY = Y_POS( cursorY );*/
+    double dx = cursorX - Window::lX;
+    double dy = cursorY - Window::lY;
+    Window::lX = cursorX;
+    Window::lY = cursorY;
 #pragma warning( push )
 #pragma warning( disable: 4244 )
-    if ( std::abs( cursorX ) > X_DEAD_ZONE ) {
-        rotateCamera( X_SPEED( ( float ) cursorX ), glm::vec3( 0.0f, -1.0f, 0.0f ) );
+    if ( dx != 0.0 ) {
+        rotateCamera(dx * SENSITIVITY, glm::vec3( 0.0f, -1.0f, 0.0f ) );
     }
-    if ( std::abs( cursorY ) > Y_DEAD_ZONE ) {
-        rotateCamera( Y_SPEED( ( float ) cursorY ), glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
+    if ( dy != 0.0 ) {
+        rotateCamera( dy * SENSITIVITY, glm::cross( glm::vec3( 0.0f, 1.0f, 0.0f ), cam->getDir() ) );
     }
 #pragma warning( pop )
 
@@ -296,118 +354,60 @@ void Window::idle_callback() {
         LOGGER->warn( "Error while updating listener position ({}).", res );
     }
 
-}
-void drawInfoGui() {   
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 2;
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-    if (ImGui::Begin("Player Overlay", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Round: 0");
-        ImGui::Text(ICON_FA_DOLLAR_SIGN " %d", Window::money);
-        ImGui::Text(ICON_FA_TOILET_PAPER " %d", Window::money);
-        switch (Window::holding) {
-            case 0:
-                ImGui::Text("Pick Up an Item");
-            break;
-            case 1:
-                ImGui::Text("You are holding a RED Item");
-                break;
-            case 2:
-                ImGui::Text("You are holding a GREEN Item");
-                break;
-            case 3:
-                ImGui::Text("You are holding a BLUE Item");
-                break;
-            case 4:
-                ImGui::Text("You are holding a BARRICADE");
-                break;
-        }\
-        ImGui::End();
-    }
+    //update particles
+    pmanager->update();
 
 }
-void drawReadyGui() {
-    bool* p_open = new bool(true);
-    const float DISTANCE = 10.0f;
-    static int corner = 1;
-    int money = Window::money;
-    
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
-    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-    if (ImGui::Begin("Ready Up Menu", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        // TODO check if readied up
-        if (false) {
-            ImGui::Text(ICON_FA_BATH "%d of 5 Ready",2);
-        } else {
-            ImGui::Text("Press R to ready up");
-        }
-        ImGui::End();
-    }
 
-}
-void drawEndGui() {
-    bool* p_open = new bool(true);
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 window_pos = ImVec2( io.DisplaySize.x *0.5f, io.DisplaySize.y * 0.5f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
-    if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-    {
-        ImGui::Text("Game Over");
-        ImGui::Text("Score: %d", Window::money);
-        ImGui::End();
-    }
-
-}
-void Window::drawGui() {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    LOGGER->trace("About to draw gui");
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowBorderSize = 5;
-    style.FrameBorderSize = 0;
-    style.PopupBorderSize = 0;
-    switch (world->phase) {
-    case World::Phase::READY:
-        drawReadyGui();
-        break;
-    case World::Phase::ROUND:
-        drawInfoGui();
-        break;
-    case World::Phase::END:
-        drawEndGui();
-        drawInfoGui();
-        break;
-    }
-    LOGGER->trace("gui drawn");
-    
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
 
 void Window::display_callback( GLFWwindow * ) {
 
     // Clear the color and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // Dunno if actually needed
-
+    glm::vec3 tmp = glm::vec3(cam->getPos());
+    switch (holding) {
+    case 1:
+        tmp.y = 0.5f;
+        tmp.x += cam->getDir().x;
+        tmp.z += cam->getDir().z;
+        redHeld->setPosition(tmp);
+        redHeld->setDirection(cam->getDir());
+        redHeld->draw(cam->getToView());
+        break;
+    case 2:
+        tmp.y = 0.5f;
+        tmp.x += cam->getDir().x;
+        tmp.z += cam->getDir().z;
+        greenHeld->setPosition(tmp);
+        greenHeld->setDirection(cam->getDir());
+        greenHeld->draw(cam->getToView());
+        break;
+    case 3:
+        tmp.y = 0.5f;
+        tmp.x += cam->getDir().x;
+        tmp.z += cam->getDir().z;
+        blueHeld->setPosition(tmp);
+        blueHeld->setDirection(cam->getDir());
+        blueHeld->draw(cam->getToView());
+        break;
+    case 4:
+        tmp.y = 0.0f;
+        selected->setPosition(round(lookingAt()) + glm::vec3(0.0f, 0.1f, 0.0f));
+        //TODO CHANGE
+        if (glm::distance(tmp, selected->getPosition()) >= 4.0f) {
+            ((LoadedModel*)selected->model)->setColor(glm::vec3(0.2f, 0.2f, 0.2f));
+        } else {
+            ((LoadedModel*)selected->model)->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+        }
+        selected->draw(cam->getToView());
+        break;
+    }
 
     // Render scene.
+    walls->Draw( cam->getToView() );
     world->draw( cam->getToView() );
-
-    drawGui();
+    UiHandler::drawGui();
 
     // Gets events, including input such as keyboard and mouse or window resizing
     glfwPollEvents();
@@ -465,7 +465,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_SPACE: // Place an object
                 if (cam->name == Window::playerName) {
                     if (Window::holding ==  4) {
-                        server->send(std::make_shared<PlaceEvent>(playerName));
+                        glm::vec3 pos = lookingAt();
+                        server->send(std::make_shared<PlaceEvent>(playerName,pos));
                     } else if (holding == 0){
                         // TODO update to select correct item
                         server->send(std::make_shared<PickUpEvent>(playerName, "0"));
@@ -490,6 +491,8 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
             case GLFW_KEY_R: // Reset camera position.
                 if ( cam->isFreeCamera() ) {
                     cam->update( DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR );
+                } else if (cam->name == Window::playerName) {
+                    server->send(std::make_shared<ReadyEvent>(playerName));
                 }
                 break;
 
@@ -573,6 +576,15 @@ void Window::key_callback( GLFWwindow * focusWindow, int key, int, int action, i
     }
 
 }
+glm::vec3 Window::lookingAt() {
+    glm::vec3 planePoint(0.0f, 0.0f, 0.0f);
+    glm::vec3 planeNormal(0.0f, 1.0f, 0.0f);
+    glm::vec3 diff = Window::cam->getPos() - planePoint;
+    float prod1 = glm::dot(diff, planeNormal);
+    float prod2 = glm::dot(Window::cam->getDir(), planeNormal);
+    float prod3 = prod1 / prod2;
+    return Window::cam->getPos() - Window::cam->getDir() * prod3;
+}
 
 glm::vec3 Window::trackBallMapping( float x, float y ) {
 
@@ -649,36 +661,84 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
 
     LOGGER->trace( "{} XXXX {}", Window::playerName, e->serialize() );
-    if (e->getType() == Event::EventType::JEvent) {
-        Window::playerName = e->getObjectId();
-        LOGGER->info("Set my ID to {}", e->getObjectId());
-    } else if(e->getType() == Event::EventType::GEvent){
-        auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
-        world->handleUpdates(uEvent, Window::playerName);
-        // update my data
-        auto it = uEvent->updates.find( Window::playerName );
-        if ( it != uEvent->updates.end() ) {
-            auto player = std::static_pointer_cast<Player>(it->second);
-            money = player->getMoney();
-            if (player->getHeldItem() != nullptr) {
-                if (player->getHeldItem()->getTag().compare("Red")==0) {
-                    holding = 1;
-                } else if (player->getHeldItem()->getTag().compare("Green") == 0) {
-                    holding = 2;
-                } else if (player->getHeldItem()->getTag().compare("Blue") == 0) {
-                    holding = 3;
-                } else if (player->getHeldItem()->getTag().compare("Barricade") == 0) {
-                    holding = 4;
-                } 
-            } else {
-                holding = 0;
+    switch ( e->getType() ) {
+        case Event::EventType::Sound:
+        {
+            std::shared_ptr<SoundEvent> se = std::dynamic_pointer_cast<SoundEvent>( e );
+            LOGGER->debug( "Playing sound '{}'.", se->getSound() );
+
+            FMOD::Studio::EventDescription * sound;
+            FMOD_RESULT res = Window::audioSystem->getEvent( se->getSound().c_str(), &sound );
+            if ( res != FMOD_OK ) {
+                LOGGER->error( "Could not get movement sound '{}' ({}).", se->getSound(), res );
+                return;
             }
-            cam = Camera::getCamera(playerName);
-            LOGGER->trace( "Updated player ");
-        } else {
-            LOGGER->trace( "Failed to find {}", playerName );
+
+            FMOD::Studio::EventInstance * instance;
+            sound->createInstance( &instance );
+
+            if ( se->isPositional() ) {
+                const glm::vec3 & pos = se->getPosition();
+                LOGGER->debug( "Setting sound position to {}, {}, {}.", pos.x, pos.y, pos.z );
+                FMOD_3D_ATTRIBUTES attributes;
+                Window::set3DParams( attributes, pos, glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+                FMOD_RESULT res = instance->set3DAttributes( &attributes );
+                if ( res != FMOD_OK ) {
+                    LOGGER->warn( "Error while setting sound event position ({}).", res );
+                }
+            }
+
+            instance->start();
+            instance->release();
+
+            break;
         }
-    } else {
-        world->handleUpdates( e, Window::playerName );
+
+        case Event::EventType::JEvent:
+            Window::playerName = e->getObjectId();
+            LOGGER->info( "Set my ID to {}", e->getObjectId() );
+            break;
+
+        case Event::EventType::GEvent:
+        {
+            auto uEvent = std::static_pointer_cast< UpdateEvent >( e );
+            world->handleUpdates( uEvent, Window::playerName );
+            // update my data
+            auto it = uEvent->updates.find( Window::playerName );
+            if ( it != uEvent->updates.end() ) {
+                auto player = std::static_pointer_cast< Player >( it->second );
+                money = player->getMoney();
+                Window::ready = player->ready;
+                if ( player->getHeldItem() != nullptr ) {
+                    if ( player->getHeldItem()->getTag().compare( "Red" ) == 0 ) {
+                        holding = 1;
+                    } else if ( player->getHeldItem()->getTag().compare( "Green" ) == 0 ) {
+                        holding = 2;
+                    } else if ( player->getHeldItem()->getTag().compare( "Blue" ) == 0 ) {
+                        holding = 3;
+                    } else if ( player->getHeldItem()->getTag().compare( "Barricade" ) == 0 ) {
+                        holding = 4;
+                    }
+                } else {
+                    holding = 0;
+                }
+                cam = Camera::getCamera( playerName );
+                LOGGER->trace( "Updated player " );
+            } else {
+                LOGGER->trace( "Failed to find {}", playerName );
+            }
+            break;
+        }
+
+        case Event::EventType::PEvent:
+        {
+            Phase & p = ( std::dynamic_pointer_cast< UpdatePhaseEvent >( e )->phase );
+            world->phase.update( p );
+            break;
+        }
+
+        default:
+            world->handleUpdates( e, Window::playerName );
+
     }
 }

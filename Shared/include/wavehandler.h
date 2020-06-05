@@ -3,6 +3,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "glm/vec3.hpp"
 
@@ -23,6 +24,7 @@ class WaveHandler {
     WaveHandler();
 
     void loadWaveData();
+    void generateWave(int wave);
     void start();
 
     State update( const GameState & gs );
@@ -35,5 +37,5 @@ class WaveHandler {
     Clock::time_point startTime;
     std::vector<std::vector<EnemyData>> waveEnemies;
     std::vector<glm::vec3> spawns;
-
+    std::unordered_map<std::string, std::shared_ptr<Enemy>> activeEnemies;
 };

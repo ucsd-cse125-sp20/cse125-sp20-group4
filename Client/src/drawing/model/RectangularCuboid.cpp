@@ -1,9 +1,9 @@
 #include "drawing/Shaders.h"
 #include "drawing/model/RectangularCuboid.h"
 
-RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float side ) : RectangularCuboid( color, side, side, side ) {}
+RectangularCuboid::RectangularCuboid( Texture * texture, const glm::vec3 & color, float side ) : RectangularCuboid( texture, color, side, side, side ) {}
 
-RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float width, float height, float depth ) : Geometry( Shaders::flat(), GL_TRIANGLES ) {
+RectangularCuboid::RectangularCuboid( Texture * texture, const glm::vec3 & color, float width, float height, float depth ) : Geometry( texture, Shaders::flat(), GL_TRIANGLES ) {
 
     width /= 2;
     height /= 2;
@@ -14,6 +14,7 @@ RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float width, floa
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> colors;
     std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> texCoords;
 
     for ( int i = -1; i <= 1; i += 2 ) {
         for ( int j = -1; j <= 1; j += 2 ) {
@@ -83,6 +84,6 @@ RectangularCuboid::RectangularCuboid( const glm::vec3 & color, float width, floa
     idx.push_back( 6 );
     idx.push_back( 7 );
 
-    initialize( vertices, colors, normals, idx );
+    initialize( vertices, colors, normals, vertices, idx );
 
 }

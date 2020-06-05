@@ -7,7 +7,8 @@
 class CameraEntity : public Camera, public Entity {
 
     public:
-    CameraEntity( const std::string & name, float camY, const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
+    CameraEntity( const std::string & name, float camY, Model * const model, const glm::vec3 position, const glm::vec3 direction, const std::string & movementSound, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
+    CameraEntity( const std::string & name, float camY, Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
     ~CameraEntity();
 
     using Camera::name;
@@ -15,7 +16,7 @@ class CameraEntity : public Camera, public Entity {
     bool isFreeCamera() const;
 
     void update( const glm::vec3 & pos, const glm::vec3 & dir );
-    void setPosition( const glm::vec3 & position );
+    void setPosition( const glm::vec3 & position, bool directionChanged = false );
     void setDirection( const glm::vec3 & direction );
 
     protected:

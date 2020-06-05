@@ -7,10 +7,10 @@ const auto LOGGER = getLogger( "CameraEntity" );
 
 /* Constructor and destructor */
 
-CameraEntity::CameraEntity( const std::string & name, float camY, const Model * const model, const glm::vec3 position, 
-                            const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+CameraEntity::CameraEntity( const std::string & name, float camY, Model * const model, const glm::vec3 position, 
+                            const glm::vec3 direction, const std::string & movementSound, const float scale, const bool axisEnabled, const float axisScale ) :
         Camera( name, position + glm::vec3( 0.0f, camY, 0.0f ), direction ),
-        Entity( name, model, position, direction, scale, axisEnabled, axisScale ), 
+        Entity( name, model, position, direction, movementSound, scale, axisEnabled, axisScale ), 
         camOffset( 0.0f, camY, 0.0f ) {
 
     LOGGER->info( "Creating new camera entity '{}'.", name );
@@ -21,6 +21,10 @@ CameraEntity::CameraEntity( const std::string & name, float camY, const Model * 
     cameras[name] = this;
 
 }
+
+CameraEntity::CameraEntity( const std::string & name, float camY, Model * const model, const glm::vec3 position,
+                            const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+    CameraEntity( name, camY, model, position, direction, "", scale, axisEnabled, axisScale ) {}
 
 CameraEntity::~CameraEntity() {
 
@@ -50,9 +54,9 @@ void CameraEntity::update( const glm::vec3 & newPos, const glm::vec3 & newDir ) 
 
 }
 
-void CameraEntity::setPosition( const glm::vec3 & newPos ) {
+void CameraEntity::setPosition( const glm::vec3 & newPos, bool directionChanged ) {
 
-    Entity::setPosition( newPos );
+    Entity::setPosition( newPos, directionChanged );
     Camera::update( newPos + camOffset, dir );
 
 }

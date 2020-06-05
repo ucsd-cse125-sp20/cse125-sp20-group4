@@ -23,4 +23,8 @@
 
 #include <EventClasses/GameState/ready.h>
 #include <EventClasses/GameState/use.h>
+
+#include <EventClasses/SoundEvent.h>
+
+#include <phases/updatephaseevent.h>
 #endif

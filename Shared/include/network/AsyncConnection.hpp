@@ -266,8 +266,14 @@ class AsyncConnection {
         }
 
         // Encode object
+        LOGGER->trace( "Encoding message." );
         std::string message;
-        encode( src, message );
+        try {
+            encode( src, message );
+        } catch ( std::exception & e ) {
+            LOGGER->error( "Unexpected exception thrown while encoding: '{}'", e.what() );
+            return true; // Discard
+        }
         if ( message.empty() ) { // Empty string reserved as a sentinel
             LOGGER->error( "Object encoding was an empty string." );
             return true; // Discard
@@ -309,11 +315,18 @@ class AsyncConnection {
             message = message.substr( pos + 1 );
         } else {
             LOGGER->error( "Message missing counter: '{}'", message );
+            return true; // Discard
         }
 
         // Decode object
         Tptr dest;
-        decode( message, dest );
+        try {
+            decode( message, dest );
+        } catch ( std::exception & e ) {
+            LOGGER->error( "Unexpected exception thrown while decoding: '{}'", e.what() );
+            return true;
+        }
+        LOGGER->trace( "Message decoded." );
 
         if ( dest == nullptr ) {
             LOGGER->error( "Message could not get decoded: '{}'", message );
