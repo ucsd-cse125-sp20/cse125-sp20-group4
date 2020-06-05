@@ -168,6 +168,7 @@ int main_inner( void ) {
     // Create the GLFW window
     spdlog::info( "Creating window..." );
     GLFWwindow * window = Window::create_window( 640, 480 );
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if ( window == NULL ) {
         spdlog::critical( "Failed to create window!" );

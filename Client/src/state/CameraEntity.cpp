@@ -7,7 +7,7 @@ const auto LOGGER = getLogger( "CameraEntity" );
 
 /* Constructor and destructor */
 
-CameraEntity::CameraEntity( const std::string & name, float camY, const Model * const model, const glm::vec3 position, 
+CameraEntity::CameraEntity( const std::string & name, float camY, Model * const model, const glm::vec3 position, 
                             const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
         Camera( name, position + glm::vec3( 0.0f, camY, 0.0f ), direction ),
         Entity( name, model, position, direction, scale, axisEnabled, axisScale ), 

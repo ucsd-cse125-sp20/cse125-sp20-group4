@@ -15,7 +15,7 @@ static const auto LOGGER = getLogger( "Entity" );
 
 /* Constructor */
 
-Entity::Entity( const std::string & name, const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
+Entity::Entity( const std::string & name, Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale, const bool axisEnabled, const float axisScale ) :
         name( name ), model( model ), position( position ), direction( glm::normalize( direction ) ), scale( scale ), axis( axisEnabled, axisScale ) {
 
     updateModelMatrix();

@@ -38,9 +38,9 @@ void Enemy::setVelocityFromCmd() {
             setPositionZ(pathList.front().z);
             pathList.pop_front();
         } else {
-            setVelocityX(baseSpeed * dispX / dispTotal);
-            setVelocityY(baseSpeed * dispY / dispTotal);
-            setVelocityZ(baseSpeed * dispZ / dispTotal);
+            setVelocityX(baseSpeed * dispX / (dispTotal*2.0));
+            setVelocityY(baseSpeed * dispY / (dispTotal * 2.0));
+            setVelocityZ(baseSpeed * dispZ / (dispTotal * 2.0));
             break;
         }
     }
