@@ -12,6 +12,7 @@
 #include "EventClasses/Factories/DeleteEventFactory.h"
 #include "EventClasses/Factories/NotifyEventFactory.h"
 
+#include "phases/updatephasefactory.h"
 #include <cstddef>
 #include <stdexcept>
 
@@ -21,6 +22,8 @@ Deserializer::Deserializer() {
     this->gameMapping.insert(std::make_pair("Shelf", std::make_unique<ShelfFactory>()));
     this->gameMapping.insert(std::make_pair("Barricade", std::make_unique<BarricadeFactory>()));
     this->gameMapping.insert(std::make_pair("Enemy", std::make_unique<EnemyFactory>()));
+    this->gameMapping.insert(std::make_pair("SpawnPoint", std::make_unique<SpawnPointFactory>()));
+    this->gameMapping.insert(std::make_pair("ToiletPaper", std::make_unique<ToiletPaperFactory>()));
 
     this->gameMapping.insert(std::make_pair("RedObject", std::make_unique<RedItemFactory>()));
     this->gameMapping.insert(std::make_pair("GreenObject", std::make_unique<GreenItemFactory>()));
@@ -43,6 +46,8 @@ Deserializer::Deserializer() {
     this->eventMapping.insert(std::make_pair(ReadyEvent::TAG, std::make_unique<ReadyEventFactory>()));
     this->eventMapping.insert(std::make_pair(JoinEvent::TAG, std::make_unique<JoinEventFactory>()));
     this->eventMapping.insert(std::make_pair(UseEvent::TAG, std::make_unique<UseEventFactory>()));
+
+    this->eventMapping.insert(std::make_pair("PhaseUpdate", std::make_unique<UpdatePhaseFactory>()));
 }
 
 std::string Deserializer::deserializeUpdates(std::string serial, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> res) {

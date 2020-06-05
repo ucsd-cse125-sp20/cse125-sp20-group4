@@ -13,7 +13,22 @@ std::shared_ptr<Event> PlaceEventFactory::create(std::string serial)
     pos = serial.find(",", last);
     std::string id = serial.substr(last, pos - last);
 
-    std::shared_ptr<Event> event = std::shared_ptr<PlaceEvent>(new PlaceEvent(id));
+    // position x
+    last = pos + 1;
+    pos = serial.find(",", last);
+    float posx = std::stof(serial.substr(last, pos - last));
+
+    // position y
+    last = pos + 1;
+    pos = serial.find(",", last);
+    float posy = std::stof(serial.substr(last, pos - last));
+
+    // position z
+    last = pos + 1;
+    pos = serial.find(",", last);
+    float posz = std::stof(serial.substr(last, pos - last));
+
+    std::shared_ptr<Event> event = std::shared_ptr<PlaceEvent>(new PlaceEvent(id,glm::vec3(posx,posy,posz)));
     return event;
 }
 

@@ -88,7 +88,7 @@ void Object::setLength(float newLength) {
     this->length = newLength;
 }
 
-void Object::setCanCollide(bool newvalue) {
+void Object::setCanCollide(bool newvalue) const{
     this->collide = newvalue;
 }
 

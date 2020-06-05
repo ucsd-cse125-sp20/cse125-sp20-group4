@@ -13,6 +13,7 @@ GameState::GameState() {
     this->dirty = true;
     this->deletes = false;
     this->map = new MapRep(100, 100);
+    this->phase = std::make_shared<Phase>(START_STATE, 100, 0, 0);
 }
 
 void GameState::createObject(std::shared_ptr<Object> obj) {
@@ -123,6 +124,28 @@ void GameState::updateState() {
         
         it++;
     }
+    it = this->gameObjects.begin();
+    //check if barricades are down, and if so, delete it
+    while (it != this->gameObjects.end()) {
+        std::shared_ptr<Barricade> barricade_ptr = std::dynamic_pointer_cast<Barricade>(it->second);
+        std::shared_ptr<Enemy> enemy = std::dynamic_pointer_cast<Enemy>(it->second);
+        it++;
+        if ( barricade_ptr != nullptr) {
+            if(!barricade_ptr->isUp()){
+                deleteObject(barricade_ptr->getId());
+            }
+        }
+        if (enemy != nullptr && enemy->reachedTarget) {
+            deleteObject(enemy->getId());
+            phase->health -= 1;
+            if (phase->health <= 0) {
+                phase->state = END_STATE;
+            }
+            phase->dirty = true;
+        }
+
+    }
+
     log->debug("Finished updating state");
 }
 
@@ -205,8 +228,20 @@ void GameState::resetDirty() {
     this->dirty = false;
     this->deletes = false;
     this->deletedIds.clear();
+    this->phase->dirty = false;
 }
-
+void GameState::unready() {
+    auto it = this->gameObjects.begin();
+    while (it != this->gameObjects.end()) {
+        auto player = std::dynamic_pointer_cast<Player>(it->second);
+        if (player != nullptr) {
+            player->ready = false;
+            player->dirty = true;
+            setDirty(true);
+        }
+        it++;
+    }
+}
 void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> object) {
     auto log = getLogger("GameState");
     auto it = this->gameObjects.begin();
@@ -244,4 +279,5 @@ void GameState::makeDirty() {
     for (auto it = this->gameObjects.begin(); it != this->gameObjects.end();it++){
         it->second->dirty = true;
     }
+    this->phase->dirty = true;
 }

@@ -12,10 +12,10 @@ private:
     float length;
     float width;
     float height;
-    bool collide;
+    mutable bool collide;
     // mesh
 public:
-    bool dirty;
+    mutable bool dirty;
     
     //constructor
     Object(const Object& obj);
@@ -41,7 +41,7 @@ public:
     void setHeight(float newHeight);
     void setLength(float newLength);
     virtual void setOrientation( const glm::vec3 & orientation );
-    void setCanCollide(bool newValue);
+    void setCanCollide(bool newValue) const;
 
     //getters
     std::string getId() const;

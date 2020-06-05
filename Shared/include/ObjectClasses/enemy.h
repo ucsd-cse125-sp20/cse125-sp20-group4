@@ -1,13 +1,13 @@
 #pragma once
 #include "movingobject.h"
-#include "pathingmap.h"
+#include "MapRep.h"
 #include "ObjectClasses/Useable/useable.h"
-#include <stack>
+#include <list>
 
 class Enemy : public MovingObject {
 private:
-    float baseSpeed;
-    std::stack<struct MapCoord> cmdStack;
+    float baseSpeed = 1.0;
+    std::list<glm::vec3> pathList;
 
 public:
     Enemy(const Enemy& player);
@@ -19,13 +19,21 @@ public:
     const std::string TAG = "Enemy";
     const std::string& getTag();
 
-    // sets the velocity from top command of cmdStack
+    void setPathList(std::list<glm::vec3>);
+    // sets the velocity from top of list
     void setVelocityFromCmd();
-
-    bool isEnemy() const;
 
     //(de)serialize functions
     virtual std::string serialize() const override;
+    virtual std::shared_ptr<Object> clone() const;
+
+    bool reachedTarget = false;
+    virtual void handleXCollision(const Object& obj);
+    virtual void handleXCollision(const MovingObject& obj);
+    virtual void handleYCollision(const Object& obj);
+    virtual void handleYCollision(const MovingObject& obj);
+    virtual void handleZCollision(const Object& obj);
+    virtual void handleZCollision(const MovingObject& obj);
 
     static Enemy& deserialize(std::string serial);
     ItemType weakness;

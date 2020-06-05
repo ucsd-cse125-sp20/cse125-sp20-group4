@@ -11,10 +11,10 @@
 class Entity {
 
     public:
-    Entity( const std::string & name, const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
+    Entity( const std::string & name, Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
     virtual ~Entity();
 
-    const Model * const model;
+    const Model * model;
     const std::string name;
 
     const glm::vec3 & getPosition() const;
@@ -22,7 +22,7 @@ class Entity {
     const glm::vec3 & getVelocity() const;
     const float & getScale() const;
 
-    virtual void setPosition( const glm::vec3 & position );
+    virtual void setPosition( const glm::vec3 & position, bool directionChanged = false );
     virtual void setDirection( const glm::vec3 & direction );
     virtual void setScale( const float & scale );
 

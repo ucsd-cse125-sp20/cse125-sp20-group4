@@ -66,6 +66,10 @@ std::shared_ptr<Object> PlayerFactory::create(std::string serial) { //TODO:Make 
     int money = std::stoi(serial.substr(last, pos - last));
 
     last = pos + 1;
+    pos = serial.find(",", last);
+    int ready = std::stoi(serial.substr(last, pos - last));
+
+    last = pos + 1;
 
     pos = serial.find("/", last);
 
@@ -80,6 +84,10 @@ std::shared_ptr<Object> PlayerFactory::create(std::string serial) { //TODO:Make 
   
 
     std::shared_ptr<Player> player = std::make_shared<Player>(id, posx, posy, posz, orx, ory, orz, width, height, length, velx, vely, velz, money, health, heldObj);
+
+    if (ready == 1) {
+        player->ready = true;
+    }
     return player;
 }
 
