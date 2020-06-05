@@ -14,6 +14,11 @@ void TextureManager::initializeTextures()
 	textures["ceiling"] = loadTexture("Textures/ceiling.jpg", false);
 	textures["wall"] = loadTexture("Textures/wall.jpg", false);
 	textures["smoke"] = loadTexture("Textures/smoke.png", true);
+	textures["water"] = loadTexture("Textures/water.png", true);
+	textures["shopper"] = loadTexture("Textures/shopper.png", true);
+	textures["barrier"] = loadTexture("Textures/barrier.png", true);
+	textures["bottle"] = loadTexture("Textures/bottle.png", true);
+	textures["watermelon"] = loadTexture("Textures/watermelon.png", true);
 }
 
 void TextureManager::deleteTextures()

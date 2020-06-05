@@ -121,14 +121,14 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 LOGGER->debug("Couldn't find entity '{}'.", it->second->getTag());
                 if (it->first.compare(id) == 0) {
                     LOGGER->debug("Making a player at pos ({},{},{})", it->second->getPositionX(), it->second->getPositionY(), it->second->getPositionZ());
-                    auto model = new LoadedModel("Models/shopper.dae", Window::tmanager->get("default"), Shaders::phong());
+                    auto model = new LoadedModel("Models/shopper.dae", Window::tmanager->get("shopper"), Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                     entity = new CameraEntity(it->second->getId(), 1.0f, (model), it->second->getPosition(), it->second->getOrientation(), 0.5f);
                     addEntity(entity);
                     Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Player") == 0) {
                     LOGGER->debug("Making a Player");
-                    auto model = new LoadedModel("Models/shopper.dae", Window::tmanager->get("default"), Shaders::phong());
+                    auto model = new LoadedModel("Models/shopper.dae", Window::tmanager->get("shopper"), Shaders::phong());
                     size_t found = 0;
                     glm::vec3 colorVec = glm::vec3(1.0f, 1.0f, 1.0f);
                     found = it->second->getId().find("0");
@@ -162,7 +162,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Enemy") == 0) {
                     LOGGER->debug("Making a Enemy");
-                    auto model = new LoadedModel("Models/shopper.dae", Window::tmanager->get("default"), Shaders::phong());
+                    auto model = new LoadedModel("Models/shopper.dae", Window::tmanager->get("shopper"), Shaders::phong());
                     if (it->first.find("red") != std::string::npos) {
                         model->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
                     }
@@ -177,8 +177,8 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     //Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
-                    auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("default"), Shaders::phong());
-                    model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+                    auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("barrier"), Shaders::phong());
+                    model->setColor(glm::vec3(1.0f));
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else if (it->second->getTag().compare("Shelf") == 0) {
 
@@ -222,8 +222,8 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                     addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else {
-                    LOGGER->debug("Making a cube");
-                    addEntity(new Entity(it->second->getId(), new RectangularCuboid(Window::tmanager->get("floor"), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f), it->second->getPosition(), it->second->getOrientation()));
+                    LOGGER->debug("Making a spawner");
+                    addEntity(new Entity(it->second->getId(), new LoadedModel("Models/spawner.dae", Window::tmanager->get("default"), Shaders::phong()), it->second->getPosition(), it->second->getOrientation(), 0.5f ));
                 }
             }
         }
