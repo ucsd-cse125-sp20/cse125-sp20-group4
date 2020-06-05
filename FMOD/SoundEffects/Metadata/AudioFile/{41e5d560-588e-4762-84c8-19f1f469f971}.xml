@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.00.00">
+	<object class="AudioFile" id="{41e5d560-588e-4762-84c8-19f1f469f971}">
+		<property name="assetPath">
+			<value>barricade_place_mixdown.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>1</value>
+		</property>
+		<property name="length">
+			<value>1.0278333333333334</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{50c36e74-bd09-44bc-9ba4-167513c04613}</destination>
+		</relationship>
+	</object>
+</objects>

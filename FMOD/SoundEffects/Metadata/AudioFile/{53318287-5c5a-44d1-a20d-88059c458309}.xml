@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.00.00">
+	<object class="AudioFile" id="{53318287-5c5a-44d1-a20d-88059c458309}">
+		<property name="assetPath">
+			<value>enemy_leave_mixdown.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>1</value>
+		</property>
+		<property name="length">
+			<value>0.044229166666666667</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{50c36e74-bd09-44bc-9ba4-167513c04613}</destination>
+		</relationship>
+	</object>
+</objects>
