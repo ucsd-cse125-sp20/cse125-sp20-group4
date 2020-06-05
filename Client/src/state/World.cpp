@@ -172,7 +172,9 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     else {
                         model->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
                     }
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
+                    entity = new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f);
+                    addEntity(entity);
+                    //Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("default"), Shaders::phong());

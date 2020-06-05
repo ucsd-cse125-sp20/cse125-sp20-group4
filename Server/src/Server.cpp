@@ -96,8 +96,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     std::deque<std::shared_ptr<Enemy>> pendingSpawns;
     unsigned int spawnCooldown = 0;
 
-    getLogger("PickUpEvent")->set_level(spdlog::level::trace);
-    getLogger("PlaceEvent")->set_level(spdlog::level::trace);
+    //getLogger("PickUpEvent")->set_level(spdlog::level::trace);
+    //getLogger("PlaceEvent")->set_level(spdlog::level::trace);
     while ( running ) {
 
         std::chrono::time_point tickStart = std::chrono::steady_clock::now();
