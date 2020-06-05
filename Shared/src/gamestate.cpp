@@ -138,6 +138,7 @@ void GameState::updateState() {
             }
         }
         if (enemy != nullptr && enemy->reachedTarget) {
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/enemy_goal", enemy->getPosition() ) );
             deleteObject(enemy->getId());
             phase->health -= 1;
             if (phase->health <= 0) {
