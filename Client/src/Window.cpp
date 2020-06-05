@@ -182,7 +182,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
     model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
 
-    selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f),0.4f);
+    selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
 
     auto red = new LoadedModel("Models/can.dae", Shaders::phong());
     red->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -191,9 +191,9 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     auto blue = new LoadedModel("Models/water.dae", Shaders::phong());
     blue->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
 
-    redHeld = new Entity("selected", red, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.4f);
-    greenHeld = new Entity("selected", green, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.4f);
-    blueHeld = new Entity("selected", blue, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.4f);
+    redHeld = new Entity("selected", red, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
+    greenHeld = new Entity("selected", green, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
+    blueHeld = new Entity("selected", blue, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
     
     pmanager = new ParticleManager();
 
@@ -386,10 +386,7 @@ void Window::display_callback( GLFWwindow * ) {
         } else {
             ((LoadedModel*)selected->model)->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
         }
-
-        if (glm::distance(tmp, selected->getPosition()) < 5.0f) {
-            selected->draw(cam->getToView());
-        }
+        selected->draw(cam->getToView());
         break;
     }
 

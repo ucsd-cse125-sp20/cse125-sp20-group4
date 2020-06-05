@@ -124,14 +124,14 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     LOGGER->debug("Making a player at pos ({},{},{})", it->second->getPositionX(), it->second->getPositionY(), it->second->getPositionZ());
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    entity = new CameraEntity(it->second->getId(), 1.5f, (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
+                    entity = new CameraEntity(it->second->getId(), 1.0f, (model), it->second->getPosition(), it->second->getOrientation(), 0.5f);
                     addEntity(entity);
                     Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Player") == 0) {
                     LOGGER->debug("Making a Player");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    entity = new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
+                    entity = new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f);
                     addEntity(entity);
                     Window::pmanager->addTrail(entity);
                 } else if (it->second->getTag().compare("Enemy") == 0) {
@@ -146,12 +146,12 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     else {
                         model->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
                     }
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.09f));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else if (it->second->getTag().compare("Barricade") == 0) {
                     LOGGER->debug("Making a barricade");
                     auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
                     model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else if (it->second->getTag().compare("Shelf") == 0) {
 
                     auto shelf = std::dynamic_pointer_cast<Shelf>(it->second);
@@ -191,7 +191,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     LOGGER->debug("Making a tp");
                     auto model = new LoadedModel("Models/tp.dae", Shaders::phong());
                     model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.4f));
+                    addEntity(new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.5f));
                 } else {
                     LOGGER->debug("Making a cube");
 
