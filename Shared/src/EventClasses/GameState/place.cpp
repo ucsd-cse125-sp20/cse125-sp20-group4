@@ -1,6 +1,7 @@
 #include "EventClasses/GameState/place.h"
 #include "ObjectClasses/barricade.h"
 #include "logger.h"
+#include "SoundQueue.h"
 
 #include <glm/gtc/epsilon.hpp>
 #define EPSILON 0.0005f
@@ -17,7 +18,7 @@ void PlaceEvent::apply(GameState* gamestate) const
     std::shared_ptr<Player> object = std::dynamic_pointer_cast<Player>(gamestate->getObject(this->getObjectId()));
     // check if found
     if (object != nullptr && object->getHeldItem() !=nullptr && object->getHeldItem()->getTag().compare("Barricade")==0) {
-        log->info("Placing object: {}", object->getHeldItem()->serialize());
+        log->trace("Placing object: {}", object->getHeldItem()->serialize());
         // get item in player inventory
         //std::shared_ptr<Object> item = object->getHeldItem();
         std::shared_ptr<Barricade> item = std::dynamic_pointer_cast<Barricade>(object->getHeldItem());
@@ -33,14 +34,15 @@ void PlaceEvent::apply(GameState* gamestate) const
         pos = pos + ori * object->getWidth() * 2.0f;*/
         glm::vec3 gpos = glm::vec3(pos);
         gamestate->map->GridifyMapPos(gpos);
-        log->warn("Placement Position: ({}, {}, {})", gpos.x, gpos.y, gpos.z);
+        log->trace("Placement Position: ({}, {}, {})", gpos.x, gpos.y, gpos.z);
         //TODO check for collision
         if (!gamestate->map->containsObject(pos) && glm::distance(object->getPosition(),gpos)>1.0f) {
-            log->debug("Placing object: {}", object->getHeldItem()->serialize());
+            log->trace("Placing object: {}", object->getHeldItem()->serialize());
             item->setPosition(gpos.x, gpos.y, gpos.z);
             gamestate->createObject(item);
             object->setHeldItem(nullptr);
-            log->info("Just Placed an item");
+            log->debug("Just Placed an item");
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/barricade_place", item->getPosition() ) );
         }
         
     }

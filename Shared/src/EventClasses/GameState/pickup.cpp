@@ -1,5 +1,7 @@
 #include "EventClasses\GameState\pickup.h"
 #include "logger.h"
+#include "SoundQueue.h"
+
 PickUpEvent::PickUpEvent(std::string id, std::string targetId) : GameStateEvent(id) {
     this->targetId = targetId;
 }
@@ -36,7 +38,7 @@ void PickUpEvent::apply(GameState* gamestate) const
             gamestate->setDirty(true);
             log->debug("Just picked up an item {}",item->serialize());
         }
-    } if (barricade != nullptr && object->getHeldItem() == nullptr) {
+    } else if (barricade != nullptr && object->getHeldItem() == nullptr) {
         log->trace("passed first check trying to get item from {}", barricade->getId());
         if (glm::distance(object->getPosition(), barricade->getPosition()) < 2.0f) {
             log->warn("passed second check");
@@ -45,6 +47,7 @@ void PickUpEvent::apply(GameState* gamestate) const
             bar->setUp(barricade->isUp());
             object->setHeldItem(bar);
             gamestate->deleteObject(barricade->getId());
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/barricade_break", barricade->getPosition() ) );
         }
     } else {
         glm::vec3 tmp = object->getPosition() + dir * 1.5f;

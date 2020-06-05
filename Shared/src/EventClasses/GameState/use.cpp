@@ -53,6 +53,7 @@ void UseEvent::apply(GameState* gamestate) const
                 deletes.push_back(enemy->getId());
                 count++;
                 object->addMoney(1);
+                SoundQueue::push( std::make_shared<SoundEvent>( "event:/enemy_leave", enemy->getPosition() ) );
             }
         }
         while (!deletes.empty()) {
