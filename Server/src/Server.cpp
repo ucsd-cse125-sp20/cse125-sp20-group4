@@ -139,6 +139,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 gameState.phase->dirty = true;
                 // TODO: remove all enemies
                 log->info("Game Over");
+                SoundQueue::push( std::make_shared<SoundEvent>( "event:/game_over" ) );
                 break;
             }
             if (spawnCooldown == 0) {
