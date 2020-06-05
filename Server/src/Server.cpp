@@ -181,18 +181,38 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                     log->error( "No locations to spawn enemies were defined." );
                     break;
                 }
-
+                std::vector<string> waveSpawns;
                 std::uniform_int_distribution<unsigned int> spawnIndices(0, (unsigned int)spawns.size() - 1);
                 for (auto it = waveEnemies.cbegin(); it != waveEnemies.cend(); it++) {
+                    int wCount = 0;
+                    int i;
+                    
                     log->info("Creating {} enemies of type '{}' on wave {}.", it->count, it->type, waveNum);
                     for (unsigned int i = 0; i < it->count; i++) {
-                        const glm::vec3& spawn = spawns[spawnIndices(rng)];
-                        const std::string id = "wave" + std::to_string(waveNum) + "-enemy-" + it->type + "-" + std::to_string(i);
-                        std::shared_ptr<Enemy> e = std::make_shared<Enemy>(id, spawn.x, spawn.y, spawn.z);
-                        e->weakness = ItemType::RED;
-                        pendingSpawns.push_back(e);
+                        waveSpawns.push_back(it->type);
                     }
+                    
+                    
                 }
+                std::shuffle(std::begin(waveSpawns), std::end(waveSpawns), std::default_random_engine());
+                for (unsigned int i = 0; i < waveSpawns.size(); i++) {
+                    const glm::vec3& spawn = spawns[spawnIndices(rng)];
+                    const std::string id = "wave" + std::to_string(waveNum) + "-enemy-" + waveSpawns[i] + "-" + std::to_string(i);
+                    log->info("Creating a {} on wave {}.", waveSpawns[i], waveNum);
+                    std::shared_ptr<Enemy> e = std::make_shared<Enemy>(id, spawn.x, spawn.y, spawn.z);
+                    if (waveSpawns[i] == "red") {
+                        e->weakness = ItemType::RED;
+                    }
+                    else if (waveSpawns[i] == "green") {
+                        e->weakness = ItemType::GREEN;
+                    }
+                    else {
+                        e->weakness = ItemType::BLUE;
+                    }
+                    log->info("enemy weak to {} created.", e->weakness);
+                    pendingSpawns.push_back(e);
+                }
+                
                 spawnCooldown = 0;
 
                 break;
