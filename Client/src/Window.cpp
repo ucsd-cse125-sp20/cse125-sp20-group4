@@ -208,7 +208,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
         tmanager->get("wall"),
         tmanager->get("wall")
     };
-    walls = new Walls(textures, glm::vec3(-0.5f), glm::vec3(30.0f, 3.0f, 30.0f));
+    walls = new Walls(textures, glm::vec3(-0.5f), glm::vec3(39.0f, 3.0f, 22.0f));
 
     // Debugging entities
     //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );

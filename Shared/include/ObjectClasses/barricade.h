@@ -10,7 +10,7 @@ protected:
 public:
 	Barricade();
 	Barricade(const Barricade& obj);
-	Barricade(std::string id, float xPos, float yPos, float zPos, float width = 1.0f, float height = 1.0f, float length = 1.0f, int durability = 15000, bool up = true);
+	Barricade(std::string id, float xPos, float yPos, float zPos, float width = 1.0f, float height = 1.0f, float length = 1.0f, int durability = 5000, bool up = true);
 
 	const std::string TAG = "Barricade";
 	const std::string& getTag();
