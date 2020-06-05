@@ -24,8 +24,8 @@ void PickUpEvent::apply(GameState* gamestate) const
             std::shared_ptr<Object> item = itemObject->getItem();
             if (item->getTag().compare("Barricade")==0) {
                 // check if player has enough dough
-                if (object->getMoney() > 5) {
-                    object->subtractMoney(5);
+                if (object->getMoney() > 15) {
+                    object->subtractMoney(15);
                     // put item into inventory
                     object->setHeldItem(item);
                 }
