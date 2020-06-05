@@ -367,7 +367,13 @@ void Window::display_callback( GLFWwindow * ) {
         tmp.y = 0.0f;
         selected->setPosition(round(lookingAt()) + glm::vec3(0.0f, 0.1f, 0.0f));
         //TODO CHANGE
-        if (glm::distance(tmp, selected->getPosition()) < 12.0f) {
+        if (glm::distance(tmp, selected->getPosition()) > 4.0f) {
+            ((LoadedModel*)selected->model)->setColor(glm::vec3(0.2f, 0.2f, 0.2f));
+        } else {
+            ((LoadedModel*)selected->model)->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
+        }
+
+        if (glm::distance(tmp, selected->getPosition()) < 5.0f) {
             selected->draw(cam->getToView());
         }
         break;

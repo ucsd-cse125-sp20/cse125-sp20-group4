@@ -7,7 +7,7 @@
 class CameraEntity : public Camera, public Entity {
 
     public:
-    CameraEntity( const std::string & name, float camY, const Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
+    CameraEntity( const std::string & name, float camY, Model * const model, const glm::vec3 position, const glm::vec3 direction, const float scale = 1.0f, const bool axisEnabled = true, const float axisScale = 0.1f );
     ~CameraEntity();
 
     using Camera::name;
