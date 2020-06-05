@@ -23,6 +23,7 @@ void PickUpEvent::apply(GameState* gamestate) const
         log->trace("passed first check trying to get item from {}",itemObject->getId());
         if (glm::distance(object->getPosition(), itemObject->getPosition()) < 2.0f && itemObject->getFactory() != nullptr) {
             log->trace("passed second check");
+            SoundQueue::push( std::make_shared<SoundEvent>( "event:/item_purchase", itemObject->getPosition() ) );
             std::shared_ptr<Object> item = itemObject->getItem();
             if (item->getTag().compare("Barricade")==0) {
                 // check if player has enough dough

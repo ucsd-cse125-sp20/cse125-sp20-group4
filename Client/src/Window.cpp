@@ -665,7 +665,7 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
         case Event::EventType::Sound:
         {
             std::shared_ptr<SoundEvent> se = std::dynamic_pointer_cast<SoundEvent>( e );
-            LOGGER->trace( "Playing sound '{}'.", se->getSound() );
+            LOGGER->debug( "Playing sound '{}'.", se->getSound() );
 
             FMOD::Studio::EventDescription * sound;
             FMOD_RESULT res = Window::audioSystem->getEvent( se->getSound().c_str(), &sound );
@@ -679,7 +679,7 @@ void Window::handleEvent( const std::shared_ptr<Event> & e ) {
 
             if ( se->isPositional() ) {
                 const glm::vec3 & pos = se->getPosition();
-                LOGGER->trace( "Setting sound position to {}, {}, {}.", pos.x, pos.y, pos.z );
+                LOGGER->debug( "Setting sound position to {}, {}, {}.", pos.x, pos.y, pos.z );
                 FMOD_3D_ATTRIBUTES attributes;
                 Window::set3DParams( attributes, pos, glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
                 FMOD_RESULT res = instance->set3DAttributes( &attributes );
