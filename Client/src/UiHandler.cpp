@@ -149,11 +149,18 @@ void UiHandler::drawEnd() {
     bool* p_open = new bool(true);
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 window_pos = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
-    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 1.5f));
     ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
     if (ImGui::Begin("End Game", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
         ImGui::Text("Game Over");
+        ImGui::End();
+    }
+
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+    if (ImGui::Begin("End rounds", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
         ImGui::Text("You Survived %d Rounds", Window::world->phase.wave);
         ImGui::End();
     }

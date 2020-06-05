@@ -137,13 +137,18 @@ void GameState::updateState() {
         }
         if (enemy != nullptr && enemy->reachedTarget) {
             deleteObject(enemy->getId());
-            phase->health -= 1;
-            if (phase->health <= 0) {
-                phase->state = END_STATE;
-            }
+            phase->health -= 2;
             phase->dirty = true;
         }
 
+    }
+    if (phase->state == ROUND_STATE && phase->health <= 0) {
+        phase->state = END_STATE;
+        phase->count = 0;
+        unready();
+        // TODO: remove all enemies
+        removeEnemies();
+        log->warn("Game Over");
     }
 
     log->debug("Finished updating state");
@@ -241,6 +246,33 @@ void GameState::unready() {
         }
         it++;
     }
+}
+void GameState::removeEnemies() {
+    auto it = this->gameObjects.begin();
+    while (it != this->gameObjects.end()) {
+        std::shared_ptr<Enemy> enemy = std::dynamic_pointer_cast<Enemy>(it->second);
+        it++;
+        if (enemy != nullptr) {
+            deleteObject(enemy->getId());
+        }
+    }
+}
+void GameState::reset() {
+    auto it = this->gameObjects.begin();
+    while (it != this->gameObjects.end()) {
+        std::shared_ptr<Barricade> bar = std::dynamic_pointer_cast<Barricade>(it->second);
+        std::shared_ptr<Player> player = std::dynamic_pointer_cast<Player>(it->second);
+        it++;
+        if (player != nullptr) {
+            player->setMoney(100);
+        }
+        if (bar != nullptr) {
+            deleteObject(bar->getId());
+        }
+    }
+    phase->wave = 1;
+    phase->health = 100;
+    phase->dirty = true;
 }
 void GameState::checkCollisions(std::string id, std::shared_ptr<MovingObject> object) {
     auto log = getLogger("GameState");

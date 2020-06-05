@@ -184,7 +184,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
 
     auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("barrier"), Shaders::phong());
     //model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
-    model->setColor(glm::vec3(1.0f));
+    model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
 
     selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
 

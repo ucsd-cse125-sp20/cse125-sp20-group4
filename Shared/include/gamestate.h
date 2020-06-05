@@ -47,5 +47,6 @@ public:
     const std::map<std::string, std::shared_ptr<Object>> & getGameObjects() const;
 
     void unready();
-
+    void removeEnemies();
+    void reset();
 };

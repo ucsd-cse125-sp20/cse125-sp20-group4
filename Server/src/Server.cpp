@@ -90,7 +90,6 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
     std::uniform_int_distribution<int> targetIndices(0, targets.size() - 1);
 
     WaveHandler waveHandler = WaveHandler();
-    waveHandler.loadWaveData();
 
     GameStateHandler gameStateHandler;
     std::deque<std::shared_ptr<Enemy>> pendingSpawns;
@@ -122,8 +121,8 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                 if (gameState.phase->state == READY_STATE) {
                     gameState.phase->wave++;
                 } else {
-                    gameState.phase->wave = 1;
-                    gameState.phase->health = 100;
+                    gameState.reset();
+                    waveHandler.loadWaveData();
                 }
                 gameState.phase->state = ROUND_STATE;
                 gameState.phase->dirty = true;
@@ -135,7 +134,10 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
             if (gameState.phase->health <= 0) {
                 gameState.phase->state = END_STATE;
                 gameState.phase->dirty = true;
+                gameState.phase->count = 0;
+                gameState.unready();
                 // TODO: remove all enemies
+                gameState.removeEnemies();
                 log->warn("Game Over");
                 break;
             }
@@ -170,7 +172,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                     gameState.phase->state = READY_STATE;
                     gameState.phase->dirty = true;                    
                 } 
-                if (gameState.phase->count >= 4) {
+                if (gameState.phase->count >= 5) {
                     waveHandler.start();
                 }
                 break;
