@@ -131,7 +131,7 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                     LOGGER->debug("Making a Player");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
                     size_t found = 0;
-                    glm::vec3 colorVec;
+                    glm::vec3 colorVec = glm::vec3(1.0f, 1.0f, 1.0f);
                     found = it->second->getId().find("0");
                     if (found != std::string::npos) {
                         colorVec = glm::vec3(1.0f, 0.0f, 0.0f);
