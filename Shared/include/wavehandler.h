@@ -24,6 +24,7 @@ class WaveHandler {
     WaveHandler();
 
     void loadWaveData();
+    void generateWave(int wave);
     void start();
 
     State update( const GameState & gs );
