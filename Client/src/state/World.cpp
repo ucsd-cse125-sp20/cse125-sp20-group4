@@ -130,7 +130,35 @@ void World::handleUpdates( const std::shared_ptr<Event> & e, std::string id ) {
                 } else if (it->second->getTag().compare("Player") == 0) {
                     LOGGER->debug("Making a Player");
                     auto model = new LoadedModel("Models/shopper.dae", Shaders::phong());
-                    model->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                    size_t found = 0;
+                    glm::vec3 colorVec;
+                    found = it->second->getId().find("0");
+                    if (found != std::string::npos) {
+                        colorVec = glm::vec3(1.0f, 0.0f, 0.0f);
+                    }
+                    found = it->second->getId().find("1");
+                    if (found != std::string::npos) {
+                        colorVec = glm::vec3(1.0f, 1.0f, 0.0f);
+
+                    }
+                    found = it->second->getId().find("2");
+
+                    if (found != std::string::npos) {
+                        colorVec = glm::vec3(0.0f, 1.0f, 0.0f);
+
+                    }
+                    found = it->second->getId().find("3");
+                    if (found != std::string::npos) {
+                        colorVec = glm::vec3(0.0f, 1.0f, 1.0f);
+
+                    }
+                    found = it->second->getId().find("4");
+                    if (found != std::string::npos) {
+                        colorVec = glm::vec3(0.0f, 0.0f, 1.0f);
+
+                    }
+
+                    model->setColor(colorVec);
                     entity = new Entity(it->second->getId(), (model), it->second->getPosition(), it->second->getOrientation(), 0.09f);
                     addEntity(entity);
                     Window::pmanager->addTrail(entity);
