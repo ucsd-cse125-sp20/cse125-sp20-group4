@@ -23,7 +23,7 @@ public:
     ParticleGenerator(const Shader & shader, Texture* texture, unsigned int amount, float scale);
     ~ParticleGenerator();
 
-    void Update(float dt, Entity* entity, unsigned int newParticles, glm::vec3 offset = glm::vec3(0.0f));
+    void Update(float dt, Entity* entity, unsigned int newParticles, glm::vec3 offset = glm::vec3(0.0f), glm::vec3 acc = glm::vec3(0.0f));
     void Draw(const glm::mat4x4& view, const glm::vec3& cameraPos);
     void Clear();
 
@@ -40,7 +40,6 @@ private:
     unsigned int VAO;
     unsigned int VBO[2];
 
-    glm::vec3 acc = glm::vec3(0.0f, -9.8f, 0.0f);
     //glm::vec3 acc = glm::vec3(0.0f, -10.0f, 0.0f);
 
     void init();

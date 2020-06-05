@@ -8,5 +8,8 @@ uniform sampler2D sprite;
 
 void main()
 {
+    if(Color.a < 0.1){
+        discard;
+    }
     color = texture(sprite, gl_PointCoord) * Color;
 }
