@@ -51,6 +51,7 @@ void UiHandler::drawGui() {
     switch (Window::world->phase.state) {
     case START_STATE:
         drawTitle();
+        drawPlayerInfo();
         drawReadyUp();
 
         break;
@@ -65,6 +66,7 @@ void UiHandler::drawGui() {
     case END_STATE:
         drawEnd();
         drawReadyUp();
+        drawPlayerInfo();
         break;
     }
 
@@ -84,7 +86,7 @@ void UiHandler::drawTitle() {
     if (ImGui::Begin("Title", p_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
     {
 
-        ImGui::Text("GAME Title");
+        ImGui::Text("The Last Roll");
         ImGui::End();
     }
 }
