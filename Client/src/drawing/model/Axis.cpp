@@ -38,7 +38,7 @@ static void setAxisColor( std::vector<glm::vec3> & colors, const glm::vec3 & col
 
 /* Constructor */
 
-Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ), normalPointSize( 0.0f ), enabled( enabled ) {
+Axis::Axis( bool enabled, float scale ) : Geometry( NULL, Shaders::flat(), GL_LINES ), normalPointSize( 0.0f ), enabled( enabled ) {
 
     const float max_coord = MAX_COORD * scale;
     const float min_coord = MIN_COORD * scale;
@@ -103,7 +103,7 @@ Axis::Axis( bool enabled, float scale ) : Geometry( Shaders::flat(), GL_LINES ),
 
     }
 
-    initialize( vertices, colors, normals, idx );
+    initialize( vertices, colors, normals, vertices, idx );
 
 }
 

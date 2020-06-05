@@ -128,6 +128,28 @@ else()
     message(STATUS "No map targets found.")
 endif()
 
+# Textures
+file(GLOB_RECURSE Client_Textures RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Textures/*)
+if (Client_Textures)
+    message(STATUS "Including textures targets.")
+    message(DEBUG "Textures: ${Client_Textures}")
+    list(TRANSFORM Client_Textures PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE Client_Textures_SRC)
+    message(TRACE "Textures sources: ${Client_Textures_SRC}")
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Client>/Textures
+                       COMMENT "Creating textures output directory."
+                       )
+    add_custom_command(TARGET Client POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                            ${Client_Textures_SRC} $<TARGET_FILE_DIR:Client>/Textures
+                       BYPRODUCTS ${Client_Textures}
+                       COMMENT "Copying textures to output."
+                       )
+else()
+    message(STATUS "No texture targets found.")
+endif()
+
 
 if (DEFINED FMOD_PATH)
     # Sound Banks

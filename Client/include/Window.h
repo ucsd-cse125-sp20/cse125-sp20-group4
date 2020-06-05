@@ -21,6 +21,7 @@
 #include "state/Camera.h"
 #include "state/World.h"
 #include "state/ParticleManager.h"
+#include "drawing/TextureManager.h"
 #include "UiHandler.h"
 
 class Window {
@@ -45,6 +46,7 @@ class Window {
     static Camera * cam;
     static Server * server;
     static ParticleManager* pmanager;
+    static TextureManager* tmanager;
     static std::string playerName;
     static bool ready;
     static Entity* selected;

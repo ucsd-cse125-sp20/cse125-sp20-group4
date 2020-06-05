@@ -19,6 +19,7 @@
 #include "drawing/model/EmptyModel.h"
 #include "drawing/model/RectangularCuboid.h"
 #include "drawing/model/LoadedModel.h"
+#include "drawing/Walls.h"
 #include "state/CameraEntity.h"
 #include "state/Entity.h"
 
@@ -62,6 +63,9 @@ Camera * Window::cam;
 World * Window::world;
 Server* Window::server;
 ParticleManager* Window::pmanager;
+TextureManager* Window::tmanager;
+
+Walls* walls;
 
 // Audio data
 FMOD::Studio::System * Window::audioSystem;
@@ -141,6 +145,7 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
 
     // Set up graphics
     Shaders::initializeShaders();
+    tmanager->initializeTextures();
 
     // Set up sound
     Window::audioSystem = audio;
@@ -176,19 +181,17 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     world = new World();
     server = ser;
     cam = Camera::addCamera( SPECTATOR_CAMERA, DEFAULT_CAMERA_POS, DEFAULT_CAMERA_DIR ); // Static fallback camera
-    
-    world->addEntity(new Entity("floor", new RectangularCuboid(glm::vec3(0.5f, 0.5f, 0.5f), 1000.0f, 1.0f, 1000.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
-    auto model = new LoadedModel("Models/barrier.dae", Shaders::phong());
+    auto model = new LoadedModel("Models/barrier.dae", Window::tmanager->get("default"), Shaders::phong());
     model->setColor(glm::vec3(0.6f, 0.3f, 0.0f));
 
     selected = new Entity("selected", model, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
 
-    auto red = new LoadedModel("Models/can.dae", Shaders::phong());
+    auto red = new LoadedModel("Models/can.dae", Window::tmanager->get("default"), Shaders::phong());
     red->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
-    auto green = new LoadedModel("Models/can.dae", Shaders::phong());
+    auto green = new LoadedModel("Models/can.dae", Window::tmanager->get("default"), Shaders::phong());
     green->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
-    auto blue = new LoadedModel("Models/water.dae", Shaders::phong());
+    auto blue = new LoadedModel("Models/water.dae", Window::tmanager->get("default"), Shaders::phong());
     blue->setColor(glm::vec3(0.0f, 0.0f, 1.0f));
 
     redHeld = new Entity("selected", red, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
@@ -196,6 +199,16 @@ void Window::initialize( Server * ser, FMOD::Studio::System * audio ) {
     blueHeld = new Entity("selected", blue, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
     
     pmanager = new ParticleManager();
+
+    std::vector<Texture*> textures = {
+        tmanager->get("floor"),
+        tmanager->get("ceiling"),
+        tmanager->get("wall"),
+        tmanager->get("wall"),
+        tmanager->get("wall"),
+        tmanager->get("wall")
+    };
+    walls = new Walls(textures, glm::vec3(-0.5f), glm::vec3(30.0f, 3.0f, 30.0f));
 
     // Debugging entities
     //world->addEntity( new Entity( "worldAxis", new Axis(), glm::vec3( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ), 1.0f, true ) );
@@ -391,6 +404,7 @@ void Window::display_callback( GLFWwindow * ) {
     }
 
     // Render scene.
+    walls->Draw( cam->getToView() );
     world->draw( cam->getToView() );
 
     UiHandler::drawGui();

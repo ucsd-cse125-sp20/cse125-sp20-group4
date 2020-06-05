@@ -3,13 +3,15 @@
 
 #include <glm\glm.hpp>
 #include <GL/glew.h>
+
+#include <vector>
+
 #include "drawing/stb_image.h"
 
 class Texture
 {
 public:
     unsigned int ID;
-    unsigned int Width, Height;
     
     unsigned int Internal_Format;
     unsigned int Image_Format;
@@ -19,11 +21,14 @@ public:
     unsigned int Filter_Min;
     unsigned int Filter_Max;
 
-    Texture();
+    Texture(std::string file, bool alpha);
 
-    void Generate(unsigned int width, unsigned int height, unsigned char* data);
     void Bind() const;
-    void loadTextureFromFile(const char* file, bool alpha);
+
+private:
+    void Generate(unsigned int width, unsigned int height, unsigned char* data);
+
+    void loadTextureFromFile(std::string file, bool alpha);
 };
 
 #endif

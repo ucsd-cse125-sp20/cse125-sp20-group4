@@ -3,34 +3,32 @@
 #include "drawing/Texture.h"
 
 
-Texture::Texture()
-    : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_REPEAT), Wrap_T(GL_REPEAT), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR)
+Texture::Texture(std::string file, bool alpha)
+    : Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_REPEAT), Wrap_T(GL_REPEAT), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR)
 {
-    glGenTextures(1, &this->ID);
-}
+    glGenTextures(1, &ID);
+    loadTextureFromFile(file, alpha);
+} 
 
 void Texture::Generate(unsigned int width, unsigned int height, unsigned char* data)
 {
-    this->Width = width;
-    this->Height = height;
+    glBindTexture(GL_TEXTURE_2D, ID);
+    glTexImage2D(GL_TEXTURE_2D, 0, Internal_Format, width, height, 0, Image_Format, GL_UNSIGNED_BYTE, data);
 
-    glBindTexture(GL_TEXTURE_2D, this->ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, this->Internal_Format, width, height, 0, this->Image_Format, GL_UNSIGNED_BYTE, data);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->Wrap_S);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->Wrap_T);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->Filter_Min);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->Filter_Max);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Wrap_S);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, Wrap_T);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter_Min);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter_Max);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::Bind() const
 {
-    glBindTexture(GL_TEXTURE_2D, this->ID);
+        glBindTexture(GL_TEXTURE_2D, ID);
 }
 
-void Texture::loadTextureFromFile(const char* file, bool alpha)
+void Texture::loadTextureFromFile(std::string file, bool alpha)
 {
     if (alpha)
     {
@@ -39,9 +37,10 @@ void Texture::loadTextureFromFile(const char* file, bool alpha)
     }
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load(file.c_str(), &width, &height, &nrChannels, 0);
 
     this->Generate(width, height, data);
 
     stbi_image_free(data);
+
 }

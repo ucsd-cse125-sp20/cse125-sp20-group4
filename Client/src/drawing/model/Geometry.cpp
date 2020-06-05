@@ -19,7 +19,7 @@ static const auto LOGGER = getLogger( "Geometry" );
 
 /* Constructor and destructor */
 
-Geometry::Geometry( const Shader & shaderProgram, GLenum drawMode ) : shaderProgram( shaderProgram ), drawMode( drawMode ), initialized( false ) {
+Geometry::Geometry( Texture * texture, const Shader & shaderProgram, GLenum drawMode ) : texture(texture), shaderProgram( shaderProgram ), drawMode( drawMode ), initialized( false ) {
 
     // Valid draw modes
     static const std::unordered_set<GLenum> DRAW_MODES { GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_LINE_STRIP_ADJACENCY, 
@@ -36,9 +36,9 @@ Geometry::Geometry( const Shader & shaderProgram, GLenum drawMode ) : shaderProg
 
 }
 
-Geometry::Geometry( const Shader & shaderProgram, const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<unsigned int> & indices, GLenum drawMode ) : Geometry( shaderProgram, drawMode ) {
+Geometry::Geometry( Texture * texture, const Shader & shaderProgram, const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<glm::vec3>& texCoords, const std::vector<unsigned int> & indices, GLenum drawMode ) : Geometry( texture, shaderProgram, drawMode ) {
 
-    initialize( vertices, colors, normals, indices );
+    initialize( vertices, colors, normals, texCoords, indices );
 
 }
 
@@ -99,7 +99,7 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
                            3, // How many components there are per vertex.
                            GL_FLOAT, // What type these components are.
                            GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't.
-                           9 * sizeof( GLfloat ), // Offset between consecutive indices.
+                           12 * sizeof( GLfloat ), // Offset between consecutive indices.
                            ( GLvoid * ) 0 ); // Offset of the first vertex's component.
 
     // Color.
@@ -108,7 +108,7 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
                            3, // How many components there are per vertex.
                            GL_FLOAT, // What type these components are.
                            GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't.
-                           9 * sizeof( GLfloat ), // Offset between consecutive indices.
+                           12 * sizeof( GLfloat ), // Offset between consecutive indices.
                            ( GLvoid * ) ( 3 * sizeof( GLfloat ) ) ); // Offset of the first vertex's component.
 
     // Normal.
@@ -117,8 +117,17 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
                            3, // How many components there are per vertex.
                            GL_FLOAT, // What type these components are.
                            GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't.
-                           9 * sizeof( GLfloat ), // Offset between consecutive indices.
+                           12 * sizeof( GLfloat ), // Offset between consecutive indices.
                            ( GLvoid * ) ( 6 * sizeof( GLfloat ) ) ); // Offset of the first vertex's component.
+
+    // TexCoords.
+    glEnableVertexAttribArray( 3 );
+    glVertexAttribPointer( 3, // Attribute ID.
+                           3, // How many components there are per vertex.
+                           GL_FLOAT, // What type these components are.
+                           GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't.
+                           12 * sizeof( GLfloat ), // Offset between consecutive indices.
+                           ( GLvoid* )( 9 * sizeof( GLfloat ) ) ); // Offset of the first vertex's component.
 
     // Bind GL_ELEMENT_ARRAY_BUFFER for drawing order.
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
@@ -129,6 +138,9 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
     // Blender export is dumb so some of the triangles are CW for some reason
     glEnable(GL_CULL_FACE);
     glEnable(GL_CW);
+
+    // Bind texture
+    texture->Bind();
 
     // Tell OpenGL to draw with triangles, using the recorded amount of indices and no offset.
     glDrawElements( drawMode, ( GLsizei ) indices.size(), GL_UNSIGNED_INT, 0 );
@@ -144,7 +156,7 @@ void Geometry::draw( const glm::mat4x4 & model, const glm::mat4x4 & view, const 
 
 /* Protected functions */
 
-void Geometry::initialize( const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<unsigned int> & idx ) {
+void Geometry::initialize( const std::vector<glm::vec3> & vertices, const std::vector<glm::vec3> & colors, const std::vector<glm::vec3> & normals, const std::vector<glm::vec3>& texCoords, const std::vector<unsigned int> & idx ) {
 
     if ( vertices.size() != colors.size() || vertices.size() != normals.size() ) {
         throw std::invalid_argument( "Geometry data lengths do not match." );
@@ -174,6 +186,11 @@ void Geometry::initialize( const std::vector<glm::vec3> & vertices, const std::v
         data.push_back( normals[i].x );
         data.push_back( normals[i].y );
         data.push_back( normals[i].z );
+
+        // TexCoords
+        data.push_back(texCoords[i].x);
+        data.push_back(texCoords[i].y);
+        data.push_back(texCoords[i].z);
 
     }
 
