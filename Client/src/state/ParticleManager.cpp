@@ -21,7 +21,7 @@ void ParticleManager::update()
 	while(it != entities.end()) {
 		if (trails.find(*it) != trails.end()) {
 			if ((*it)->getVelocity() != glm::vec3(0.0)) {
-				trails[*it]->Update(0.01f, *it, 10, glm::vec3(0.0f));
+				trails[*it]->Update(0.01f, *it, 10, glm::vec3(0.0f,-0.5f,0.0f));
 			}
 			else {
 				trails[*it]->Clear();

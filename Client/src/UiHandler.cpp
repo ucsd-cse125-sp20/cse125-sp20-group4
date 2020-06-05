@@ -18,11 +18,11 @@ void UiHandler::initialize() {
     //io.Fonts->AddFontDefault();
     ImFontConfig config;
     config.MergeMode = true;
-    config.GlyphMinAdvanceX = 35.0f; // Use if you want to make the icon monospaced
-    io.Fonts->AddFontFromFileTTF("fonts/Bangers-Regular.ttf", 30.0f);
+    config.GlyphMinAdvanceX = 100.0f; // Use if you want to make the icon monospaced
+    io.Fonts->AddFontFromFileTTF("fonts/Bangers-Regular.ttf", 80.0f);
 
     static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    io.Fonts->AddFontFromFileTTF("fonts/fa-solid-900.ttf", 30.0f, &config, icon_ranges);
+    io.Fonts->AddFontFromFileTTF("fonts/fa-solid-900.ttf", 80.0f, &config, icon_ranges);
 
     //static const ImWchar icon_ranges[] = { ICON_MIN_MD, ICON_MAX_MD, 0 };
     //io.Fonts->AddFontFromFileTTF("fonts/MaterialIcons-Regular.ttf", 30.0f, &config, icon_ranges);
