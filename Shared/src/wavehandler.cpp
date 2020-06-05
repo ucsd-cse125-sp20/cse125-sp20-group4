@@ -25,9 +25,9 @@ void WaveHandler::loadWaveData() {
     EnemyData eBlue;
     EnemyData eGreen;
     eRed.type = "red";
-    eRed.count = 0; //30;
+    eRed.count = 3; //30;
     eBlue.type = "blue";
-    eBlue.count = 10;
+    eBlue.count = 0;
     eGreen.type = "green";
     eGreen.count = 0;
 
@@ -40,11 +40,11 @@ void WaveHandler::loadWaveData() {
 
     std::vector<EnemyData> w2;
     eRed.type = "red";
-    eRed.count = 0; //30;
+    eRed.count = 3; //30;
     eBlue.type = "blue";
-    eBlue.count = 0;
+    eBlue.count = 3;
     eGreen.type = "green";
-    eGreen.count = 10;
+    eGreen.count = 0;
     w2.push_back( eRed );
     w2.push_back(eBlue);
     w2.push_back(eGreen);
@@ -52,11 +52,11 @@ void WaveHandler::loadWaveData() {
 
     std::vector<EnemyData> w3;
     eRed.type = "red";
-    eRed.count = 0; //30;
+    eRed.count = 3; //30;
     eBlue.type = "blue";
-    eBlue.count = 10;
+    eBlue.count = 3;
     eGreen.type = "green";
-    eGreen.count = 0;
+    eGreen.count = 3;
 
     w3.push_back(eRed);
     w3.push_back(eBlue);
@@ -65,6 +65,25 @@ void WaveHandler::loadWaveData() {
 
     waveNum = 0;
     waveActive = false;
+
+}
+void WaveHandler::generateWave(int wave) {
+    int numEnemies = (wave * 2);
+    
+    EnemyData eRed;
+    EnemyData eBlue;
+    EnemyData eGreen;
+    std::vector<EnemyData> w;
+    eRed.type = "red";
+    eRed.count = numEnemies; //30;
+    eBlue.type = "blue";
+    eBlue.count = numEnemies;
+    eGreen.type = "green";
+    eGreen.count = numEnemies;
+    w.push_back(eRed);
+    w.push_back(eBlue);
+    w.push_back(eGreen);
+    waveEnemies.push_back(w);
 
 }
 
@@ -119,9 +138,10 @@ WaveHandler::State WaveHandler::update( const GameState & gs ) {
             LOGGER->info( "Wave {} completed, waiting for next wave.", waveNum );
             waveNum++;
             waveActive = false;
-            if ( waveNum > waveEnemies.size() ) {
-                LOGGER->info( "All waves done." );
-                return State::DONE;
+            if ( waveNum + 3 > waveEnemies.size() ) {
+                LOGGER->info( "generating next wave" );
+                generateWave(waveNum + 3);
+                //return State::DONE;
             } else {
                 startTime = START_TIME( DEFAULT_READY_TIME );
                 LOGGER->debug( "Wave will start at {}.", timeToStr( startTime ) );
