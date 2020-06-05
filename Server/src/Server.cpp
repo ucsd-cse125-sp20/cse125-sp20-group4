@@ -118,7 +118,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
         case START_STATE:
         case READY_STATE:
         case END_STATE:
-            if (gameState.phase->count >= 1) {
+            if (gameState.phase->count >= 4) {
                 if (gameState.phase->state == READY_STATE) {
                     gameState.phase->wave++;
                 } else {
@@ -170,7 +170,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
                     gameState.phase->state = READY_STATE;
                     gameState.phase->dirty = true;                    
                 } 
-                if (gameState.phase->count >= 1) {
+                if (gameState.phase->count >= 4) {
                     waveHandler.start();
                 }
                 break;

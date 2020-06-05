@@ -30,7 +30,7 @@
 
 static const auto LOGGER = getLogger( "Window" );
 
-static const char * window_title = "CSE 125 Project";
+static const char * window_title = "The Last Roll";
 
 #define RADIANS( W ) ( W ) * ( glm::pi<float>() / 180.0f )
 #define PRINT_VECTOR( V ) V.x << "|" << V.y << "|" << V.z
@@ -407,7 +407,6 @@ void Window::display_callback( GLFWwindow * ) {
     // Render scene.
     walls->Draw( cam->getToView() );
     world->draw( cam->getToView() );
-
     UiHandler::drawGui();
 
     // Gets events, including input such as keyboard and mouse or window resizing
