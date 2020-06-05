@@ -6,7 +6,7 @@ const std::string& Barricade::getTag() {
 }
 Barricade::Barricade(const Barricade& obj): Barricade(obj.getId(), obj.getPositionX(), obj.getPositionY(), obj.getPositionZ(), obj.getWidth(), obj.getHeight(), obj.getLength(), obj.getDurability(), obj.isUp()) {}
 
-Barricade::Barricade() : Object("ignore", 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1, 1, 1, true) {}
+Barricade::Barricade() : Barricade("ignore", 0.0f, 0.0f, 0.0f, 1, 1, 1) {}
 
 Barricade::Barricade(std::string id, float xPos, float yPos, float zPos, float width, float height, float length, int durability, bool up) : Object(id, xPos, yPos, zPos, 1.0f, 0.0f, 0.0f, width, height, length, up) {
 	setUp(up);
@@ -45,6 +45,7 @@ int Barricade::getDurability() const{
 }
 
 void Barricade::degradeBarricade() const {
+	auto log = getLogger(TAG);
 	this->setDurability(this->getDurability() - this->degradeFactor);
 	this->dirty = true;
 }
@@ -52,7 +53,7 @@ void Barricade::degradeBarricade() const {
 void Barricade::setDurability(int newDurability) const {
 	auto log = getLogger(TAG);
 	this->durability = newDurability;
-	log->trace("Set durability of barricade with it {} to status {}", this->getId(), newDurability);
+	log->trace("Set durability of barricade with id {} to {}", this->getId(), newDurability);
 	if (this->durability <= 0) {
 		this->setUp(false);
 	}
