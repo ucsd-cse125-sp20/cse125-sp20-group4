@@ -65,7 +65,7 @@ void handleGame( const std::shared_ptr<Clients> & clients ) {
 
     // ************** SETUP GAME STATE ****************
     GameState gameState;
-    MapLoader::LoadMap("Maps/map2.txt", &gameState);
+    MapLoader::LoadMap("Maps/map3.txt", &gameState);
     gameState.initialize();
     std::vector<glm::vec3> targets;
     // get all toilet paper targets
