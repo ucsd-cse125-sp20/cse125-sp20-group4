@@ -661,40 +661,84 @@ void Window::mouse_scroll_callback( GLFWwindow *, double /* xoffset */, double /
 void Window::handleEvent( const std::shared_ptr<Event> & e ) {
 
     LOGGER->trace( "{} XXXX {}", Window::playerName, e->serialize() );
-    if (e->getType() == Event::EventType::JEvent) {
-        Window::playerName = e->getObjectId();
-        LOGGER->info("Set my ID to {}", e->getObjectId());
-    } else if (e->getType() == Event::EventType::GEvent) {
-        auto uEvent = std::static_pointer_cast<UpdateEvent>(e);
-        world->handleUpdates(uEvent, Window::playerName);
-        // update my data
-        auto it = uEvent->updates.find(Window::playerName);
-        if (it != uEvent->updates.end()) {
-            auto player = std::static_pointer_cast<Player>(it->second);
-            money = player->getMoney();
-            Window::ready = player->ready;
-            if (player->getHeldItem() != nullptr) {
-                if (player->getHeldItem()->getTag().compare("Red") == 0) {
-                    holding = 1;
-                } else if (player->getHeldItem()->getTag().compare("Green") == 0) {
-                    holding = 2;
-                } else if (player->getHeldItem()->getTag().compare("Blue") == 0) {
-                    holding = 3;
-                } else if (player->getHeldItem()->getTag().compare("Barricade") == 0) {
-                    holding = 4;
-                }
-            } else {
-                holding = 0;
+    switch ( e->getType() ) {
+        case Event::EventType::Sound:
+        {
+            std::shared_ptr<SoundEvent> se = std::dynamic_pointer_cast<SoundEvent>( e );
+            LOGGER->trace( "Playing sound '{}'.", se->getSound() );
+
+            FMOD::Studio::EventDescription * sound;
+            FMOD_RESULT res = Window::audioSystem->getEvent( se->getSound().c_str(), &sound );
+            if ( res != FMOD_OK ) {
+                LOGGER->error( "Could not get movement sound '{}' ({}).", se->getSound(), res );
+                return;
             }
-            cam = Camera::getCamera(playerName);
-            LOGGER->trace("Updated player ");
-        } else {
-            LOGGER->trace("Failed to find {}", playerName);
+
+            FMOD::Studio::EventInstance * instance;
+            sound->createInstance( &instance );
+
+            if ( se->isPositional() ) {
+                const glm::vec3 & pos = se->getPosition();
+                LOGGER->trace( "Setting sound position to {}, {}, {}.", pos.x, pos.y, pos.z );
+                FMOD_3D_ATTRIBUTES attributes;
+                Window::set3DParams( attributes, pos, glm::vec3( 0.0f ), glm::vec3( 0.0f ) );
+                FMOD_RESULT res = instance->set3DAttributes( &attributes );
+                if ( res != FMOD_OK ) {
+                    LOGGER->warn( "Error while setting sound event position ({}).", res );
+                }
+            }
+
+            instance->start();
+            instance->release();
+
+            break;
         }
-    } else if (e->getType() == Event::EventType::PEvent) {
-        Phase& p = (std::dynamic_pointer_cast<UpdatePhaseEvent>(e)->phase);
-        world->phase.update(p);
-    } else {
-        world->handleUpdates( e, Window::playerName );
+
+        case Event::EventType::JEvent:
+            Window::playerName = e->getObjectId();
+            LOGGER->info( "Set my ID to {}", e->getObjectId() );
+            break;
+
+        case Event::EventType::GEvent:
+        {
+            auto uEvent = std::static_pointer_cast< UpdateEvent >( e );
+            world->handleUpdates( uEvent, Window::playerName );
+            // update my data
+            auto it = uEvent->updates.find( Window::playerName );
+            if ( it != uEvent->updates.end() ) {
+                auto player = std::static_pointer_cast< Player >( it->second );
+                money = player->getMoney();
+                Window::ready = player->ready;
+                if ( player->getHeldItem() != nullptr ) {
+                    if ( player->getHeldItem()->getTag().compare( "Red" ) == 0 ) {
+                        holding = 1;
+                    } else if ( player->getHeldItem()->getTag().compare( "Green" ) == 0 ) {
+                        holding = 2;
+                    } else if ( player->getHeldItem()->getTag().compare( "Blue" ) == 0 ) {
+                        holding = 3;
+                    } else if ( player->getHeldItem()->getTag().compare( "Barricade" ) == 0 ) {
+                        holding = 4;
+                    }
+                } else {
+                    holding = 0;
+                }
+                cam = Camera::getCamera( playerName );
+                LOGGER->trace( "Updated player " );
+            } else {
+                LOGGER->trace( "Failed to find {}", playerName );
+            }
+            break;
+        }
+
+        case Event::EventType::PEvent:
+        {
+            Phase & p = ( std::dynamic_pointer_cast< UpdatePhaseEvent >( e )->phase );
+            world->phase.update( p );
+            break;
+        }
+
+        default:
+            world->handleUpdates( e, Window::playerName );
+
     }
 }
